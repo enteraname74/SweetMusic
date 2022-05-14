@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_color"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/primary_color">
+
+        <TextView
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/third_color"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp"
+            android:text="@string/app_name">
+
+        </TextView>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="135dp"
+            android:gravity="center_horizontal|center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/playlists"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="7dp"
+                android:backgroundTint="@color/secondary_color"
+                android:text="Playlists"
+                android:textColor="@color/third_color"
+                android:textSize="11sp">
+
+            </Button>
+
+            <Button
+                android:id="@+id/likes"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="7dp"
+                android:backgroundTint="@color/secondary_color"
+                android:text="Favorites"
+                android:textColor="@color/third_color"
+                android:textSize="11sp">
+
+            </Button>
+
+            <Button
+                android:id="@+id/album"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_margin="7dp"
+                android:backgroundTint="@color/secondary_color"
+                android:text="Albums"
+                android:textColor="@color/third_color"
+                android:textSize="11sp">
+
+            </Button>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/menu_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/secondary_color"
+            android:visibility="visible"/>
+
+        <TextView
+            android:id="@+id/no_songs_found"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@color/third_color"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@color/secondary_color"
+            android:text="NO SONGS FOUND"
+            android:gravity="center_horizontal|center_vertical"
+            android:visibility="gone">
+        </TextView>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/primary_color"
+        />
+
+</LinearLayout>
