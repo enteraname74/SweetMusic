@@ -31,6 +31,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
+        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
 
         musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
 
@@ -88,6 +89,8 @@ class MusicPlayerActivity : AppCompatActivity() {
             mediaPlayer.start()
             seekBar?.progress = 0
             seekBar?.max = mediaPlayer.duration
+            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            Log.d("TRACK INFO", mediaPlayer.trackInfo.toString())
         } catch (e : IOException){
             e.printStackTrace()
         }
@@ -143,31 +146,18 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     class FunctionnalSeekBar(var musicPlayerActivity: MusicPlayerActivity) : Runnable{
 
-        fun convertDuration(duration : Long) : String{
-            var minutes : Float = duration.toFloat() / 1000 / 60
-            var seconds : Float = duration.toFloat() / 1000 % 60
-
-            var strMinutes : String = minutes.toString().split(".")[0]
-
-            var strSeconds : String = ""
-            if (seconds < 10.0) {
-                strSeconds = "0"+seconds.toString().split(".")[0]
-            } else {
-                strSeconds = seconds.toString().split(".")[0]
-            }
-
-            var strDuration : String = strMinutes+":"+strSeconds
-
-            return strDuration
-        }
-
         override fun run() {
             if(musicPlayerActivity.mediaPlayer != null){
                 musicPlayerActivity.seekBar?.progress = musicPlayerActivity.mediaPlayer.currentPosition
-                musicPlayerActivity.currentTimeTv?.text = convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
+                musicPlayerActivity.currentTimeTv?.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
 
                 Handler(Looper.getMainLooper()).postDelayed(this,1000)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("RESUME", "RESUME MUSIC")
     }
 }

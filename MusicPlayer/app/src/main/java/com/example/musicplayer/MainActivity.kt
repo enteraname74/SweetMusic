@@ -126,6 +126,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         super.onResume()
         if(menuRecyclerView!=null){
             menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
+            Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }
     }
