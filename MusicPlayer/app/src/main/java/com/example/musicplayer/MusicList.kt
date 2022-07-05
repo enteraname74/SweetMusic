@@ -13,13 +13,12 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
-class MusicList(
-    val listName : String,
+data class MusicList(
     val musics : ArrayList<Music>,
     private val context : Context,
     private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
-    class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, Serializable {
 
         var albumCover : ImageView? = null
         var songName : TextView? = null
@@ -57,7 +56,7 @@ class MusicList(
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
         val currentMusic = musics[position]
 
-        holder.albumCover?.setImageResource(R.drawable.icone_musique)
+        holder.albumCover?.setImageResource(R.drawable.michael)
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album

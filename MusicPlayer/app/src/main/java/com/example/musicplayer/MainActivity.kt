@@ -78,9 +78,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
                 //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                 menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-                menuRecyclerView?.adapter = MusicList("main",musics, applicationContext,this)
-
-
+                menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
             }
         }
 
@@ -102,6 +100,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
+
+        val playlists = findViewById<Button>(R.id.playlists)
+        playlists?.setOnClickListener(View.OnClickListener { playlistButton() })
     }
 
     private fun checkPermission() : Boolean {
@@ -148,7 +149,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = MusicList("main",musics, applicationContext,this)
+            menuRecyclerView?.adapter = MusicList(musics,applicationContext,this)
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -225,5 +226,14 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
+    }
+
+    private fun playlistButton() {
+        val intent = Intent(this@MainActivity,PlaylistsMenuActivity::class.java)
+
+        var playlist = Playlist("testPlaylist",musics,false)
+
+        intent.putExtra("MAIN",playlist)
+        startActivity(intent)
     }
 }

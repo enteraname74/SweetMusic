@@ -83,6 +83,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
 
         currentSong = musics.get(MyMediaPlayer.currentIndex)
+        musicIcon?.setImageResource(R.drawable.michael)
         titleTv?.text = currentSong?.name
         songTitleInfo?.text = currentSong?.name
         totalTimeTv?.text = convertDuration(currentSong?.duration as Long)

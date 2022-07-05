@@ -26,11 +26,11 @@
 
     <ImageView
         android:id="@+id/album_cover_big"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
         android:layout_above="@id/controls"
-        android:layout_centerHorizontal="true"
-        android:padding="28dp"
+        android:layout_marginTop="70dp"
+        android:layout_marginBottom="-5dp"
         android:src="@drawable/icone_musique">
 
     </ImageView>

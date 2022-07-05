@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
 class Playlists (
-    private var allPlaylists : Array<MusicList>,
+    private var allPlaylists : ArrayList<Playlist>,
     private val context : Context,
     private val mOnPlaylistListener : Playlists.OnPlaylistsListener ) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
 
@@ -65,9 +65,7 @@ class Playlists (
         fun onPlaylistClick(position : Int)
     }
 
-    fun addList(list : MusicList) {
-        val allLists: MutableList<MusicList> = allPlaylists.toMutableList()
-        allLists.add(list)
-        allPlaylists = allLists.toTypedArray()
+    fun addList(list : Playlist) {
+        allPlaylists.add(list)
     }
 }
