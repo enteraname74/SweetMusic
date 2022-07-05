@@ -102,6 +102,10 @@ class MusicPlayerActivity : AppCompatActivity() {
         } else {
             seekBar?.progress = 0
             seekBar?.max = mediaPlayer.duration
+
+            if (!mediaPlayer.isPlaying){
+                pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            }
         }
     }
 

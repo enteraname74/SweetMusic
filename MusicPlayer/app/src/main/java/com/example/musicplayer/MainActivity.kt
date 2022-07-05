@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -18,14 +19,13 @@ import java.io.File
 
 class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
-
     private var musics = ArrayList<Music>()
     private var menuRecyclerView : RecyclerView? = null
+    private var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Log.d("Test","TEST")
 
         if (!checkPermission()){
             requestPermission()
@@ -82,6 +82,19 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
             }
         }
+
+        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+
+        if (MyMediaPlayer.currentIndex == -1){
+            noSongPlaying.visibility = View.VISIBLE
+            infoSongPlaying.visibility = View.GONE
+        } else {
+            noSongPlaying.visibility = View.GONE
+            infoSongPlaying.visibility = View.VISIBLE
+            songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
+        }
     }
 
     private fun checkPermission() : Boolean {
@@ -102,11 +115,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         }
     }
     override fun onMusicClick(position: Int) {
-        Log.d("ACTIVITE", "APPUIE$position")
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
-            Log.d("NOT SAME SONG",MyMediaPlayer.currentIndex.toString())
             MyMediaPlayer.getInstance.reset()
             MyMediaPlayer.currentIndex = position
             sameMusic = false
@@ -129,6 +140,18 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         super.onResume()
         if(menuRecyclerView!=null){
             menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
+
+            val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+            val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            noSongPlaying.visibility = View.VISIBLE
+
+            if (MyMediaPlayer.currentIndex != -1){
+                noSongPlaying.visibility = View.GONE
+                infoSongPlaying.visibility = View.VISIBLE
+                songTitleInfo.text = musics[MyMediaPlayer.currentIndex].name
+            }
+
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }

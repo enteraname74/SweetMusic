@@ -102,7 +102,83 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:background="@color/primary_color"
-        />
+        android:background="@color/primary_color">
 
+        <ImageView
+            android:id="@+id/album_cover_info"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/icone_musique">
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                android:id="@+id/info_song_playing"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="10dp">
+
+                <TextView
+                    android:id="@+id/song_title_info"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:text="Name of the Song"
+                    android:ellipsize="marquee"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/third_color">
+
+                </TextView>
+
+
+                <ImageView
+                    android:id="@+id/previous"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_baseline_skip_previous_24"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="20dp"
+                    android:layout_toEndOf="@+id/song_title_info"
+                    >
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_baseline_skip_next_24"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@+id/pause_play"
+                    >
+                </ImageView>
+
+                <ImageView
+                    android:id="@+id/pause_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_toEndOf="@+id/previous"
+                    android:src="@drawable/ic_baseline_pause_circle_outline_24">
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/no_song_playing"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:textColor="@color/third_color"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:text="NO SONG IS PLAYING"
+                    android:gravity="center_horizontal|center_vertical"
+                    android:visibility="gone">
+                </TextView>
+
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
