@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.io.IOException
 
+// Classe représentant la lecture d'une musique :
 class MusicPlayerActivity : AppCompatActivity() {
 
     var titleTv : TextView? = null;
@@ -23,9 +24,10 @@ class MusicPlayerActivity : AppCompatActivity() {
     var previousBtn : ImageView? = null;
     var musicIcon : ImageView? = null;
     var currentSong : Music? = null
-    var myThread = Thread(FunctionnalSeekBar(this))
+    var myThread = Thread(functionnalSeekBar(this))
 
     var musics = ArrayList<Music>()
+    var sameMusic : Boolean = false
     var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,8 +36,10 @@ class MusicPlayerActivity : AppCompatActivity() {
         Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
 
         musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
+        sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
 
         Log.d("MUSIC", musics.toString())
+        Log.d("SAME MUSIC ?", sameMusic.toString())
 
         titleTv = findViewById(R.id.song_title)
         currentTimeTv = findViewById(R.id.current_time)
@@ -55,6 +59,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if(mediaPlayer != null && fromUser){
+                    Log.d("THERE", progress.toString())
                     mediaPlayer.seekTo(progress)
                 }
             }
@@ -70,7 +75,6 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     fun setRessourcesWithMusic(){
         currentSong = musics?.get(MyMediaPlayer.currentIndex)
-        Log.d("DURATION",currentSong?.duration.toString())
         titleTv?.text = currentSong?.name
         totalTimeTv?.text = convertDuration(currentSong?.duration as Long)
         pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
@@ -78,25 +82,33 @@ class MusicPlayerActivity : AppCompatActivity() {
         previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
 
         playMusic()
-
     }
 
     fun playMusic(){
-        mediaPlayer.reset()
-        try {
-            mediaPlayer.setDataSource(currentSong?.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+        /*
+        Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
+         */
+
+        if (!sameMusic) {
+            mediaPlayer.reset()
+            try {
+                mediaPlayer.setDataSource(currentSong?.path)
+                mediaPlayer.prepare()
+                mediaPlayer.start()
+                seekBar?.progress = 0
+                seekBar?.max = mediaPlayer.duration
+                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        } else {
             seekBar?.progress = 0
             seekBar?.max = mediaPlayer.duration
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            Log.d("TRACK INFO", mediaPlayer.trackInfo.toString())
-        } catch (e : IOException){
-            e.printStackTrace()
         }
     }
 
     fun playNextSong(){
+        sameMusic = false;
         if(MyMediaPlayer.currentIndex==(musics.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
@@ -107,6 +119,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
 
     fun playPreviousSong(){
+        sameMusic = false;
         if(MyMediaPlayer.currentIndex==0){
             MyMediaPlayer.currentIndex = (musics.size)-1
         } else {
@@ -144,7 +157,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         return strDuration
     }
 
-    class FunctionnalSeekBar(var musicPlayerActivity: MusicPlayerActivity) : Runnable{
+    class functionnalSeekBar(var musicPlayerActivity: MusicPlayerActivity) : Runnable{
 
         override fun run() {
             if(musicPlayerActivity.mediaPlayer != null){

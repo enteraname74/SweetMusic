@@ -1,7 +1,7 @@
 package com.example.musicplayer
-
 import java.io.Serializable
 
+// Classe permettant de représenter une musique :
 data class Music (
     val name : String,
     val artist : String,

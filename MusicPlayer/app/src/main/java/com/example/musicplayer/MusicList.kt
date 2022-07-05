@@ -1,5 +1,4 @@
 package com.example.musicplayer
-
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -9,13 +8,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.android.car.ui.utils.CarUiUtils.getActivity
-import kotlinx.android.synthetic.main.music_file.view.*
+import java.io.Serializable
 
-
-class MusicList(private val musics : ArrayList<Music>, private val context : Context, private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>() {
+// Classe permettant de représenter une liste de musiques :
+class MusicList(private val musics : ArrayList<Music>, private val context : Context, private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
     class MusicListViewHolder(var itemView : View, var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 

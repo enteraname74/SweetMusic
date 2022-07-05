@@ -105,9 +105,14 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     }
     override fun onMusicClick(position: Int) {
         Log.d("ACTIVITE", "APPUIE"+position)
+        var sameMusic : Boolean = true
 
-        MyMediaPlayer.getInstance.reset()
-        MyMediaPlayer.currentIndex = position
+        if (position != MyMediaPlayer.currentIndex) {
+            Log.d("NOT SAME SONG",MyMediaPlayer.currentIndex.toString())
+            MyMediaPlayer.getInstance.reset()
+            MyMediaPlayer.currentIndex = position
+            sameMusic = false
+        }
 
         val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
 
@@ -117,8 +122,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
         intent.putExtra("LIST",musics)
         //flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.putExtra("SAME MUSIC", sameMusic)
 
-        Log.d("ACTIVITE", musics.toString())
         startActivity(intent)
     }
 
