@@ -2,6 +2,7 @@ package com.example.musicplayer
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,7 +73,7 @@ class MusicList(private val musics : ArrayList<Music>, private val context : Con
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
         if(MyMediaPlayer.currentIndex == position){
-            holder.background?.setBackgroundColor(Color.parseColor("#161925"))
+            holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         }
     }
 

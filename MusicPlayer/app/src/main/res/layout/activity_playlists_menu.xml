@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/primary_color"
-    tools:context=".MainActivity">
+    tools:context=".PlaylistsMenuActivity">
 
     <LinearLayout
+        android:id="@+id/titleMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -27,53 +28,39 @@
         </TextView>
 
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="135dp"
+            android:layout_height="wrap_content"
             android:gravity="center_horizontal|center_vertical"
+            android:layout_margin="10dp"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/playlists"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_margin="7dp"
-                android:backgroundTint="@color/secondary_color"
-                android:text="Playlists"
-                android:textColor="@color/third_color"
-                android:textSize="11sp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PLAYLISTS"
+                android:textColor="@color/third_color">
 
-            </Button>
+            </TextView>
 
-            <Button
-                android:id="@+id/likes"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_margin="7dp"
-                android:backgroundTint="@color/secondary_color"
-                android:text="Favorites"
-                android:textColor="@color/third_color"
-                android:textSize="11sp">
+            <ImageView
+                android:id="@+id/add_playlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/ic_baseline_add_24">
 
-            </Button>
+            </ImageView>
 
-            <Button
-                android:id="@+id/album"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_margin="7dp"
-                android:backgroundTint="@color/secondary_color"
-                android:text="Albums"
-                android:textColor="@color/third_color"
-                android:textSize="11sp">
 
-            </Button>
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/playlists"
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="591dp"
+        android:layout_below="@+id/titleMenu"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -97,12 +84,13 @@
         </TextView>
 
 
-    </LinearLayout>
+    </RelativeLayout>
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:orientation="horizontal"
+        android:layout_below="@+id/playlists"
         android:background="@color/primary_color">
 
         <ImageView
@@ -181,4 +169,4 @@
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

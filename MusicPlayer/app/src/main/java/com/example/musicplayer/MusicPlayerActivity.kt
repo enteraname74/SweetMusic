@@ -32,10 +32,14 @@ class MusicPlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
-        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
 
         musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
+        val position = intent.getSerializableExtra("POSITION") as Int
+
+        MyMediaPlayer.currentIndex = position
+
+        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
 
         Log.d("MUSIC", musics.toString())
         Log.d("SAME MUSIC ?", sameMusic.toString())

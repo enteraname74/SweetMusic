@@ -3,7 +3,6 @@ package com.example.musicplayer
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -120,14 +119,15 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         }
     }
     override fun onMusicClick(position: Int) {
+        Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
             MyMediaPlayer.getInstance.reset()
-            MyMediaPlayer.currentIndex = position
             sameMusic = false
         }
-
+        MyMediaPlayer.currentIndex = position
+        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
         val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
 
         /*On fait passer notre liste de musiques dans notre nouvelle activité pour
@@ -137,6 +137,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         intent.putExtra("LIST",musics)
         //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
+        intent.putExtra("POSITION", position)
 
         startActivity(intent)
     }

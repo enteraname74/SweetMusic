@@ -18,6 +18,11 @@
         android:theme="@style/Theme.MusicPlayer"
         tools:targetApi="31">
         <activity
+            android:name=".PlaylistsMenuActivity"
+            android:exported="false"
+            android:label="@string/title_activity_playlists_menu"
+            android:theme="@style/Theme.MusicPlayer.NoActionBar" />
+        <activity
             android:name=".MusicPlayerActivity"
             android:exported="false" />
         <activity
