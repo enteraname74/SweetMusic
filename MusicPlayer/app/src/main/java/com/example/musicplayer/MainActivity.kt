@@ -78,7 +78,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
                 //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                 menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-                menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
+                menuRecyclerView?.adapter = MusicList("main",musics, applicationContext,this)
+
+
             }
         }
 
@@ -95,6 +97,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
             bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
+            songTitleInfo?.setSelected(true)
         }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
@@ -145,7 +148,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
+            menuRecyclerView?.adapter = MusicList("main",musics, applicationContext,this)
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -165,6 +168,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
                 previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
                 bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
+                songTitleInfo?.setSelected(true)
             }
 
             if (!mediaPlayer.isPlaying){
@@ -172,7 +176,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             } else {
                 pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-
+            mediaPlayer.setOnCompletionListener { playNextSong() }
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }

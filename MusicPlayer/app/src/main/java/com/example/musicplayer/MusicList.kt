@@ -13,9 +13,13 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
-class MusicList(private val musics : ArrayList<Music>, private val context : Context, private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
+class MusicList(
+    val listName : String,
+    val musics : ArrayList<Music>,
+    private val context : Context,
+    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
-    class MusicListViewHolder(var itemView : View, var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
 
         var albumCover : ImageView? = null
         var songName : TextView? = null
@@ -48,21 +52,6 @@ class MusicList(private val musics : ArrayList<Music>, private val context : Con
                 false
             ), mOnMusicListener
         )
-    }
-
-    private fun onListItemClick(position : Int){
-        var currentMusic = musics[position]
-
-        MyMediaPlayer.getInstance.reset()
-        MyMediaPlayer.currentIndex = position
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-        val intent = Intent(context,MusicPlayerActivity::class.java).apply{
-            putExtra("LIST",musics)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        context.startActivity(intent)
     }
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {

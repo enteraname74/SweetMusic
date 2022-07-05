@@ -80,8 +80,11 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
 
     private fun setRessourcesWithMusic(){
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+
         currentSong = musics.get(MyMediaPlayer.currentIndex)
         titleTv?.text = currentSong?.name
+        songTitleInfo?.text = currentSong?.name
         totalTimeTv?.text = convertDuration(currentSong?.duration as Long)
         pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
         nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
