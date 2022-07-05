@@ -3,10 +3,12 @@ package com.example.musicplayer
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -16,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
+import java.io.IOException
 
 class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
@@ -95,6 +98,12 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
         }
+
+        mediaPlayer.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
+            override fun onCompletion(mp: MediaPlayer?) {
+                playNextSong()
+            }
+        })
     }
 
     private fun checkPermission() : Boolean {
@@ -144,12 +153,25 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            val pausePlay = findViewById<ImageView>(R.id.pause_play)
+            val nextBtn = findViewById<ImageView>(R.id.next)
+            val previousBtn = findViewById<ImageView>(R.id.previous)
             noSongPlaying.visibility = View.VISIBLE
 
             if (MyMediaPlayer.currentIndex != -1){
                 noSongPlaying.visibility = View.GONE
                 infoSongPlaying.visibility = View.VISIBLE
                 songTitleInfo.text = musics[MyMediaPlayer.currentIndex].name
+
+                pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
+                nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
+                previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
+            }
+
+            if (!mediaPlayer.isPlaying){
+                pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
 
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
@@ -157,4 +179,48 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         }
     }
 
+    private fun playMusic(){
+        val pausePlay = findViewById<ImageView>(R.id.pause_play)
+        val currentSong = musics.get(MyMediaPlayer.currentIndex)
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        mediaPlayer.reset()
+        try {
+            mediaPlayer.setDataSource(currentSong.path)
+            mediaPlayer.prepare()
+            mediaPlayer.start()
+            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun playNextSong(){
+        if(MyMediaPlayer.currentIndex==(musics.size)-1){
+            MyMediaPlayer.currentIndex = 0
+        } else {
+            MyMediaPlayer.currentIndex+=1
+        }
+        playMusic()
+    }
+
+    private fun playPreviousSong(){
+        if(MyMediaPlayer.currentIndex==0){
+            MyMediaPlayer.currentIndex = (musics.size)-1
+        } else {
+            MyMediaPlayer.currentIndex-=1
+        }
+        playMusic()
+    }
+
+    private fun pausePlay(){
+        val pausePlay = findViewById<ImageView>(R.id.pause_play)
+        if(mediaPlayer.isPlaying){
+            mediaPlayer.pause()
+            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+        } else {
+            mediaPlayer.start()
+            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
+    }
 }

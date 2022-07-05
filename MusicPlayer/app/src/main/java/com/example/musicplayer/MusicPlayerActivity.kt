@@ -176,4 +176,5 @@ class MusicPlayerActivity : AppCompatActivity() {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
     }
+
 }
