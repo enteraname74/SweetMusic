@@ -1,4 +1,5 @@
 package com.example.musicplayer
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -69,6 +70,9 @@ class MusicPlayerActivity : AppCompatActivity() {
             }
 
         })
+
+        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     private fun setRessourcesWithMusic(){
@@ -161,11 +165,6 @@ class MusicPlayerActivity : AppCompatActivity() {
         override fun run() {
             musicPlayerActivity.seekBar?.progress = musicPlayerActivity.mediaPlayer.currentPosition
             musicPlayerActivity.currentTimeTv?.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
-
-            // Si nous arrivons au bout de la barre (donc, au bout de la musique), on passe à la musique suivante :
-            if(musicPlayerActivity.currentTimeTv?.text == musicPlayerActivity.totalTimeTv?.text){
-                musicPlayerActivity.playNextSong()
-            }
 
             Handler(Looper.getMainLooper()).postDelayed(this,1000)
 

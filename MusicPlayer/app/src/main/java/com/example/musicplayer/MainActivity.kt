@@ -99,11 +99,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
         }
 
-        mediaPlayer.setOnCompletionListener(object : MediaPlayer.OnCompletionListener {
-            override fun onCompletion(mp: MediaPlayer?) {
-                playNextSong()
-            }
-        })
+        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     private fun checkPermission() : Boolean {
