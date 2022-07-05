@@ -8,10 +8,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.RelativeLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -89,6 +86,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
 
         if (MyMediaPlayer.currentIndex == -1){
             noSongPlaying.visibility = View.VISIBLE
@@ -97,6 +95,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
+            bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
         }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
@@ -153,6 +152,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             val pausePlay = findViewById<ImageView>(R.id.pause_play)
             val nextBtn = findViewById<ImageView>(R.id.next)
             val previousBtn = findViewById<ImageView>(R.id.previous)
+            val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
             noSongPlaying.visibility = View.VISIBLE
 
             if (MyMediaPlayer.currentIndex != -1){
@@ -163,6 +163,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
                 previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
+                bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
             }
 
             if (!mediaPlayer.isPlaying){
