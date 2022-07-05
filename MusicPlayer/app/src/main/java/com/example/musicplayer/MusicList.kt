@@ -65,7 +65,7 @@ class MusicList(private val musics : ArrayList<Music>, private val context : Con
     }
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
-        var currentMusic = musics[position]
+        val currentMusic = musics[position]
 
         holder.albumCover?.setImageResource(R.drawable.icone_musique)
         holder.songName?.text = currentMusic.name

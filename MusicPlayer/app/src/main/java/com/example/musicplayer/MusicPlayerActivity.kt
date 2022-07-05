@@ -1,6 +1,4 @@
 package com.example.musicplayer
-
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,19 +13,19 @@ import java.io.IOException
 // Classe représentant la lecture d'une musique :
 class MusicPlayerActivity : AppCompatActivity() {
 
-    var titleTv : TextView? = null;
-    var currentTimeTv : TextView? = null;
-    var totalTimeTv : TextView? = null;
-    var seekBar : SeekBar? = null;
-    var pausePlay : ImageView? = null;
-    var nextBtn : ImageView? = null;
-    var previousBtn : ImageView? = null;
-    var musicIcon : ImageView? = null;
-    var currentSong : Music? = null
-    var myThread = Thread(functionnalSeekBar(this))
+    private var titleTv : TextView? = null
+    var currentTimeTv : TextView? = null
+    private var totalTimeTv : TextView? = null
+    var seekBar : SeekBar? = null
+    private var pausePlay : ImageView? = null
+    private var nextBtn : ImageView? = null
+    private var previousBtn : ImageView? = null
+    private var musicIcon : ImageView? = null
+    private var currentSong : Music? = null
+    private var myThread = Thread(FunctionnalSeekBar(this))
 
-    var musics = ArrayList<Music>()
-    var sameMusic : Boolean = false
+    private var musics = ArrayList<Music>()
+    private var sameMusic : Boolean = false
     var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +56,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if(mediaPlayer != null && fromUser){
+                if(fromUser){
                     Log.d("THERE", progress.toString())
                     mediaPlayer.seekTo(progress)
                 }
@@ -73,8 +71,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         })
     }
 
-    fun setRessourcesWithMusic(){
-        currentSong = musics?.get(MyMediaPlayer.currentIndex)
+    private fun setRessourcesWithMusic(){
+        currentSong = musics.get(MyMediaPlayer.currentIndex)
         titleTv?.text = currentSong?.name
         totalTimeTv?.text = convertDuration(currentSong?.duration as Long)
         pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
@@ -84,7 +82,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         playMusic()
     }
 
-    fun playMusic(){
+    private fun playMusic(){
         /*
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
@@ -107,8 +105,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    fun playNextSong(){
-        sameMusic = false;
+    private fun playNextSong(){
+        sameMusic = false
         if(MyMediaPlayer.currentIndex==(musics.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
@@ -118,8 +116,8 @@ class MusicPlayerActivity : AppCompatActivity() {
         setRessourcesWithMusic()
     }
 
-    fun playPreviousSong(){
-        sameMusic = false;
+    private fun playPreviousSong(){
+        sameMusic = false
         if(MyMediaPlayer.currentIndex==0){
             MyMediaPlayer.currentIndex = (musics.size)-1
         } else {
@@ -129,7 +127,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         setRessourcesWithMusic()
     }
 
-    fun pausePlay(){
+    private fun pausePlay(){
         if(mediaPlayer.isPlaying){
             mediaPlayer.pause()
             pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
@@ -139,33 +137,34 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
     }
 
-    fun convertDuration(duration : Long) : String{
-        var minutes : Float = duration.toFloat() / 1000 / 60
-        var seconds : Float = duration.toFloat() / 1000 % 60
+    fun convertDuration(duration: Long): String {
+        val minutes: Float = duration.toFloat() / 1000 / 60
+        val seconds: Float = duration.toFloat() / 1000 % 60
 
-        var strMinutes : String = minutes.toString().split(".")[0]
+        val strMinutes: String = minutes.toString().split(".")[0]
 
-        var strSeconds : String = ""
-        if (seconds < 10.0) {
-            strSeconds = "0"+seconds.toString().split(".")[0]
+        val strSeconds = if (seconds < 10.0) {
+            "0" + seconds.toString().split(".")[0]
         } else {
-            strSeconds = seconds.toString().split(".")[0]
+            seconds.toString().split(".")[0]
         }
 
-        var strDuration : String = strMinutes+":"+strSeconds
-
-        return strDuration
+        return "$strMinutes:$strSeconds"
     }
 
-    class functionnalSeekBar(var musicPlayerActivity: MusicPlayerActivity) : Runnable{
+    class FunctionnalSeekBar(private var musicPlayerActivity: MusicPlayerActivity) : Runnable{
 
         override fun run() {
-            if(musicPlayerActivity.mediaPlayer != null){
-                musicPlayerActivity.seekBar?.progress = musicPlayerActivity.mediaPlayer.currentPosition
-                musicPlayerActivity.currentTimeTv?.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
+            musicPlayerActivity.seekBar?.progress = musicPlayerActivity.mediaPlayer.currentPosition
+            musicPlayerActivity.currentTimeTv?.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
 
-                Handler(Looper.getMainLooper()).postDelayed(this,1000)
+            // Si nous arrivons au bout de la barre (donc, au bout de la musique), on passe à la musique suivante :
+            if(musicPlayerActivity.currentTimeTv?.text == musicPlayerActivity.totalTimeTv?.text){
+                musicPlayerActivity.playNextSong()
             }
+
+            Handler(Looper.getMainLooper()).postDelayed(this,1000)
+
         }
     }
 

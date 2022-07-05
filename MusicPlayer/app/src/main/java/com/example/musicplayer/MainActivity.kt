@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
 
     private var musics = ArrayList<Music>()
-    var menuRecyclerView : RecyclerView? = null
+    private var menuRecyclerView : RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,17 +51,17 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             null // The sort order for the returned rows
         )
 
-        menuRecyclerView = findViewById<RecyclerView>(R.id.menu_recycler_view)
+        menuRecyclerView = findViewById(R.id.menu_recycler_view)
         val noSongsFound = findViewById<TextView>(R.id.no_songs_found)
 
         when (cursor?.count){
             null -> {
                 Toast.makeText(this,"Couldn't retrieve music files",Toast.LENGTH_SHORT).show()
-                menuRecyclerView?.visibility = View.GONE;
-                noSongsFound.visibility = View.VISIBLE;
+                menuRecyclerView?.visibility = View.GONE
+                noSongsFound.visibility = View.VISIBLE
             }
             0 -> {
-                menuRecyclerView?.visibility = View.GONE;
+                menuRecyclerView?.visibility = View.GONE
                 noSongsFound.visibility = View.VISIBLE
             }
             else -> {
@@ -74,20 +74,18 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
                 musics.reverse()
 
-                menuRecyclerView?.visibility = View.VISIBLE;
-                noSongsFound.visibility = View.GONE;
+                menuRecyclerView?.visibility = View.VISIBLE
+                noSongsFound.visibility = View.GONE
 
                 //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                 menuRecyclerView?.layoutManager = LinearLayoutManager(this)
                 menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
             }
         }
-
-
     }
 
     private fun checkPermission() : Boolean {
-        val result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+        val result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
         return result == PackageManager.PERMISSION_GRANTED
     }
 
@@ -104,8 +102,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         }
     }
     override fun onMusicClick(position: Int) {
-        Log.d("ACTIVITE", "APPUIE"+position)
-        var sameMusic : Boolean = true
+        Log.d("ACTIVITE", "APPUIE$position")
+        var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
             Log.d("NOT SAME SONG",MyMediaPlayer.currentIndex.toString())

@@ -2,7 +2,7 @@ package com.example.musicplayer
 
 import android.media.MediaPlayer
 
-class MyMediaPlayer() {
+class MyMediaPlayer {
     /*Permet de créer un équivalent de "static" en Java
     Toutes les valeurs présentes dans companion object sont en static
      */
