@@ -103,7 +103,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
         playlistsButton?.setOnClickListener(View.OnClickListener { playlistButton() })
-
     }
 
     private fun checkPermission() : Boolean {
