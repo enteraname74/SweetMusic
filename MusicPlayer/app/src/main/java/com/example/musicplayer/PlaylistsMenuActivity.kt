@@ -1,13 +1,13 @@
 package com.example.musicplayer
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -68,6 +68,10 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
             songTitleInfo?.setSelected(true)
         }
+
+        // Mise en place du bouton de création de playlist :
+        val addPlaylist = findViewById<ImageView>(R.id.add_playlist)
+        addPlaylist?.setOnClickListener(View.OnClickListener { addPlaylist() })
     }
 
     override fun onResume() {
@@ -186,5 +190,34 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
+    }
+
+    private fun addPlaylist(){
+        val builder = AlertDialog.Builder(this@PlaylistsMenuActivity)
+        builder.setTitle("Create playlist")
+        // L'entrée :
+        val inputText = EditText(this@PlaylistsMenuActivity)
+        // Le type d'entrée :
+        inputText.setInputType(InputType.TYPE_CLASS_TEXT)
+        builder.setView(inputText)
+        // Les boutons :
+        // Si on valide la création, on crée notre playlist :
+        builder.setPositiveButton("OK",DialogInterface.OnClickListener{dialogInterface, i ->
+            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" "))) {
+                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(), false)
+                playlists.add(newPlaylist)
+                menuRecyclerView?.adapter = Playlists(playlists, applicationContext, this)
+            } else {
+                Toast.makeText(this,"A title must be set correctly !",Toast.LENGTH_SHORT).show()
+            }
+        })
+        // Si on annule la création de la playlist, on quitte la fenêtre
+        builder.setNegativeButton("CANCEL", DialogInterface.OnClickListener{dialogInterface, i ->
+            dialogInterface.cancel()
+        })
+
+        builder.show()
+
+        Log.d("playlist ajouté","")
     }
 }
