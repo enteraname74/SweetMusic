@@ -101,8 +101,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
 
-        val playlists = findViewById<Button>(R.id.playlists)
-        playlists?.setOnClickListener(View.OnClickListener { playlistButton() })
+        val playlistsButton = findViewById<Button>(R.id.playlists)
+        playlistsButton?.setOnClickListener(View.OnClickListener { playlistButton() })
+
     }
 
     private fun checkPermission() : Boolean {
@@ -233,7 +234,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
         var playlist = Playlist("testPlaylist",musics,false)
 
-        intent.putExtra("MAIN",playlist)
+        intent.putExtra("testPlaylist",playlist)
+        intent.putExtra("MAIN", musics)
         startActivity(intent)
     }
 }
