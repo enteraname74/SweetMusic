@@ -39,6 +39,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         // Vérifions si on change de playlist :
         if (musics != MyMediaPlayer.currentPlaylist) {
+            Log.d("CHANGEMENT PLAYLIST","")
             MyMediaPlayer.currentPlaylist = musics
             sameMusic = false
         }

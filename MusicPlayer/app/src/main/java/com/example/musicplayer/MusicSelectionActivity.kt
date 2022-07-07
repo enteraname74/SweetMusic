@@ -60,43 +60,6 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
     }
 
-    override fun onResume() {
-        super.onResume()
-        if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = adapter
-
-            val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-            val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
-            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-            val pausePlay = findViewById<ImageView>(R.id.pause_play)
-            val nextBtn = findViewById<ImageView>(R.id.next)
-            val previousBtn = findViewById<ImageView>(R.id.previous)
-            val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-            noSongPlaying.visibility = View.VISIBLE
-
-            if (MyMediaPlayer.currentIndex != -1){
-                noSongPlaying.visibility = View.GONE
-                infoSongPlaying.visibility = View.VISIBLE
-                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-
-                pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-                nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
-                previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-                bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
-                songTitleInfo?.setSelected(true)
-            }
-
-            if (!mediaPlayer.isPlaying){
-                pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else {
-                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            }
-            mediaPlayer.setOnCompletionListener { playNextSong() }
-            Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
-            Log.d("RESUME","resume")
-        }
-    }
-
     private fun onBottomMenuClick(position : Int){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true

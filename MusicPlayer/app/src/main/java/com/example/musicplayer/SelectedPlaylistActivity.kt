@@ -14,6 +14,7 @@ import java.io.IOException
 
 class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener {
     private lateinit var playlist : Playlist
+    private lateinit var adapter : MusicList
     private var musics = ArrayList<Music>()
     private var allMusics = ArrayList<Music>()
     private var menuRecyclerView : RecyclerView? = null
@@ -28,8 +29,10 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         allMusics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
         musics = playlist.musicList
 
+        adapter = MusicList(musics,applicationContext,this)
+
         menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-        menuRecyclerView?.adapter = MusicList(musics,applicationContext,this)
+        menuRecyclerView?.adapter = adapter
 
         val playlistName = findViewById<TextView>(R.id.playlist_name)
         playlistName?.text = playlist.listName
@@ -57,7 +60,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = MusicList(musics,applicationContext,this)
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -110,7 +113,8 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
                 }
             }
             playlist.musicList = musics
-            menuRecyclerView?.adapter = MusicList(musics,applicationContext,this)
+            adapter.musics = musics
+            menuRecyclerView?.adapter = adapter
         }
     }
 

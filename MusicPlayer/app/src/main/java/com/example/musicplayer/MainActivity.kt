@@ -14,7 +14,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.ObjectOutputStream
 
 class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
@@ -82,6 +84,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                 menuRecyclerView?.layoutManager = LinearLayoutManager(this)
                 menuRecyclerView?.adapter = adapter
+                adapter.notifyItemRangeChanged(0, adapter.getItemCount());
             }
         }
 
@@ -154,7 +157,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = MusicList(musics,applicationContext,this)
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -266,5 +269,16 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         intent.putExtra("testPlaylist",playlist)
         intent.putExtra("MAIN", musics)
         startActivity(intent)
+    }
+
+    private fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
     }
 }

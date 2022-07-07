@@ -1,13 +1,10 @@
 package com.example.musicplayer
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -16,7 +13,7 @@ import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
 data class MusicList(
-    val musics : ArrayList<Music>,
+    var musics : ArrayList<Music>,
     private val context : Context,
     private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
@@ -63,6 +60,8 @@ data class MusicList(
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
+
+        Log.d("SAME PLAY", (MyMediaPlayer.currentPlaylist == musics).toString())
 
         if(MyMediaPlayer.currentIndex == position && MyMediaPlayer.currentPlaylist == musics){
             Log.d("CHANGE COLOR", MyMediaPlayer.currentIndex.toString())
