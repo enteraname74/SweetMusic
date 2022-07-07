@@ -64,7 +64,7 @@ data class MusicList(
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
 
-        if(MyMediaPlayer.currentIndex == position){
+        if(MyMediaPlayer.currentIndex == position && MyMediaPlayer.currentPlaylist == musics){
             Log.d("CHANGE COLOR", MyMediaPlayer.currentIndex.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         } else {

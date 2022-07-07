@@ -45,8 +45,8 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         } else {
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
-            songTitleInfo?.text = allMusics[MyMediaPlayer.currentIndex].name
-            bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
+            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
             songTitleInfo?.setSelected(true)
         }
 
@@ -71,12 +71,12 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             if (MyMediaPlayer.currentIndex != -1){
                 noSongPlaying.visibility = View.GONE
                 infoSongPlaying.visibility = View.VISIBLE
-                songTitleInfo.text = allMusics[MyMediaPlayer.currentIndex].name
+                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
 
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
                 previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-                bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
+                bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
                 songTitleInfo?.setSelected(true)
             }
 
@@ -138,9 +138,34 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         startActivity(intent)
     }
 
+    private fun onBottomMenuClick(position : Int){
+        Log.d("MUSIC POSITION", position.toString())
+        var sameMusic = true
+
+        if (position != MyMediaPlayer.currentIndex) {
+            MyMediaPlayer.getInstance.reset()
+            sameMusic = false
+        }
+        MyMediaPlayer.currentIndex = position
+        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
+        val intent = Intent(this@SelectedPlaylistActivity,MusicPlayerActivity::class.java)
+
+        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
+        récupérer les données des musiques
+         */
+
+        // Si on joue actuellement une autre playlist que celle du menu dans laquelle on est, on passe uniquement la playlist qui se jour actuellement :
+        intent.putExtra("LIST",MyMediaPlayer.currentPlaylist)
+        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.putExtra("SAME MUSIC", sameMusic)
+        intent.putExtra("POSITION", position)
+
+        startActivity(intent)
+    }
+
     private fun playMusic(){
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val currentSong = musics.get(MyMediaPlayer.currentIndex)
+        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         mediaPlayer.reset()
         try {
@@ -148,14 +173,14 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             mediaPlayer.prepare()
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
+            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 
     private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex==(musics.size)-1){
+        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
             MyMediaPlayer.currentIndex+=1
@@ -165,7 +190,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
 
     private fun playPreviousSong(){
         if(MyMediaPlayer.currentIndex==0){
-            MyMediaPlayer.currentIndex = (musics.size)-1
+            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
             MyMediaPlayer.currentIndex-=1
         }

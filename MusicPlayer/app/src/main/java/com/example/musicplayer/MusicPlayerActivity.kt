@@ -37,6 +37,12 @@ class MusicPlayerActivity : AppCompatActivity() {
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
         val position = intent.getSerializableExtra("POSITION") as Int
 
+        // Vérifions si on change de playlist :
+        if (musics != MyMediaPlayer.currentPlaylist) {
+            MyMediaPlayer.currentPlaylist = musics
+            sameMusic = false
+        }
+
         MyMediaPlayer.currentIndex = position
 
         Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
@@ -82,7 +88,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun setRessourcesWithMusic(){
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
 
-        currentSong = musics.get(MyMediaPlayer.currentIndex)
+        currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         musicIcon?.setImageResource(R.drawable.michael)
         titleTv?.text = currentSong?.name
         songTitleInfo?.text = currentSong?.name

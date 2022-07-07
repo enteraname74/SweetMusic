@@ -73,6 +73,8 @@ data class MusicListSelection(
             } else {
                 holder.checkbox?.setChecked(true)
             }
+        } else {
+            holder.checkbox?.setChecked(false)
         }
     }
 
