@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -19,6 +20,7 @@ import java.io.IOException
 class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     private var musics = ArrayList<Music>()
+    private lateinit var adapter : MusicList
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
 
@@ -76,9 +78,11 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 menuRecyclerView?.visibility = View.VISIBLE
                 noSongsFound.visibility = View.GONE
 
+                adapter = MusicList(musics, applicationContext,this)
+
                 //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                 menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-                menuRecyclerView?.adapter = MusicList(musics, applicationContext,this)
+                menuRecyclerView?.adapter = adapter
             }
         }
 
@@ -122,6 +126,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             )
         }
     }
+
     override fun onMusicClick(position: Int) {
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
@@ -144,6 +149,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         intent.putExtra("POSITION", position)
 
         startActivity(intent)
+
     }
 
     override fun onResume() {

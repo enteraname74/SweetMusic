@@ -51,10 +51,6 @@ class Playlists (
 
         holder.albumCover?.setImageResource(R.drawable.icone_musique)
         holder.playlistName?.text = currentPlaylist.listName
-
-        if(MyMediaPlayer.currentIndex == position){
-            holder.playlistName?.setTextColor(Color.parseColor("#FFFFFF"))
-        }
     }
 
     override fun getItemCount(): Int {

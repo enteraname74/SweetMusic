@@ -15,10 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
-data class MusicList(
+data class MusicListSelection(
     val musics : ArrayList<Music>,
+    val selectedMusicsPositions : ArrayList<Int>,
     private val context : Context,
-    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
+    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicListSelection.MusicListViewHolder>(), Serializable {
 
     class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, Serializable {
 
@@ -27,6 +28,7 @@ data class MusicList(
         var artist : TextView? = null
         var albumName : TextView? = null
         var background : LinearLayout? = null
+        var checkbox : CheckBox? = null
 
         init{
             super.itemView
@@ -36,6 +38,7 @@ data class MusicList(
             artist = itemView.findViewById(R.id.artist)
             albumName = itemView.findViewById(R.id.album_name)
             background = itemView.findViewById(R.id.background)
+            checkbox = itemView.findViewById(R.id.checkbox_music)
 
             itemView.setOnClickListener(this)
         }
@@ -48,7 +51,7 @@ data class MusicList(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MusicListViewHolder {
         return MusicListViewHolder(
             LayoutInflater.from(context).inflate(
-                R.layout.music_file,
+                R.layout.music_file_selection,
                 parent,
                 false
             ), mOnMusicListener
@@ -64,11 +67,12 @@ data class MusicList(
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
 
-        if(MyMediaPlayer.currentIndex == position){
-            Log.d("CHANGE COLOR", MyMediaPlayer.currentIndex.toString())
-            holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
-        } else {
-            holder.songName?.setTextColor(Color.parseColor("#7da7c5"))
+        if (position in selectedMusicsPositions) {
+            if (holder.checkbox?.isChecked == true){
+                holder.checkbox?.setChecked(false)
+            } else {
+                holder.checkbox?.setChecked(true)
+            }
         }
     }
 

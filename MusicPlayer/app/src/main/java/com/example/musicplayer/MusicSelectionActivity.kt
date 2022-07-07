@@ -1,46 +1,32 @@
 package com.example.musicplayer
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.IOException
 
-class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener, MusicList.OnMusicListener {
-    private var menuRecyclerView : RecyclerView? = null
-    private var playlists = ArrayList<Playlist>()
+
+class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicListener {
     private var musics = ArrayList<Music>()
+    private var selectedMusics = ArrayList<Music>()
+    private var selectedMusicsPositions = ArrayList<Int>()
+    private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_playlists_menu)
+        setContentView(R.layout.activity_music_selection)
 
-        menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
-        val noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
-
+        menuRecyclerView = findViewById(R.id.all_songs_list)
         musics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
-        val playlist = intent.getSerializableExtra("testPlaylist") as Playlist
-        playlists.add(playlist)
 
-        if (playlists.size != 0){
-            menuRecyclerView?.visibility = View.VISIBLE
-            noPlaylistsFound.visibility = View.GONE
-
-            //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-            menuRecyclerView?.adapter = Playlists(playlists,applicationContext,this)
-        } else {
-            menuRecyclerView?.visibility = View.GONE
-            noPlaylistsFound.visibility = View.VISIBLE
-        }
+        menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+        menuRecyclerView?.adapter = MusicListSelection(musics,selectedMusicsPositions,applicationContext,this)
 
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
         val nextBtn = findViewById<ImageView>(R.id.next)
@@ -51,46 +37,38 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
 
-        // On met en place les données du menu situé tout en bas de l'écran :
         if (MyMediaPlayer.currentIndex == -1){
             noSongPlaying.visibility = View.VISIBLE
             infoSongPlaying.visibility = View.GONE
         } else {
-            // Changement de la vue :
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
-
-            // Mise en places des boutons :
             pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
             nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
             previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-            bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
+            bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
             songTitleInfo?.setSelected(true)
         }
-
-        // Mise en place du bouton de création de playlist :
-        val addPlaylist = findViewById<ImageView>(R.id.add_playlist)
-        addPlaylist?.setOnClickListener(View.OnClickListener { addPlaylist() })
-
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
+
+        val validateButton = findViewById<Button>(R.id.validate)
+        validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
     }
 
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = Playlists(playlists,applicationContext,this)
-
-            val pausePlay = findViewById<ImageView>(R.id.pause_play)
-            val nextBtn = findViewById<ImageView>(R.id.next)
-            val previousBtn = findViewById<ImageView>(R.id.previous)
+            menuRecyclerView?.adapter = MusicListSelection(musics,selectedMusicsPositions, applicationContext,this)
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            val pausePlay = findViewById<ImageView>(R.id.pause_play)
+            val nextBtn = findViewById<ImageView>(R.id.next)
+            val previousBtn = findViewById<ImageView>(R.id.previous)
             val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-
             noSongPlaying.visibility = View.VISIBLE
 
             if (MyMediaPlayer.currentIndex != -1){
@@ -101,7 +79,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
                 previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-                bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
+                bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
                 songTitleInfo?.setSelected(true)
             }
 
@@ -114,41 +92,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }
-    }
-
-    override fun onPlaylistClick(position: Int) {
-        Log.d("PLAYLIST POSITION", position.toString())
-
-        val currentPlaylist = playlists[position]
-        val intent = Intent(this@PlaylistsMenuActivity,SelectedPlaylistActivity::class.java)
-        intent.putExtra("MAIN", musics)
-        intent.putExtra("LIST",currentPlaylist)
-
-        startActivity(intent)
-    }
-
-    override fun onMusicClick(position: Int) {
-        Log.d("MUSIC POSITION", position.toString())
-        var sameMusic = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
-            sameMusic = false
-        }
-        MyMediaPlayer.currentIndex = position
-        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
-        val intent = Intent(this@PlaylistsMenuActivity,MusicPlayerActivity::class.java)
-
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-
-        intent.putExtra("LIST",musics)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", position)
-
-        startActivity(intent)
     }
 
     private fun playMusic(){
@@ -196,32 +139,49 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         }
     }
 
-    private fun addPlaylist(){
-        val builder = AlertDialog.Builder(this@PlaylistsMenuActivity)
-        builder.setTitle("Create playlist")
-        // L'entrée :
-        val inputText = EditText(this@PlaylistsMenuActivity)
-        // Le type d'entrée :
-        inputText.setInputType(InputType.TYPE_CLASS_TEXT)
-        builder.setView(inputText)
-        // Les boutons :
-        // Si on valide la création, on crée notre playlist :
-        builder.setPositiveButton("OK",DialogInterface.OnClickListener{dialogInterface, i ->
-            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" "))) {
-                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(), false)
-                playlists.add(newPlaylist)
-                menuRecyclerView?.adapter = Playlists(playlists, applicationContext, this)
-            } else {
-                Toast.makeText(this,"A title must be set correctly !",Toast.LENGTH_SHORT).show()
-            }
-        })
-        // Si on annule la création de la playlist, on quitte la fenêtre
-        builder.setNegativeButton("CANCEL", DialogInterface.OnClickListener{dialogInterface, i ->
-            dialogInterface.cancel()
-        })
+    override fun onMusicClick(position: Int) {
+        val selectedMusic = musics[position]
 
-        builder.show()
+        if (selectedMusic in selectedMusics){
+            selectedMusics.remove(selectedMusic)
+            selectedMusicsPositions.remove(position)
+        } else {
+            selectedMusics.add(selectedMusic)
+            selectedMusicsPositions.add(position)
+        }
+        MyMediaPlayer.currentIndex = position
+        menuRecyclerView?.adapter = MusicListSelection(musics,selectedMusicsPositions,applicationContext,this)
 
-        Log.d("playlist ajouté","")
+    }
+
+    private fun onValidateButtonClick(){
+        val returnIntent = Intent()
+        returnIntent.putExtra("addedSongs", selectedMusics)
+        setResult(RESULT_OK, returnIntent)
+        finish()
+    }
+
+    private fun onBottomMenuClick(position: Int){
+        Log.d("MUSIC POSITION", position.toString())
+        var sameMusic = true
+
+        if (position != MyMediaPlayer.currentIndex) {
+            MyMediaPlayer.getInstance.reset()
+            sameMusic = false
+        }
+        MyMediaPlayer.currentIndex = position
+        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
+        val intent = Intent(this@MusicSelectionActivity,MusicPlayerActivity::class.java)
+
+        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
+        récupérer les données des musiques
+         */
+
+        intent.putExtra("LIST",musics)
+        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.putExtra("SAME MUSIC", sameMusic)
+        intent.putExtra("POSITION", position)
+
+        startActivity(intent)
     }
 }

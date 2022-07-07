@@ -1,17 +1,21 @@
 package com.example.musicplayer
 
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.IOException
 
 class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener {
+    private lateinit var playlist : Playlist
     private var musics = ArrayList<Music>()
+    private var allMusics = ArrayList<Music>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
 
@@ -20,7 +24,8 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         setContentView(R.layout.activity_selected_playlist)
 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
-        val playlist = intent.getSerializableExtra("LIST") as Playlist
+        playlist = intent.getSerializableExtra("LIST") as Playlist
+        allMusics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
         musics = playlist.musicList
 
         menuRecyclerView?.layoutManager = LinearLayoutManager(this)
@@ -40,14 +45,13 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         } else {
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
-            songTitleInfo?.text = musics[MyMediaPlayer.currentIndex].name
+            songTitleInfo?.text = allMusics[MyMediaPlayer.currentIndex].name
             bottomInfos.setOnClickListener(View.OnClickListener {onMusicClick(MyMediaPlayer.currentIndex) })
             songTitleInfo?.setSelected(true)
         }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
-
     }
 
     override fun onResume() {
@@ -67,7 +71,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             if (MyMediaPlayer.currentIndex != -1){
                 noSongPlaying.visibility = View.GONE
                 infoSongPlaying.visibility = View.VISIBLE
-                songTitleInfo.text = musics[MyMediaPlayer.currentIndex].name
+                songTitleInfo.text = allMusics[MyMediaPlayer.currentIndex].name
 
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
@@ -84,6 +88,29 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             mediaPlayer.setOnCompletionListener { playNextSong() }
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
+        }
+
+        val addSongs = findViewById<ImageView>(R.id.add_songs)
+        addSongs.setOnClickListener(View.OnClickListener { onAddSongsClick() })
+    }
+
+    fun onAddSongsClick(){
+        val intent = Intent(this@SelectedPlaylistActivity,MusicSelectionActivity::class.java)
+
+        intent.putExtra("MAIN", allMusics)
+        resultLauncher.launch(intent)
+    }
+
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data?.getSerializableExtra("addedSongs") as ArrayList<Music>
+            for (song in data){
+                if (song !in musics){
+                    musics.add(song)
+                }
+            }
+            playlist.musicList = musics
+            menuRecyclerView?.adapter = MusicList(musics,applicationContext,this)
         }
     }
 
