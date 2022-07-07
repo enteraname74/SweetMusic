@@ -11,10 +11,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.IOException
+import java.io.*
 
 class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener, MusicList.OnMusicListener {
     private var menuRecyclerView : RecyclerView? = null
+    private lateinit var adapter : Playlists
+    private lateinit var noPlaylistsFound : TextView
     private var playlists = ArrayList<Playlist>()
     private var musics = ArrayList<Music>()
     private var mediaPlayer = MyMediaPlayer.getInstance
@@ -23,20 +25,27 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlists_menu)
 
+        //writeObjectToFile("allPlaylists", playlists)
+
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
-        val noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
+        noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
 
         musics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
-        val playlist = intent.getSerializableExtra("testPlaylist") as Playlist
-        playlists.add(playlist)
+
+        if (File(applicationContext.filesDir, "allPlaylists").exists()){
+            playlists = readAllMusicsFromFile("allPlaylists")
+        }
+
+        adapter = Playlists(playlists,applicationContext,this)
 
         if (playlists.size != 0){
             menuRecyclerView?.visibility = View.VISIBLE
             noPlaylistsFound.visibility = View.GONE
 
+
             //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
             menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-            menuRecyclerView?.adapter = Playlists(playlists,applicationContext,this)
+            menuRecyclerView?.adapter = adapter
         } else {
             menuRecyclerView?.visibility = View.GONE
             noPlaylistsFound.visibility = View.VISIBLE
@@ -79,8 +88,19 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
 
     override fun onResume() {
         super.onResume()
+        if (playlists.size != 0) {
+            menuRecyclerView?.visibility = View.VISIBLE
+            noPlaylistsFound.visibility = View.GONE
+
+            //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
+            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+        }
         if(menuRecyclerView!=null){
-            menuRecyclerView?.adapter = Playlists(playlists,applicationContext,this)
+            Log.d("MAJ","")
+            playlists = readAllMusicsFromFile("allPlaylists")
+            adapter.allPlaylists = playlists
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
 
             val pausePlay = findViewById<ImageView>(R.id.pause_play)
             val nextBtn = findViewById<ImageView>(R.id.next)
@@ -123,6 +143,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         val intent = Intent(this@PlaylistsMenuActivity,SelectedPlaylistActivity::class.java)
         intent.putExtra("MAIN", musics)
         intent.putExtra("LIST",currentPlaylist)
+        intent.putExtra("POSITION", position)
 
         startActivity(intent)
     }
@@ -235,6 +256,13 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" "))) {
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(), false)
                 playlists.add(newPlaylist)
+                writeObjectToFile("allPlaylists", playlists)
+
+                menuRecyclerView?.visibility = View.VISIBLE
+                noPlaylistsFound.visibility = View.GONE
+
+                //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
+                menuRecyclerView?.layoutManager = LinearLayoutManager(this)
                 menuRecyclerView?.adapter = Playlists(playlists, applicationContext, this)
             } else {
                 Toast.makeText(this,"A title must be set correctly !",Toast.LENGTH_SHORT).show()
@@ -248,5 +276,32 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         builder.show()
 
         Log.d("playlist ajouté","")
+    }
+
+    private fun writeObjectToFile(filename : String, content : ArrayList<Playlist>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+            Toast.makeText(this,"ALL PLAYLISTS SAVED",Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+    }
+
+    private fun readAllMusicsFromFile(filename : String) : ArrayList<Playlist> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Playlist>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Playlist>
+            ois.close();
+            Toast.makeText(this,"ALL PLAYLISTS FETCHED",Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
+        return content
     }
 }

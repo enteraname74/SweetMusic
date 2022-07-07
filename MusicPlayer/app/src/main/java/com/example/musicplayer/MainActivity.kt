@@ -13,10 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.ObjectOutputStream
+import java.io.*
 
 class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
@@ -29,62 +26,87 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val noSongsFound = findViewById<TextView>(R.id.no_songs_found)
+        noSongsFound.visibility = View.VISIBLE
+
         if (!checkPermission()){
             requestPermission()
         }
 
-        // A "projection" defines the columns that will be returned for each row
-        val projection: Array<String> = arrayOf(
-            MediaStore.Audio.Media.TITLE,
-            MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.DURATION,
-            MediaStore.Audio.Media.DATA,
-        )
+        if (File(applicationContext.filesDir, "allMusics").exists()){
+            musics = readAllMusicsFromFile("allMusics")
 
-        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+            menuRecyclerView = findViewById(R.id.menu_recycler_view)
+            menuRecyclerView?.visibility = View.VISIBLE
+            noSongsFound.visibility = View.GONE
 
-        // Does a query against the table and returns a Cursor object
-        val cursor = contentResolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,    // The content URI of the words table
-            projection,                                     // The columns to return for each row
-            selection,                                      // Either null, or the boolean that specifies the rows to retrieve
-            null,
-            null // The sort order for the returned rows
-        )
+            adapter = MusicList(musics, applicationContext, this)
 
-        menuRecyclerView = findViewById(R.id.menu_recycler_view)
-        val noSongsFound = findViewById<TextView>(R.id.no_songs_found)
+            //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
+            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+            menuRecyclerView?.adapter = adapter
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+        } else {
 
-        when (cursor?.count){
-            null -> {
-                Toast.makeText(this,"Couldn't retrieve music files",Toast.LENGTH_SHORT).show()
-                menuRecyclerView?.visibility = View.GONE
-                noSongsFound.visibility = View.VISIBLE
-            }
-            0 -> {
-                menuRecyclerView?.visibility = View.GONE
-                noSongsFound.visibility = View.VISIBLE
-            }
-            else -> {
-                while(cursor.moveToNext()){
-                    val music = Music(cursor.getString(0),cursor.getString(1),cursor.getString(2),"",cursor.getLong(3),cursor.getString(4))
-                    if(File(music.path).exists()) {
-                        musics.add(music)
-                    }
+            // A "projection" defines the columns that will be returned for each row
+            val projection: Array<String> = arrayOf(
+                MediaStore.Audio.Media.TITLE,
+                MediaStore.Audio.Media.ARTIST,
+                MediaStore.Audio.Media.ALBUM,
+                MediaStore.Audio.Media.DURATION,
+                MediaStore.Audio.Media.DATA,
+            )
+
+            val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+
+            // Does a query against the table and returns a Cursor object
+            val cursor = contentResolver.query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,    // The content URI of the words table
+                projection,                                     // The columns to return for each row
+                selection,                                      // Either null, or the boolean that specifies the rows to retrieve
+                null,
+                null // The sort order for the returned rows
+            )
+
+            when (cursor?.count) {
+                null -> {
+                    Toast.makeText(this, "Couldn't retrieve music files", Toast.LENGTH_SHORT).show()
+                    menuRecyclerView?.visibility = View.GONE
+                    noSongsFound.visibility = View.VISIBLE
                 }
+                0 -> {
+                    menuRecyclerView?.visibility = View.GONE
+                    noSongsFound.visibility = View.VISIBLE
+                }
+                else -> {
+                    while (cursor.moveToNext()) {
+                        val music = Music(
+                            cursor.getString(0),
+                            cursor.getString(1),
+                            cursor.getString(2),
+                            "",
+                            cursor.getLong(3),
+                            cursor.getString(4)
+                        )
+                        if (File(music.path).exists()) {
+                            musics.add(music)
+                        }
+                    }
 
-                musics.reverse()
+                    musics.reverse()
 
-                menuRecyclerView?.visibility = View.VISIBLE
-                noSongsFound.visibility = View.GONE
+                    writeObjectToFile("allMusics", musics)
+                    menuRecyclerView = findViewById(R.id.menu_recycler_view)
+                    menuRecyclerView?.visibility = View.VISIBLE
+                    noSongsFound.visibility = View.GONE
 
-                adapter = MusicList(musics, applicationContext,this)
+                    adapter = MusicList(musics, applicationContext, this)
 
-                //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-                menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-                menuRecyclerView?.adapter = adapter
-                adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+                    //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
+                    menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+                    menuRecyclerView?.adapter = adapter
+                    adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+                }
             }
         }
 
@@ -120,6 +142,11 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
             Toast.makeText(this,"PERMISSION IS REQUIRED FOR THIS APP TO FUNCTION. PLEASE ALLOW PERMISSIONS FROM SETTINGS",Toast.LENGTH_SHORT).show()
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                69
+            )
         } else {
             ActivityCompat.requestPermissions(
                 this,
@@ -151,7 +178,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         intent.putExtra("POSITION", position)
 
         startActivity(intent)
-
     }
 
     override fun onResume() {
@@ -271,14 +297,30 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         startActivity(intent)
     }
 
-    private fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
+    private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
+            Toast.makeText(this,"ALL MUSICS SAVED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
+    }
+
+    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Music>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Music>
+            ois.close();
+            Toast.makeText(this,"ALL MUSICS FETCHED",Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
+        return content
     }
 }

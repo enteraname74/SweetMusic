@@ -10,10 +10,11 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.IOException
+import java.io.*
 
 class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener {
     private lateinit var playlist : Playlist
+    private var playlistPosition : Int = 0
     private lateinit var adapter : MusicList
     private var musics = ArrayList<Music>()
     private var allMusics = ArrayList<Music>()
@@ -27,6 +28,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         playlist = intent.getSerializableExtra("LIST") as Playlist
         allMusics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
+        playlistPosition = intent.getSerializableExtra("POSITION") as Int
         musics = playlist.musicList
 
         adapter = MusicList(musics,applicationContext,this)
@@ -115,6 +117,10 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             playlist.musicList = musics
             adapter.musics = musics
             menuRecyclerView?.adapter = adapter
+
+            val playlists = readAllMusicsFromFile("allPlaylists")
+            playlists[playlistPosition].musicList = musics
+            writeObjectToFile("allPlaylists", playlists)
         }
     }
 
@@ -210,5 +216,32 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
+    }
+
+    private fun writeObjectToFile(filename : String, content : ArrayList<Playlist>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+            Toast.makeText(this,"ALL PLAYLISTS SAVED",Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+    }
+
+    private fun readAllMusicsFromFile(filename : String) : ArrayList<Playlist> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Playlist>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Playlist>
+            ois.close();
+            Toast.makeText(this,"ALL PLAYLISTS FETCHED",Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
+        return content
     }
 }

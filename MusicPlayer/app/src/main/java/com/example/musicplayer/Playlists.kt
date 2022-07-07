@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
 class Playlists (
-    private var allPlaylists : ArrayList<Playlist>,
+    var allPlaylists : ArrayList<Playlist>,
     private val context : Context,
     private val mOnPlaylistListener : Playlists.OnPlaylistsListener ) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
 
