@@ -57,7 +57,9 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         mediaPlayer.setOnCompletionListener { playNextSong() }
 
         val validateButton = findViewById<Button>(R.id.validate)
+        val cancelButton = findViewById<Button>(R.id.cancel)
         validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
+        cancelButton.setOnClickListener(View.OnClickListener { onCancelButtonClick() })
     }
 
     private fun onBottomMenuClick(position : Int){
@@ -148,6 +150,12 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         val returnIntent = Intent()
         returnIntent.putExtra("addedSongs", selectedMusics)
         setResult(RESULT_OK, returnIntent)
+        finish()
+    }
+
+    private fun onCancelButtonClick(){
+        val returnIntent = Intent()
+        setResult(RESULT_CANCELED, returnIntent)
         finish()
     }
 }
