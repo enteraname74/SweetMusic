@@ -8,21 +8,27 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.ObjectOutputStream
 
 // Classe représentant la lecture d'une musique :
 class MusicPlayerActivity : AppCompatActivity() {
 
-    private var titleTv : TextView? = null
-    var currentTimeTv : TextView? = null
-    private var totalTimeTv : TextView? = null
-    var seekBar : SeekBar? = null
-    private var pausePlay : ImageView? = null
-    private var nextBtn : ImageView? = null
-    private var previousBtn : ImageView? = null
-    private var musicIcon : ImageView? = null
-    private var currentSong : Music? = null
+    private lateinit var titleTv : TextView
+    lateinit var currentTimeTv : TextView
+    private lateinit var totalTimeTv : TextView
+    lateinit var seekBar : SeekBar
+    private lateinit var pausePlay : ImageView
+    private lateinit var nextBtn : ImageView
+    private lateinit var previousBtn : ImageView
+    private lateinit var musicIcon : ImageView
+    private lateinit var favoriteBtn : ImageView
+    private lateinit var currentSong : Music
+    private val saveFile = "allMusics.musics"
     private var myThread = Thread(FunctionnalSeekBar(this))
 
     private var musics = ArrayList<Music>()
@@ -46,9 +52,6 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         MyMediaPlayer.currentIndex = position
 
-        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
-
-        Log.d("MUSIC", musics.toString())
         Log.d("SAME MUSIC ?", sameMusic.toString())
 
         titleTv = findViewById(R.id.song_title)
@@ -59,14 +62,15 @@ class MusicPlayerActivity : AppCompatActivity() {
         nextBtn = findViewById(R.id.next)
         previousBtn = findViewById(R.id.previous)
         musicIcon = findViewById(R.id.album_cover_big)
+        favoriteBtn = findViewById(R.id.favorite)
 
-        titleTv?.setSelected(true)
+        titleTv.setSelected(true)
 
         setRessourcesWithMusic()
 
         this@MusicPlayerActivity.runOnUiThread(myThread)
 
-        seekBar?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if(fromUser){
                     Log.d("THERE", progress.toString())
@@ -90,13 +94,17 @@ class MusicPlayerActivity : AppCompatActivity() {
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-        musicIcon?.setImageResource(R.drawable.michael)
-        titleTv?.text = currentSong?.name
-        songTitleInfo?.text = currentSong?.name
-        totalTimeTv?.text = convertDuration(currentSong?.duration as Long)
-        pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-        nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
-        previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
+        Log.d("CURRENT SONG", currentSong.toString())
+        musicIcon.setImageResource(R.drawable.michael)
+        titleTv.text = currentSong.name
+        songTitleInfo?.text = currentSong.name
+        totalTimeTv.text = convertDuration(currentSong.duration as Long)
+        // Vérifions si la musique est en favoris :
+        getFavoriteState()
+        pausePlay.setOnClickListener(View.OnClickListener{pausePlay()})
+        nextBtn.setOnClickListener(View.OnClickListener { playNextSong() })
+        previousBtn.setOnClickListener(View.OnClickListener { playPreviousSong() })
+        favoriteBtn.setOnClickListener(View.OnClickListener { setFavorite() })
 
         playMusic()
     }
@@ -109,21 +117,21 @@ class MusicPlayerActivity : AppCompatActivity() {
         if (!sameMusic) {
             mediaPlayer.reset()
             try {
-                mediaPlayer.setDataSource(currentSong?.path)
+                mediaPlayer.setDataSource(currentSong.path)
                 mediaPlayer.prepare()
                 mediaPlayer.start()
-                seekBar?.progress = 0
-                seekBar?.max = mediaPlayer.duration
-                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                seekBar.progress = 0
+                seekBar.max = mediaPlayer.duration
+                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         } else {
-            seekBar?.progress = 0
-            seekBar?.max = mediaPlayer.duration
+            seekBar.progress = 0
+            seekBar.max = mediaPlayer.duration
 
             if (!mediaPlayer.isPlaying){
-                pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             }
         }
     }
@@ -153,11 +161,34 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun pausePlay(){
         if(mediaPlayer.isPlaying){
             mediaPlayer.pause()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
         } else {
             mediaPlayer.start()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
+    }
+
+    // Permet de savoir si une chanson est en favoris :
+    private fun getFavoriteState(){
+        if(currentSong.favorite){
+            favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
+        } else {
+            favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+        }
+    }
+
+    // Permet de changer le statut favoris de la chanson :
+    private fun setFavorite(){
+        if(currentSong.favorite){
+            currentSong.favorite = false
+            musics[MyMediaPlayer.currentIndex].favorite = false
+            favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+        } else {
+            currentSong.favorite = true
+            musics[MyMediaPlayer.currentIndex].favorite = true
+            favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
+        }
+        writeObjectToFile(saveFile, musics)
     }
 
     fun convertDuration(duration: Long): String {
@@ -189,6 +220,18 @@ class MusicPlayerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
+    }
+
+    private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+            Toast.makeText(this,"ALL MUSICS SAVED", Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
     }
 
 }

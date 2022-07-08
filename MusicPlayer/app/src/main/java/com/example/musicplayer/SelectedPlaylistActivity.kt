@@ -20,6 +20,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
     private var allMusics = ArrayList<Music>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
+    private var saveFile = "allPlaylists.playlists"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,9 +119,9 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             adapter.musics = musics
             menuRecyclerView?.adapter = adapter
 
-            val playlists = readAllMusicsFromFile("allPlaylists")
+            val playlists = readAllPlaylistsFromFile(saveFile)
             playlists[playlistPosition].musicList = musics
-            writeObjectToFile("allPlaylists", playlists)
+            writeObjectToFile(saveFile, playlists)
         }
     }
 
@@ -174,13 +175,13 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
     }
 
     private fun playMusic(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         mediaPlayer.reset()
         try {
+            val pausePlay = findViewById<ImageView>(R.id.pause_play)
+            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
+            mediaPlayer.prepareAsync()
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
@@ -230,7 +231,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         }
     }
 
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Playlist> {
+    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
         val path = applicationContext.filesDir
         var content = ArrayList<Playlist>()
         try {

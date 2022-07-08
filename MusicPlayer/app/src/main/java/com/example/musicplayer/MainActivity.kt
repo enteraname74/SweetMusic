@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     private lateinit var adapter : MusicList
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
+    private val saveFile = "allMusics.musics"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +34,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             requestPermission()
         }
 
-        if (File(applicationContext.filesDir, "allMusics").exists()){
-            musics = readAllMusicsFromFile("allMusics")
+        if (File(applicationContext.filesDir, saveFile).exists()){
+            musics = readAllMusicsFromFile(saveFile)
 
             menuRecyclerView = findViewById(R.id.menu_recycler_view)
             menuRecyclerView?.visibility = View.VISIBLE
@@ -95,11 +96,11 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
                     musics.reverse()
 
-                    writeObjectToFile("allMusics", musics)
+                    writeObjectToFile(saveFile, musics)
                     menuRecyclerView = findViewById(R.id.menu_recycler_view)
                     menuRecyclerView?.visibility = View.VISIBLE
                     noSongsFound.visibility = View.GONE
-
+                    Log.d("GET ALL MUSICS","")
                     adapter = MusicList(musics, applicationContext, this)
 
                     //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
@@ -183,6 +184,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
+            musics = readAllMusicsFromFile(saveFile)
+            adapter.musics = musics
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
@@ -243,14 +246,14 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     }
 
     private fun playMusic(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         mediaPlayer.reset()
         try {
+            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
+            mediaPlayer.prepareAsync()
             mediaPlayer.start()
+            val pausePlay = findViewById<ImageView>(R.id.pause_play)
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
         } catch (e: IOException) {

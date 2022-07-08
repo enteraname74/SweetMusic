@@ -18,22 +18,37 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
     private lateinit var adapter : Playlists
     private lateinit var noPlaylistsFound : TextView
     private var playlists = ArrayList<Playlist>()
+    private val playlistsNames = ArrayList<String>()
     private var musics = ArrayList<Music>()
     private var mediaPlayer = MyMediaPlayer.getInstance
+    private var saveFile = "allPlaylists.playlists"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlists_menu)
 
-        //writeObjectToFile("allPlaylists", playlists)
+        //writeObjectToFile("allPlaylists.playlists", playlists)
 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
 
         musics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
 
-        if (File(applicationContext.filesDir, "allPlaylists").exists()){
-            playlists = readAllMusicsFromFile("allPlaylists")
+        // Si on a déjà enregistré des playlists, on va les chercher dans notre fichier :
+        if (File(applicationContext.filesDir, saveFile).exists()){
+            playlists = readAllPlaylistsFromFile(saveFile)
+        }
+
+        // On récupère une liste des noms des playlists :
+        for (element in playlists){
+            playlistsNames.add(element.listName)
+        }
+
+        // On vérifie que la playlist "Favorites" existe, sinon, on la crée :
+        if (!(playlistsNames.contains("Favorites"))){
+            val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),true)
+            playlists.add(favoritePlaylist)
+            writeObjectToFile(saveFile,playlists)
         }
 
         adapter = Playlists(playlists,applicationContext,this)
@@ -98,7 +113,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         }
         if(menuRecyclerView!=null){
             Log.d("MAJ","")
-            playlists = readAllMusicsFromFile("allPlaylists")
+            playlists = readAllPlaylistsFromFile(saveFile)
             adapter.allPlaylists = playlists
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
 
@@ -252,11 +267,16 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         builder.setView(inputText)
         // Les boutons :
         // Si on valide la création, on crée notre playlist :
-        builder.setPositiveButton("OK",DialogInterface.OnClickListener{dialogInterface, i ->
-            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" "))) {
-                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(), false)
+        builder.setPositiveButton("OK",DialogInterface.OnClickListener{ _, _ ->
+            /* Afin de créer une playlist, nous devons vérifier les critères suivants :
+                - Le nom n'est pas vide ou ne commence pas avec un espace (au cas où on a qu'un espace en guise de nom
+                - Le nom n'est pas déjà prit
+             */
+
+            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString()))) {
+                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>())
                 playlists.add(newPlaylist)
-                writeObjectToFile("allPlaylists", playlists)
+                writeObjectToFile(saveFile, playlists)
 
                 menuRecyclerView?.visibility = View.VISIBLE
                 noPlaylistsFound.visibility = View.GONE
@@ -290,7 +310,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         }
     }
 
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Playlist> {
+    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
         val path = applicationContext.filesDir
         var content = ArrayList<Playlist>()
         try {
