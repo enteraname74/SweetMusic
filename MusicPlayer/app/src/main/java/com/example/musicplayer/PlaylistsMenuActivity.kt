@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.*
@@ -59,7 +60,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
 
 
             //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+            menuRecyclerView?.layoutManager = GridLayoutManager(this,2)
             menuRecyclerView?.adapter = adapter
         } else {
             menuRecyclerView?.visibility = View.GONE
@@ -103,14 +104,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
 
     override fun onResume() {
         super.onResume()
-        if (playlists.size != 0) {
-            menuRecyclerView?.visibility = View.VISIBLE
-            noPlaylistsFound.visibility = View.GONE
-
-            //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
-        }
         if(menuRecyclerView!=null){
             Log.d("MAJ","")
             playlists = readAllPlaylistsFromFile(saveFile)

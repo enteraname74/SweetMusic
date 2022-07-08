@@ -61,28 +61,32 @@
         android:layout_width="match_parent"
         android:layout_height="591dp"
         android:layout_below="@+id/titleMenu"
+        android:background="@color/secondary_color"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menu_playlist_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:background="@color/secondary_color"
-            android:visibility="visible" />
+            android:visibility="visible">
+
+        </androidx.recyclerview.widget.RecyclerView>
 
         <TextView
             android:id="@+id/no_playlists_found"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@color/secondary_color"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="NO PLAYLISTS FOUND"
             android:textColor="@color/third_color"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:background="@color/secondary_color"
-            android:text="NO PLAYLISTS FOUND"
-            android:gravity="center_horizontal|center_vertical"
             android:visibility="gone">
-        </TextView>
 
+        </TextView>
 
     </RelativeLayout>
     <LinearLayout

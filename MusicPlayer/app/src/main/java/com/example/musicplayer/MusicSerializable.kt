@@ -3,12 +3,12 @@ import android.graphics.Bitmap
 import java.io.Serializable
 
 // Classe permettant de représenter une musique :
-data class Music(
+data class MusicSerializable(
     var name: String,
     var artist: String,
     var album: String,
-    var albumCover: Bitmap?,
+    var albumCover: ByteArray?,
     var duration: Long,
     var path: String,
     var favorite: Boolean = false
-        ) : Serializable{}
+) : Serializable{}

@@ -74,7 +74,12 @@ data class MusicList(
         Log.d("POSITION", position.toString())
         val currentMusic = musics[position]
 
-        holder.albumCover?.setImageResource(R.drawable.michael)
+        if(currentMusic.albumCover != null){
+            holder.albumCover?.setImageBitmap(currentMusic.albumCover)
+        } else {
+            holder.albumCover?.setImageResource(R.drawable.michael)
+        }
+
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album

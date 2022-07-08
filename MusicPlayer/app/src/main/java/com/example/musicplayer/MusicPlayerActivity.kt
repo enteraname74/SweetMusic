@@ -40,7 +40,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
         val position = intent.getSerializableExtra("POSITION") as Int
-        musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
+        //musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
 
         MyMediaPlayer.currentIndex = position
 
@@ -87,7 +87,12 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         Log.d("CURRENT SONG", currentSong.toString())
-        musicIcon.setImageResource(R.drawable.michael)
+        if (currentSong.albumCover != null){
+            musicIcon.setImageBitmap(currentSong.albumCover)
+        } else {
+            musicIcon.setImageResource(R.drawable.michael)
+        }
+
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration as Long)

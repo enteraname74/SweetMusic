@@ -49,7 +49,7 @@ class Playlists (
     override fun onBindViewHolder(holder: Playlists.PlaylistsViewHolder, position: Int) {
         val currentPlaylist = allPlaylists[position]
 
-        holder.albumCover?.setImageResource(R.drawable.icone_musique)
+        holder.albumCover?.setImageResource(R.drawable.michael)
         holder.playlistName?.text = currentPlaylist.listName
     }
 

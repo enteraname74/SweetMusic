@@ -1,11 +1,16 @@
 package com.example.musicplayer
 
 import android.Manifest
+import android.R.attr.bitmap
+import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.util.Size
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +19,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.*
+
 
 class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
@@ -56,6 +62,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 MediaStore.Audio.Media.ALBUM,
                 MediaStore.Audio.Media.DURATION,
                 MediaStore.Audio.Media.DATA,
+                MediaStore.Audio.Albums.ALBUM_ID
             )
 
             val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
@@ -81,14 +88,33 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 }
                 else -> {
                     while (cursor.moveToNext()) {
+                        val albumId = cursor.getLong(5)
+                        val albumUri = ContentUris.withAppendedId(
+                            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
+                        )
+                        Log.d("URI", albumUri.toString())
+                        var albumCover : Bitmap?
+                        try {
+                            albumCover = contentResolver.loadThumbnail(
+                                albumUri,
+                                Size(200, 200),
+                                null
+                            )
+                            Log.d("FILE FOUND",albumCover.toString())
+                        } catch (error : FileNotFoundException){
+                            Log.d("FILE NOT FOUND","")
+                            albumCover = null
+
+                        }
                         val music = Music(
                             cursor.getString(0),
                             cursor.getString(1),
                             cursor.getString(2),
-                            "",
+                            albumCover,
                             cursor.getLong(3),
                             cursor.getString(4)
                         )
+                        Log.d("SONG", music.toString())
                         if (File(music.path).exists()) {
                             musics.add(music)
                         }
@@ -320,26 +346,67 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
         val path = applicationContext.filesDir
+        // transformons nos élements bitmap en quelque chose de serializable et donc d'enregistrable :
+        val savedArray = ArrayList<MusicSerializable>()
+        for (element in content){
+            val bitmap = element.albumCover
+            val byteStream = ByteArrayOutputStream()
+            bitmap?.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
+            val bitmapBytes = byteStream.toByteArray()
+
+            val savedElement = MusicSerializable(
+                element.name,
+                element.artist,
+                element.album,
+                bitmapBytes,
+                element.duration,
+                element.path,
+                element.favorite
+            )
+            savedArray.add(savedElement)
+        }
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
+            oos.writeObject(savedArray)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error","")
+            Log.d("ErrorWRITE",error.toString())
         }
+        Toast.makeText(this,"ALL SONGS WRITE",Toast.LENGTH_SHORT).show()
     }
 
     private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
         val path = applicationContext.filesDir
         var content = ArrayList<Music>()
+        var fetchedContent = ArrayList<MusicSerializable>()
         try {
             val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Music>
+            fetchedContent = ois.readObject() as ArrayList<MusicSerializable>
             ois.close();
         } catch (error : IOException){
-            Log.d("Error","")
+            Log.d("Error",error.toString())
         }
+        Log.d("CONTENT", fetchedContent.toString())
+        for (element in fetchedContent){
+            val bytes = element.albumCover
+            var bitmap : Bitmap? = null
+            if (bytes != null && bytes.isNotEmpty()) {
+                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
 
+            val music = Music(
+                element.name,
+                element.artist,
+                element.album,
+                bitmap,
+                element.duration,
+                element.path,
+                element.favorite
+            )
+
+            content.add(music)
+        }
+        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
         return content
     }
 }
