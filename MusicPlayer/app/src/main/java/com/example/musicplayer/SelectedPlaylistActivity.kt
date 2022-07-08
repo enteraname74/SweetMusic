@@ -159,6 +159,10 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         startActivity(intent)
     }
 
+    override fun onLongMusicClick(position: Int) {
+        Toast.makeText(this,"LONG PRESS",Toast.LENGTH_SHORT).show()
+    }
+
     private fun onBottomMenuClick(position : Int){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
@@ -191,7 +195,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepareAsync()
+            mediaPlayer.prepare()
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
@@ -206,6 +210,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         } else {
             MyMediaPlayer.currentIndex+=1
         }
+        adapter.notifyDataSetChanged()
         playMusic()
     }
 
@@ -215,6 +220,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         } else {
             MyMediaPlayer.currentIndex-=1
         }
+        adapter.notifyDataSetChanged()
         playMusic()
     }
 

@@ -189,6 +189,11 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         startActivity(intent)
     }
 
+    override fun onLongMusicClick(position: Int) {
+        Log.d("LONG PRESS","")
+        Toast.makeText(this,"LONG PRESS",Toast.LENGTH_SHORT).show()
+    }
+
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
@@ -278,6 +283,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         } else {
             MyMediaPlayer.currentIndex+=1
         }
+        adapter.notifyDataSetChanged()
         playMusic()
     }
 
@@ -287,6 +293,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         } else {
             MyMediaPlayer.currentIndex-=1
         }
+        adapter.notifyDataSetChanged()
         playMusic()
     }
 
