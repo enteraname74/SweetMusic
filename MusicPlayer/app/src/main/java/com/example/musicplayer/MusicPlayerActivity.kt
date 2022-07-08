@@ -10,10 +10,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.ObjectOutputStream
+import java.io.*
 
 // Classe représentant la lecture d'une musique :
 class MusicPlayerActivity : AppCompatActivity() {
@@ -29,26 +26,21 @@ class MusicPlayerActivity : AppCompatActivity() {
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
     private val saveFile = "allMusics.musics"
+    private var savePlaylistsFile = "allPlaylists.playlists"
     private var myThread = Thread(FunctionnalSeekBar(this))
 
     private var musics = ArrayList<Music>()
-    private var sameMusic : Boolean = false
+    private var sameMusic = false
     var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
-        musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
+
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
         val position = intent.getSerializableExtra("POSITION") as Int
-
-        // Vérifions si on change de playlist :
-        if (musics != MyMediaPlayer.currentPlaylist) {
-            Log.d("CHANGEMENT PLAYLIST","")
-            MyMediaPlayer.currentPlaylist = musics
-            sameMusic = false
-        }
+        musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
 
         MyMediaPlayer.currentIndex = position
 
@@ -186,9 +178,45 @@ class MusicPlayerActivity : AppCompatActivity() {
         } else {
             currentSong.favorite = true
             musics[MyMediaPlayer.currentIndex].favorite = true
+
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         }
-        writeObjectToFile(saveFile, musics)
+
+        // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
+        // Commencons par la playlist principale :
+        val allSongs  = readAllMusicsFromFile(saveFile)
+        for (element in allSongs){
+            // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
+            if (element.path == currentSong.path){
+                element.favorite = currentSong.favorite
+                writeObjectToFile(saveFile, allSongs)
+                break
+            }
+        }
+        // Ensuite, mettons à jour nos playlists :
+        val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
+        for (playlist in playlists){
+            for (element in playlist.musicList){
+                if (element.path == currentSong.path){
+                    element.favorite = currentSong.favorite
+                    break
+                }
+            }
+        }
+        // Mettons à jour la playlist favoris :
+        val favoritePlaylist = playlists[0]
+        var shouldBeInFavoriteList = true
+        for (element in favoritePlaylist.musicList){
+            if (element.path == currentSong.path){
+                favoritePlaylist.musicList.remove(element)
+                shouldBeInFavoriteList = false
+                break
+            }
+        }
+        if (shouldBeInFavoriteList){
+            favoritePlaylist.musicList.add(currentSong)
+        }
+        writePlaylistToFile(savePlaylistsFile, playlists)
     }
 
     fun convertDuration(duration: Long): String {
@@ -228,10 +256,48 @@ class MusicPlayerActivity : AppCompatActivity() {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
-            Toast.makeText(this,"ALL MUSICS SAVED", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
+    }
+
+    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Music>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Music>
+            ois.close();
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
+        return content
+    }
+
+    private fun writePlaylistToFile(filename : String, content : ArrayList<Playlist>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+    }
+
+    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Playlist>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Playlist>
+            ois.close();
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
+        return content
     }
 
 }

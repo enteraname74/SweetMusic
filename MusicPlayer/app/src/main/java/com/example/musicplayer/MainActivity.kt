@@ -165,7 +165,15 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             MyMediaPlayer.getInstance.reset()
             sameMusic = false
         }
+        // Vérifions si on change de playlist :
+        if (musics != MyMediaPlayer.currentPlaylist) {
+            Log.d("CHANGEMENT PLAYLIST","")
+            MyMediaPlayer.currentPlaylist = musics
+            sameMusic = false
+        }
+
         MyMediaPlayer.currentIndex = position
+
         Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
         val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
 
@@ -214,7 +222,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             } else {
                 pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            mediaPlayer.setOnCompletionListener { playNextSong() }
+            mediaPlayer.setOnCompletionListener { playNextSong()}
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }
@@ -246,22 +254,25 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     }
 
     private fun playMusic(){
+        Log.d("1","")
         mediaPlayer.reset()
         try {
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepareAsync()
+            mediaPlayer.prepare()
             mediaPlayer.start()
             val pausePlay = findViewById<ImageView>(R.id.pause_play)
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
         } catch (e: IOException) {
+            Log.d("ERROR","")
             e.printStackTrace()
         }
     }
 
     private fun playNextSong(){
+        Log.d("THERE","mp")
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
@@ -306,7 +317,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
-            Toast.makeText(this,"ALL MUSICS SAVED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
@@ -319,7 +329,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             val ois = ObjectInputStream(FileInputStream(File(path, filename)));
             content = ois.readObject() as ArrayList<Music>
             ois.close();
-            Toast.makeText(this,"ALL MUSICS FETCHED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }

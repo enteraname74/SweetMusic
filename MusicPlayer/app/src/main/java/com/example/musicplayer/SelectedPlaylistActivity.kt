@@ -63,6 +63,9 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
+            val playlists = readAllPlaylistsFromFile(saveFile)
+            playlist = playlists[playlistPosition]
+            adapter.musics = playlists[playlistPosition].musicList
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
@@ -133,6 +136,13 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             MyMediaPlayer.getInstance.reset()
             sameMusic = false
         }
+        // Vérifions si on change de playlist :
+        if (musics != MyMediaPlayer.currentPlaylist) {
+            Log.d("CHANGEMENT PLAYLIST","")
+            MyMediaPlayer.currentPlaylist = musics
+            sameMusic = false
+        }
+
         MyMediaPlayer.currentIndex = position
         Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
         val intent = Intent(this@SelectedPlaylistActivity,MusicPlayerActivity::class.java)
@@ -141,7 +151,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         récupérer les données des musiques
          */
 
-        intent.putExtra("LIST",musics)
+        intent.putExtra("LIST",playlist.musicList)
         //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
@@ -225,7 +235,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
-            Toast.makeText(this,"ALL PLAYLISTS SAVED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
@@ -238,7 +247,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             val ois = ObjectInputStream(FileInputStream(File(path, filename)));
             content = ois.readObject() as ArrayList<Playlist>
             ois.close();
-            Toast.makeText(this,"ALL PLAYLISTS FETCHED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }

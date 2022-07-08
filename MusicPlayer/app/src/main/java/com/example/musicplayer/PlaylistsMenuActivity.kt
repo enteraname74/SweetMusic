@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.*
 
-class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener, MusicList.OnMusicListener {
+class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener {
     private var menuRecyclerView : RecyclerView? = null
     private lateinit var adapter : Playlists
     private lateinit var noPlaylistsFound : TextView
@@ -163,30 +163,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         startActivity(intent)
     }
 
-    override fun onMusicClick(position: Int) {
-        Log.d("MUSIC POSITION", position.toString())
-        var sameMusic = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
-            sameMusic = false
-        }
-        MyMediaPlayer.currentIndex = position
-        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
-        val intent = Intent(this@PlaylistsMenuActivity,MusicPlayerActivity::class.java)
-
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-
-        intent.putExtra("LIST",musics)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", position)
-
-        startActivity(intent)
-    }
-
     private fun onBottomMenuClick(position : Int){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
@@ -304,7 +280,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
-            Toast.makeText(this,"ALL PLAYLISTS SAVED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
@@ -317,7 +292,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             val ois = ObjectInputStream(FileInputStream(File(path, filename)));
             content = ois.readObject() as ArrayList<Playlist>
             ois.close();
-            Toast.makeText(this,"ALL PLAYLISTS FETCHED",Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
