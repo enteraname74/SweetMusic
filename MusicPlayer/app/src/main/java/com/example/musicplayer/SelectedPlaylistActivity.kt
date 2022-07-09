@@ -140,6 +140,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         if (musics != MyMediaPlayer.currentPlaylist) {
             Log.d("CHANGEMENT PLAYLIST","")
             MyMediaPlayer.currentPlaylist = musics
+            MyMediaPlayer.playlistName = playlist.listName
             sameMusic = false
         }
 
@@ -147,12 +148,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
         val intent = Intent(this@SelectedPlaylistActivity,MusicPlayerActivity::class.java)
 
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-
-        intent.putExtra("LIST",playlist.musicList)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
 
@@ -179,9 +174,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         récupérer les données des musiques
          */
 
-        // Si on joue actuellement une autre playlist que celle du menu dans laquelle on est, on passe uniquement la playlist qui se jour actuellement :
-        intent.putExtra("LIST",MyMediaPlayer.currentPlaylist)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
 

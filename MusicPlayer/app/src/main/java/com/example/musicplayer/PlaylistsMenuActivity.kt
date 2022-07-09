@@ -172,9 +172,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         récupérer les données des musiques
          */
 
-        // Si on joue actuellement une autre playlist que celle du menu dans laquelle on est, on passe uniquement la playlist qui se jour actuellement :
-        intent.putExtra("LIST",MyMediaPlayer.currentPlaylist)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
 

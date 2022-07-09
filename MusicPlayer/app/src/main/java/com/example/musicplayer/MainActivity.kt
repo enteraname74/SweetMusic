@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
 
 
@@ -28,6 +29,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
     private val saveFile = "allMusics.musics"
+    private var savePlaylistsFile = "allPlaylists.playlists"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +56,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             menuRecyclerView?.adapter = adapter
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
         } else {
-
             // A "projection" defines the columns that will be returned for each row
             val projection: Array<String> = arrayOf(
                 MediaStore.Audio.Media.TITLE,
@@ -93,18 +94,16 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
                         )
                         Log.d("URI", albumUri.toString())
-                        var albumCover : Bitmap?
-                        try {
-                            albumCover = contentResolver.loadThumbnail(
+
+                        val albumCover : ByteArray? = try {
+                            val bitmap = contentResolver.loadThumbnail(
                                 albumUri,
                                 Size(200, 200),
                                 null
                             )
-                            Log.d("FILE FOUND",albumCover.toString())
+                            bitmapToByteArray(bitmap)
                         } catch (error : FileNotFoundException){
-                            Log.d("FILE NOT FOUND","")
-                            albumCover = null
-
+                            null
                         }
                         val music = Music(
                             cursor.getString(0),
@@ -119,7 +118,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                             musics.add(music)
                         }
                     }
-
                     musics.reverse()
 
                     writeObjectToFile(saveFile, musics)
@@ -195,6 +193,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         if (musics != MyMediaPlayer.currentPlaylist) {
             Log.d("CHANGEMENT PLAYLIST","")
             MyMediaPlayer.currentPlaylist = musics
+            MyMediaPlayer.playlistName = "Main"
             sameMusic = false
         }
 
@@ -207,8 +206,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         récupérer les données des musiques
          */
 
-        intent.putExtra("LIST",musics)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
 
@@ -223,9 +220,12 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            musics = readAllMusicsFromFile(saveFile)
-            adapter.musics = musics
-            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+            if (MyMediaPlayer.playlistName == "MAIN"){
+                musics = MyMediaPlayer.currentPlaylist
+                adapter.musics = musics
+                adapter.notifyItemRangeChanged(0, adapter.getItemCount())
+            }
+            Log.d("DATA REFRESHED","")
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -275,9 +275,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         récupérer les données des musiques
          */
 
-        // Si on joue actuellement une autre playlist que celle du menu dans laquelle on est, on passe uniquement la playlist qui se jour actuellement :
-        intent.putExtra("LIST",MyMediaPlayer.currentPlaylist)
-        //flags = Intent.FLAG_ACTIVITY_NEW_TASK
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
 
@@ -346,28 +343,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
         val path = applicationContext.filesDir
-        // transformons nos élements bitmap en quelque chose de serializable et donc d'enregistrable :
-        val savedArray = ArrayList<MusicSerializable>()
-        for (element in content){
-            val bitmap = element.albumCover
-            val byteStream = ByteArrayOutputStream()
-            bitmap?.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
-            val bitmapBytes = byteStream.toByteArray()
-
-            val savedElement = MusicSerializable(
-                element.name,
-                element.artist,
-                element.album,
-                bitmapBytes,
-                element.duration,
-                element.path,
-                element.favorite
-            )
-            savedArray.add(savedElement)
-        }
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(savedArray)
+            oos.writeObject(content)
             oos.close()
         } catch (error : IOException){
             Log.d("ErrorWRITE",error.toString())
@@ -378,35 +356,20 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
         val path = applicationContext.filesDir
         var content = ArrayList<Music>()
-        var fetchedContent = ArrayList<MusicSerializable>()
         try {
             val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            fetchedContent = ois.readObject() as ArrayList<MusicSerializable>
+            content = ois.readObject() as ArrayList<Music>
             ois.close();
         } catch (error : IOException){
             Log.d("Error",error.toString())
         }
-        Log.d("CONTENT", fetchedContent.toString())
-        for (element in fetchedContent){
-            val bytes = element.albumCover
-            var bitmap : Bitmap? = null
-            if (bytes != null && bytes.isNotEmpty()) {
-                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            }
-
-            val music = Music(
-                element.name,
-                element.artist,
-                element.album,
-                bitmap,
-                element.duration,
-                element.path,
-                element.favorite
-            )
-
-            content.add(music)
-        }
         Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
         return content
+    }
+
+    private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
+        val byteStream = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
+        return byteStream.toByteArray()
     }
 }

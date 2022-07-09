@@ -20,6 +20,7 @@ class MyMediaPlayer {
 
         var currentIndex : Int = -1
         var currentPlaylist = ArrayList<Music>()
+        var playlistName = ""
     }
 
 

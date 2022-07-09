@@ -7,7 +7,7 @@ data class Music(
     var name: String,
     var artist: String,
     var album: String,
-    var albumCover: Bitmap?,
+    var albumCover: ByteArray?,
     var duration: Long,
     var path: String,
     var favorite: Boolean = false

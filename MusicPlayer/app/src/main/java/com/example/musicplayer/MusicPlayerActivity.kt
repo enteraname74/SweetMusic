@@ -1,4 +1,6 @@
 package com.example.musicplayer
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -29,7 +31,6 @@ class MusicPlayerActivity : AppCompatActivity() {
     private var savePlaylistsFile = "allPlaylists.playlists"
     private var myThread = Thread(FunctionnalSeekBar(this))
 
-    private var musics = ArrayList<Music>()
     private var sameMusic = false
     var mediaPlayer = MyMediaPlayer.getInstance
 
@@ -40,7 +41,6 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
         val position = intent.getSerializableExtra("POSITION") as Int
-        //musics = intent.getSerializableExtra("LIST") as ArrayList<Music>
 
         MyMediaPlayer.currentIndex = position
 
@@ -88,7 +88,13 @@ class MusicPlayerActivity : AppCompatActivity() {
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         Log.d("CURRENT SONG", currentSong.toString())
         if (currentSong.albumCover != null){
-            musicIcon.setImageBitmap(currentSong.albumCover)
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentSong.albumCover
+            var bitmap: Bitmap? = null
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            musicIcon.setImageBitmap(bitmap)
         } else {
             musicIcon.setImageResource(R.drawable.michael)
         }
@@ -135,7 +141,7 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     private fun playNextSong(){
         sameMusic = false
-        if(MyMediaPlayer.currentIndex==(musics.size)-1){
+        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
             MyMediaPlayer.currentIndex+=1
@@ -147,7 +153,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun playPreviousSong(){
         sameMusic = false
         if(MyMediaPlayer.currentIndex==0){
-            MyMediaPlayer.currentIndex = (musics.size)-1
+            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
             MyMediaPlayer.currentIndex-=1
         }
@@ -178,11 +184,11 @@ class MusicPlayerActivity : AppCompatActivity() {
     private fun setFavorite(){
         if(currentSong.favorite){
             currentSong.favorite = false
-            musics[MyMediaPlayer.currentIndex].favorite = false
+            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
         } else {
             currentSong.favorite = true
-            musics[MyMediaPlayer.currentIndex].favorite = true
+            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
 
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         }
@@ -262,8 +268,9 @@ class MusicPlayerActivity : AppCompatActivity() {
             oos.writeObject(content)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error","")
+            Log.d("ErrorWRITE",error.toString())
         }
+        Toast.makeText(this,"ALL SONGS WRITE",Toast.LENGTH_SHORT).show()
     }
 
     private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
@@ -274,9 +281,9 @@ class MusicPlayerActivity : AppCompatActivity() {
             content = ois.readObject() as ArrayList<Music>
             ois.close();
         } catch (error : IOException){
-            Log.d("Error","")
+            Log.d("Error",error.toString())
         }
-
+        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
         return content
     }
 
@@ -304,5 +311,4 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         return content
     }
-
 }

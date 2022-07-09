@@ -1,5 +1,7 @@
 package com.example.musicplayer
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
 import android.view.ContextMenu
@@ -75,7 +77,13 @@ data class MusicList(
         val currentMusic = musics[position]
 
         if(currentMusic.albumCover != null){
-            holder.albumCover?.setImageBitmap(currentMusic.albumCover)
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentMusic.albumCover
+            var bitmap: Bitmap? = null
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            holder.albumCover?.setImageBitmap(bitmap)
         } else {
             holder.albumCover?.setImageResource(R.drawable.michael)
         }
