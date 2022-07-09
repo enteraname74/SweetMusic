@@ -2,6 +2,8 @@ package com.example.musicplayer
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
 import android.view.LayoutInflater
@@ -62,7 +64,18 @@ data class MusicListSelection(
         Log.d("POSITION", position.toString())
         val currentMusic = musics[position]
 
-        holder.albumCover?.setImageResource(R.drawable.michael)
+        if(currentMusic.albumCover != null){
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentMusic.albumCover
+            var bitmap: Bitmap? = null
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            holder.albumCover?.setImageBitmap(bitmap)
+        } else {
+            holder.albumCover?.setImageResource(R.drawable.michael)
+        }
+
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album

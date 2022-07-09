@@ -8,7 +8,10 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
+import java.io.ObjectInputStream
 
 
 class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicListener {
@@ -18,13 +21,14 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
     private var selectedMusicsPositions = ArrayList<Int>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
+    private val savedMusicsFile = "allMusics.musics"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_selection)
 
         menuRecyclerView = findViewById(R.id.all_songs_list)
-        musics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
+        musics = readAllMusicsFromFile(savedMusicsFile)
 
         adapter = MusicListSelection(musics,selectedMusicsPositions,applicationContext,this)
 
@@ -154,5 +158,19 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         val returnIntent = Intent()
         setResult(RESULT_CANCELED, returnIntent)
         finish()
+    }
+
+    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Music>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Music>
+            ois.close();
+        } catch (error : IOException){
+            Log.d("Error",error.toString())
+        }
+        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
+        return content
     }
 }

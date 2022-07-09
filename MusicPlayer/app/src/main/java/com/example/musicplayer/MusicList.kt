@@ -74,6 +74,10 @@ data class MusicList(
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
         Log.d("POSITION", position.toString())
+        Log.d("MEDIA PLAYER POSITION",MyMediaPlayer.currentIndex.toString())
+        Log.d("CURRENT MEDIA PLAYLIST", MyMediaPlayer.currentPlaylist.toString())
+        Log.d("CURRENT PLAYLIST", musics.toString())
+        Log.d("SAME PLAYLIST ?", (MyMediaPlayer.currentPlaylist == musics).toString())
         val currentMusic = musics[position]
 
         if(currentMusic.albumCover != null){

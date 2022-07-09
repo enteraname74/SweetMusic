@@ -56,6 +56,15 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             menuRecyclerView?.adapter = adapter
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
         } else {
+            // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
+
+            // Créons d'abord la playlist des favoris :
+            Log.d("FAVORIS","")
+            val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),true)
+            val playlists = ArrayList<Playlist>()
+            playlists.add(favoritePlaylist)
+            writePlaylistsToFile(savePlaylistsFile,playlists)
+
             // A "projection" defines the columns that will be returned for each row
             val projection: Array<String> = arrayOf(
                 MediaStore.Audio.Media.TITLE,
@@ -333,11 +342,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     private fun playlistButton() {
         val intent = Intent(this@MainActivity,PlaylistsMenuActivity::class.java)
-
-        var playlist = Playlist("testPlaylist",musics,false)
-
-        intent.putExtra("testPlaylist",playlist)
-        intent.putExtra("MAIN", musics)
         startActivity(intent)
     }
 
@@ -365,6 +369,17 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         }
         Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
         return content
+    }
+
+    private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
     }
 
     private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {

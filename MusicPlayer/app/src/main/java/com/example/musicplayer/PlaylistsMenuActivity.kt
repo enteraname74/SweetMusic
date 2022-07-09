@@ -20,7 +20,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
     private lateinit var noPlaylistsFound : TextView
     private var playlists = ArrayList<Playlist>()
     private val playlistsNames = ArrayList<String>()
-    private var musics = ArrayList<Music>()
     private var mediaPlayer = MyMediaPlayer.getInstance
     private var saveFile = "allPlaylists.playlists"
 
@@ -33,8 +32,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
 
-        musics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
-
         // Si on a déjà enregistré des playlists, on va les chercher dans notre fichier :
         if (File(applicationContext.filesDir, saveFile).exists()){
             playlists = readAllPlaylistsFromFile(saveFile)
@@ -43,13 +40,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         // On récupère une liste des noms des playlists :
         for (element in playlists){
             playlistsNames.add(element.listName)
-        }
-
-        // On vérifie que la playlist "Favorites" existe, sinon, on la crée :
-        if (!(playlistsNames.contains("Favorites"))){
-            val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),true)
-            playlists.add(favoritePlaylist)
-            writeObjectToFile(saveFile,playlists)
         }
 
         adapter = Playlists(playlists,applicationContext,this)
@@ -149,7 +139,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
 
         val currentPlaylist = playlists[position]
         val intent = Intent(this@PlaylistsMenuActivity,SelectedPlaylistActivity::class.java)
-        intent.putExtra("MAIN", musics)
         intent.putExtra("LIST",currentPlaylist)
         intent.putExtra("POSITION", position)
 

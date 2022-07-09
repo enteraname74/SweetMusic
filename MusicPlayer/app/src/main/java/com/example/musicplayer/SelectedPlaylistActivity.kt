@@ -17,7 +17,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
     private var playlistPosition : Int = 0
     private lateinit var adapter : MusicList
     private var musics = ArrayList<Music>()
-    private var allMusics = ArrayList<Music>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
     private var saveFile = "allPlaylists.playlists"
@@ -28,7 +27,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         playlist = intent.getSerializableExtra("LIST") as Playlist
-        allMusics = intent.getSerializableExtra("MAIN") as ArrayList<Music>
         playlistPosition = intent.getSerializableExtra("POSITION") as Int
         musics = playlist.musicList
 
@@ -105,8 +103,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
 
     fun onAddSongsClick(){
         val intent = Intent(this@SelectedPlaylistActivity,MusicSelectionActivity::class.java)
-
-        intent.putExtra("MAIN", allMusics)
         resultLauncher.launch(intent)
     }
 
