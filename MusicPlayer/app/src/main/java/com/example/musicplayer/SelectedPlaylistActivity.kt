@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -220,6 +221,31 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         } else {
             mediaPlayer.start()
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            0 -> {
+                Toast.makeText(this,"Ajout dans une playlist",Toast.LENGTH_SHORT).show()
+                true
+            }
+            1 -> {
+                musics.removeAt(item.groupId)
+                adapter.musics.removeAt(item.groupId)
+                adapter.notifyDataSetChanged()
+
+                // Mettons à jour l'état des playlists :
+                val playlists = readAllPlaylistsFromFile(saveFile)
+                playlists[playlistPosition].musicList = musics
+                writeObjectToFile(saveFile, playlists)
+
+                Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> {
+                onContextItemSelected(item)
+            }
         }
     }
 

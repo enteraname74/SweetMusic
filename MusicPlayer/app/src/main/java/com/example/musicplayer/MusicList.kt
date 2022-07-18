@@ -4,15 +4,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
-import android.view.ContextMenu
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
@@ -43,7 +38,6 @@ data class MusicList(
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
             itemView.setOnCreateContextMenuListener(this)
-
         }
 
         override fun onClick(v: View?) {
@@ -57,8 +51,8 @@ data class MusicList(
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 1, 0, "ADD TO")
-            menu?.add(this.bindingAdapterPosition, 2, 0, "REMOVE")
+            menu?.add(this.bindingAdapterPosition, 0, 0, "ADD TO")
+            menu?.add(this.bindingAdapterPosition, 1, 0, "REMOVE")
         }
 
     }
@@ -74,11 +68,6 @@ data class MusicList(
     }
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
-        Log.d("POSITION", position.toString())
-        Log.d("MEDIA PLAYER POSITION",MyMediaPlayer.currentIndex.toString())
-        Log.d("MEDIA PLAYER MUSICS", MyMediaPlayer.playlistName)
-        Log.d("MUSICS", listName)
-        Log.d("SAME PLAYLIST ?", (MyMediaPlayer.currentPlaylist == musics).toString())
         val currentMusic = musics[position]
 
         if(currentMusic.albumCover != null){

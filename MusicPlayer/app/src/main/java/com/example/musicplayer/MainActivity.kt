@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -59,7 +60,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
 
             // Créons d'abord la playlist des favoris :
-            Log.d("FAVORIS","")
             val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),true)
             val playlists = ArrayList<Playlist>()
             playlists.add(favoritePlaylist)
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                         val albumCover : ByteArray? = try {
                             val bitmap = contentResolver.loadThumbnail(
                                 albumUri,
-                                Size(200, 200),
+                                Size(500, 500),
                                 null
                             )
                             bitmapToByteArray(bitmap)
@@ -122,7 +122,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                             cursor.getLong(3),
                             cursor.getString(4)
                         )
-                        Log.d("SONG", music.toString())
                         if (File(music.path).exists()) {
                             musics.add(music)
                         }
@@ -337,6 +336,25 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     private fun playlistButton() {
         val intent = Intent(this@MainActivity,PlaylistsMenuActivity::class.java)
         startActivity(intent)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            0 -> {
+                Toast.makeText(this,"Ajout dans une playlist",Toast.LENGTH_SHORT).show()
+                true
+            }
+            1 -> {
+                musics.removeAt(item.groupId)
+                adapter.musics.removeAt(item.groupId)
+                adapter.notifyDataSetChanged()
+                Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> {
+                onContextItemSelected(item)
+            }
+        }
     }
 
     private fun writeObjectToFile(filename : String, content : ArrayList<Music>){

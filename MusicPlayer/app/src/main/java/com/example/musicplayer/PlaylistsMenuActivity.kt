@@ -236,8 +236,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 menuRecyclerView?.visibility = View.VISIBLE
                 noPlaylistsFound.visibility = View.GONE
 
-                //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-                menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+                menuRecyclerView?.layoutManager = GridLayoutManager(this,2)
                 menuRecyclerView?.adapter = Playlists(playlists, applicationContext, this)
             } else {
                 Toast.makeText(this,"A title must be set correctly !",Toast.LENGTH_SHORT).show()
