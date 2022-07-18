@@ -228,8 +228,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     override fun onResume() {
         super.onResume()
+        Log.d("MAIN ?", MyMediaPlayer.playlistName.toString())
         if(menuRecyclerView!=null){
-            if (MyMediaPlayer.playlistName == "MAIN"){
+            if (MyMediaPlayer.playlistName == "Main"){
                 musics = MyMediaPlayer.currentPlaylist
                 adapter.musics = musics
                 adapter.notifyItemRangeChanged(0, adapter.getItemCount())
@@ -291,7 +292,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     }
 
     private fun playMusic(){
-        Log.d("1","")
         mediaPlayer.reset()
         try {
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
@@ -309,7 +309,6 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     }
 
     private fun playNextSong(){
-        Log.d("THERE","mp")
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
