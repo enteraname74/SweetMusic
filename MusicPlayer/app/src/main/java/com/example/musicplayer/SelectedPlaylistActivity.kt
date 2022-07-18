@@ -30,7 +30,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         playlistPosition = intent.getSerializableExtra("POSITION") as Int
         musics = playlist.musicList
 
-        adapter = MusicList(musics,applicationContext,this)
+        adapter = MusicList(musics,playlist.listName,applicationContext,this)
 
         menuRecyclerView?.layoutManager = LinearLayoutManager(this)
         menuRecyclerView?.adapter = adapter

@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             menuRecyclerView?.visibility = View.VISIBLE
             noSongsFound.visibility = View.GONE
 
-            adapter = MusicList(musics, applicationContext, this)
+            adapter = MusicList(musics, "Main",applicationContext, this)
 
             //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
             menuRecyclerView?.layoutManager = LinearLayoutManager(this)
@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                     menuRecyclerView?.visibility = View.VISIBLE
                     noSongsFound.visibility = View.GONE
                     Log.d("GET ALL MUSICS","")
-                    adapter = MusicList(musics, applicationContext, this)
+                    adapter = MusicList(musics,"Main", applicationContext, this)
 
                     //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                     menuRecyclerView?.layoutManager = LinearLayoutManager(this)
@@ -228,13 +228,8 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     override fun onResume() {
         super.onResume()
-        Log.d("MAIN ?", MyMediaPlayer.playlistName.toString())
         if(menuRecyclerView!=null){
-            if (MyMediaPlayer.playlistName == "Main"){
-                musics = MyMediaPlayer.currentPlaylist
-                adapter.musics = musics
-                adapter.notifyItemRangeChanged(0, adapter.getItemCount())
-            }
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount())
             Log.d("DATA REFRESHED","")
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)

@@ -19,6 +19,7 @@ import java.io.Serializable
 // Classe permettant de représenter une liste de musiques :
 data class MusicList(
     var musics : ArrayList<Music>,
+    var listName : String,
     private val context : Context,
     private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
@@ -75,6 +76,8 @@ data class MusicList(
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
         Log.d("POSITION", position.toString())
         Log.d("MEDIA PLAYER POSITION",MyMediaPlayer.currentIndex.toString())
+        Log.d("MEDIA PLAYER MUSICS", MyMediaPlayer.playlistName)
+        Log.d("MUSICS", listName)
         Log.d("SAME PLAYLIST ?", (MyMediaPlayer.currentPlaylist == musics).toString())
         val currentMusic = musics[position]
 
@@ -94,7 +97,7 @@ data class MusicList(
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
 
-        if(MyMediaPlayer.currentIndex == position && MyMediaPlayer.currentPlaylist == musics){
+        if(MyMediaPlayer.currentIndex == position && MyMediaPlayer.playlistName == listName){
             Log.d("CHANGE COLOR", MyMediaPlayer.currentIndex.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         } else {
