@@ -182,10 +182,6 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         startActivity(intent)
     }
 
-    override fun onLongMusicClick(position: Int) {
-        Toast.makeText(this,"LONG PRESS",Toast.LENGTH_SHORT).show()
-    }
-
     private fun onBottomMenuClick(position : Int){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
@@ -286,9 +282,25 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
+            2 -> {
+                Log.d("GROUPID", item.groupId.toString())
+                val intent = Intent(this@SelectedPlaylistActivity,ModifyMusicInfoActivity::class.java)
+                intent.putExtra("PLAYLIST_NAME", playlist.listName)
+                intent.putExtra("POSITION",item.groupId)
+                resultModifyMusic.launch(intent)
+                true
+            }
             else -> {
                 onContextItemSelected(item)
             }
+        }
+    }
+
+    var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // On récupère les musiques avec la modification effectuée :
+            musics = readAllMusicsFromFile(saveFile)
+            adapter.musics = musics
         }
     }
 

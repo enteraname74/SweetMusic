@@ -264,9 +264,10 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             /* Afin de créer une playlist, nous devons vérifier les critères suivants :
                 - Le nom n'est pas vide ou ne commence pas avec un espace (au cas où on a qu'un espace en guise de nom
                 - Le nom n'est pas déjà prit
+                - Le nom n'est pas celui de la playlist principale ("Main")
              */
 
-            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString()))) {
+            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString())) && (inputText.text.toString() != "Main")) {
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>())
                 playlists.add(newPlaylist)
                 writeObjectToFile(saveFile, playlists)

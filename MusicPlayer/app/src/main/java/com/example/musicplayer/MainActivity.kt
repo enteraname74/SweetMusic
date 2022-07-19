@@ -220,14 +220,11 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
         startActivity(intent)
     }
 
-    override fun onLongMusicClick(position: Int) {
-        Log.d("LONG PRESS","")
-        Toast.makeText(this,"LONG PRESS",Toast.LENGTH_SHORT).show()
-    }
-
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
+            musics = readAllMusicsFromFile(saveFile)
+            adapter.musics = musics
             adapter.notifyItemRangeChanged(0, adapter.getItemCount())
             Log.d("DATA REFRESHED","")
 
@@ -375,11 +372,14 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 musics.removeAt(item.groupId)
                 adapter.musics.removeAt(item.groupId)
                 adapter.notifyDataSetChanged()
+
+                writeObjectToFile(saveFile, musics)
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
             2 -> {
                 val intent = Intent(this@MainActivity,ModifyMusicInfoActivity::class.java)
+                intent.putExtra("PLAYLIST_NAME", "Main")
                 intent.putExtra("POSITION",item.groupId)
                 resultLauncher.launch(intent)
                 true

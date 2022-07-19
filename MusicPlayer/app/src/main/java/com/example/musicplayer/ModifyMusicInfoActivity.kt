@@ -27,16 +27,22 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
     private lateinit var artistNameField : EditText
     private val saveMusicsFile = "allMusics.musics"
     private var savePlaylistsFile = "allPlaylists.playlists"
-    private lateinit var allMusics : ArrayList<Music>
+    private lateinit var currentPlaylist : ArrayList<Music>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
+        val playlistName = intent.getSerializableExtra("PLAYLIST_NAME") as String
+        if (playlistName == "Main"){
+            currentPlaylist = readAllMusicsFromFile(saveMusicsFile)
+        } else {
+            val allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+            currentPlaylist = allPlaylists.first{it.listName == playlistName}.musicList
+        }
 
-        allMusics = readAllMusicsFromFile(saveMusicsFile)
         // On récupère notre musique à modifier :
         val position = intent.getSerializableExtra("POSITION") as Int
-        musicFile = allMusics[position]
+        musicFile = currentPlaylist[position]
 
         // On récupère les différents champs modifiable :
         albumCoverField = findViewById(R.id.album_image)
@@ -96,7 +102,7 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
 
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
 
-
+        val allMusics = readAllMusicsFromFile(saveMusicsFile)
         var position = allMusics.indexOf(allMusics.first{it.path == musicFile.path})
         allMusics[position] = musicFile
         writeObjectToFile(saveMusicsFile,allMusics)
