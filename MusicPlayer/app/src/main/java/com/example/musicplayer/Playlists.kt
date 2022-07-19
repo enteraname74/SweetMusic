@@ -1,6 +1,8 @@
 package com.example.musicplayer
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.util.Log
 import android.view.ContextMenu
@@ -20,15 +22,14 @@ class Playlists (
 
     class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener {
 
-        var albumCover : ImageView? = null
-        var playlistName : TextView? = null
-
+        var playlistName : TextView
+        var playlistCover : ImageView
 
         init{
             super.itemView
 
-            albumCover = itemView.findViewById(R.id.playlist_cover)
             playlistName = itemView.findViewById(R.id.playlist_name)
+            playlistCover = itemView.findViewById(R.id.playlist_cover)
 
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
@@ -64,8 +65,20 @@ class Playlists (
     override fun onBindViewHolder(holder: Playlists.PlaylistsViewHolder, position: Int) {
         val currentPlaylist = allPlaylists[position]
 
-        holder.albumCover?.setImageResource(R.drawable.michael)
-        holder.playlistName?.text = currentPlaylist.listName
+
+        holder.playlistName.text = currentPlaylist.listName
+
+        if (currentPlaylist.playlistCover != null){
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentPlaylist.playlistCover
+            var bitmap: Bitmap? = null
+            if ((bytes != null) && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            holder.playlistCover.setImageBitmap(bitmap)
+        } else {
+            holder.playlistCover.setImageResource(R.drawable.michael)
+        }
     }
 
     override fun getItemCount(): Int {

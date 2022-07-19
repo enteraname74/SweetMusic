@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
 
             // Créons d'abord la playlist des favoris :
-            val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),true)
+            val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),null)
             val playlists = ArrayList<Playlist>()
             playlists.add(favoritePlaylist)
             writePlaylistsToFile(savePlaylistsFile,playlists)

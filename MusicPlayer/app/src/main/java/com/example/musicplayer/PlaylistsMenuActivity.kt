@@ -52,7 +52,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             menuRecyclerView?.visibility = View.VISIBLE
             noPlaylistsFound.visibility = View.GONE
 
-
             //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
             menuRecyclerView?.layoutManager = GridLayoutManager(this,2)
             menuRecyclerView?.adapter = adapter
@@ -269,16 +268,19 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 - Le nom n'est pas celui de la playlist principale ("Main")
              */
 
+            Log.d("test",playlistsNames.contains(inputText.text.toString()).toString())
             if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString())) && (inputText.text.toString() != "Main")) {
-                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>())
+                playlistsNames.add(inputText.text.toString())
+                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(),null)
                 playlists.add(newPlaylist)
+                adapter.allPlaylists = playlists
                 writePlaylistsToFile(saveFile, playlists)
 
                 menuRecyclerView?.visibility = View.VISIBLE
                 noPlaylistsFound.visibility = View.GONE
 
                 menuRecyclerView?.layoutManager = GridLayoutManager(this,2)
-                menuRecyclerView?.adapter = Playlists(playlists, applicationContext, this)
+                menuRecyclerView?.adapter = adapter
             } else {
                 Toast.makeText(this,"A title must be set correctly !",Toast.LENGTH_SHORT).show()
             }
@@ -295,8 +297,11 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
-            0 -> {playlists.removeAt(item.groupId)
-                adapter.allPlaylists.removeAt(item.groupId)
+            0 -> {
+                Log.d("playlists",adapter.allPlaylists.toString())
+                Log.d("ID", item.groupId.toString())
+                playlists.removeAt(item.groupId)
+                adapter.allPlaylists = playlists
                 adapter.notifyDataSetChanged()
 
                 writePlaylistsToFile(saveFile,playlists)

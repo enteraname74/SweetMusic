@@ -7,13 +7,14 @@
     tools:context=".ModifyMusicInfoActivity"
     android:background="@color/primary_color"
     android:paddingLeft="30dp"
-    android:paddingRight="30dp">
+    android:paddingRight="30dp"
+    android:id="@+id/modify_playlist">
 
     <TextView
         android:id="@+id/title_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Modify Music Informations"
+        android:text="Modify Playlist Informations"
         android:textColor="@color/third_color"
         android:gravity="center_horizontal"
         android:layout_marginTop="10dp"
@@ -22,10 +23,10 @@
     </TextView>
 
     <TextView
-        android:id="@+id/album_art"
+        android:id="@+id/playlist_art"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Album art :"
+        android:text="Playlist image :"
         android:textColor="@color/third_color"
         android:layout_below="@+id/title_activity"
         android:textSize="17sp"
@@ -35,71 +36,32 @@
     </TextView>
 
     <ImageView
-        android:id="@+id/album_image"
+        android:id="@+id/playlist_image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:layout_below="@+id/album_art"
+        android:layout_below="@+id/playlist_art"
         android:layout_marginTop="10dp"
-        android:src="@drawable/michael"></ImageView>
+        android:src="@drawable/michael">
+
+    </ImageView>
 
     <TextView
-        android:id="@+id/music_name"
+        android:id="@+id/playlist_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/album_image"
+        android:layout_below="@+id/playlist_image"
         android:layout_marginTop="10dp"
-        android:text="Name of the song :"
-        android:textColor="@color/third_color"
-        android:textSize="17sp"></TextView>
-
-    <EditText
-        android:id="@+id/edit_music_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/music_name"
-        android:backgroundTint="@color/third_color"
-        android:textColor="@color/third_color"
-        android:textSize="15sp">
-    </EditText>
-
-    <TextView
-        android:id="@+id/album_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Album :"
-        android:textColor="@color/third_color"
-        android:layout_below="@+id/edit_music_name"
-        android:textSize="17sp"
-        android:layout_marginTop="10dp"
-        >
-    </TextView>
-
-    <EditText
-        android:id="@+id/edit_album_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/album_name"
-        android:backgroundTint="@color/third_color"
-        android:textColor="@color/third_color"
-        android:textSize="15sp">
-    </EditText>
-
-    <TextView
-        android:id="@+id/artist_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_album_name"
-        android:layout_marginTop="10dp"
-        android:text="Artist :"
+        android:text="Name of the playlist :"
         android:textColor="@color/third_color"
         android:textSize="17sp">
+
     </TextView>
 
     <EditText
-        android:id="@+id/edit_artist_name"
+        android:id="@+id/edit_playlist_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/artist_name"
+        android:layout_below="@+id/playlist_name"
         android:backgroundTint="@color/third_color"
         android:textColor="@color/third_color"
         android:textSize="15sp">
