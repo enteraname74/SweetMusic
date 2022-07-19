@@ -1,16 +1,20 @@
 package com.example.musicplayer
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import java.io.*
 
@@ -56,8 +60,23 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         albumNameField.setText(musicFile.album)
         artistNameField.setText(musicFile.artist)
 
+        albumCoverField.setOnClickListener(View.OnClickListener { selectImage() })
         val validateButton = findViewById<Button>(R.id.validate_button)
         validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
+    }
+
+    private fun selectImage() {
+        val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        resultImageLauncher.launch(intent)
+    }
+
+    var resultImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri : Uri? = result.getData()?.data
+            val inputStream = contentResolver.openInputStream(uri as Uri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            albumCoverField.setImageBitmap(bitmap)
+        }
     }
 
     private fun onValidateButtonClick(){
