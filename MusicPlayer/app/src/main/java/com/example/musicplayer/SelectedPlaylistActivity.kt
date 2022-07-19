@@ -2,6 +2,8 @@ package com.example.musicplayer
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -28,8 +30,9 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         setContentView(R.layout.activity_selected_playlist)
 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
-        playlist = intent.getSerializableExtra("LIST") as Playlist
+        val allPlaylists = readAllPlaylistsFromFile(saveFile)
         playlistPosition = intent.getSerializableExtra("POSITION") as Int
+        playlist = allPlaylists[playlistPosition]
         musics = playlist.musicList
 
         adapter = MusicList(musics,playlist.listName,applicationContext,this)
@@ -185,6 +188,18 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             val pausePlay = findViewById<ImageView>(R.id.pause_play)
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+            if (currentSong.albumCover != null){
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = currentSong.albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                albumCoverInfo.setImageBitmap(bitmap)
+            } else {
+                albumCoverInfo.setImageResource(R.drawable.michael)
+            }
             mediaPlayer.setDataSource(currentSong.path)
             mediaPlayer.prepare()
             mediaPlayer.start()

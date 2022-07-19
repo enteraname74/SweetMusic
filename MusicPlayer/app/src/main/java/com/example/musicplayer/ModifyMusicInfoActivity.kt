@@ -25,14 +25,15 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
     private lateinit var musicNameField : EditText
     private lateinit var albumNameField : EditText
     private lateinit var artistNameField : EditText
-    private val saveFile = "allMusics.musics"
+    private val saveMusicsFile = "allMusics.musics"
+    private var savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var allMusics : ArrayList<Music>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
 
-        allMusics = readAllMusicsFromFile(saveFile)
+        allMusics = readAllMusicsFromFile(saveMusicsFile)
         // On récupère notre musique à modifier :
         val position = intent.getSerializableExtra("POSITION") as Int
         musicFile = allMusics[position]
@@ -96,9 +97,23 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
 
 
-        val position = allMusics.indexOf(allMusics.first{it.path == musicFile.path})
+        var position = allMusics.indexOf(allMusics.first{it.path == musicFile.path})
         allMusics[position] = musicFile
-        writeObjectToFile(saveFile,allMusics)
+        writeObjectToFile(saveMusicsFile,allMusics)
+
+        // Ensuite, mettons à jour nos playlists :
+        val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
+
+        for (playlist in playlists){
+            for (music in playlist.musicList){
+                if (music.path == musicFile.path){
+                    position = playlist.musicList.indexOf(music)
+                    playlist.musicList[position] = musicFile
+                    break
+                }
+            }
+        }
+        writePlaylistToFile(savePlaylistsFile, playlists)
 
         setResult(RESULT_OK)
         finish()
@@ -122,6 +137,18 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         Toast.makeText(this,"ALL SONGS WRITE", Toast.LENGTH_SHORT).show()
     }
 
+    private fun writePlaylistToFile(filename : String, content : ArrayList<Playlist>){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            oos.writeObject(content)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+    }
+
+
     private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
         val path = applicationContext.filesDir
         var content = ArrayList<Music>()
@@ -133,6 +160,20 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
             Log.d("Error",error.toString())
         }
         Toast.makeText(this,"ALL SONGS FETCHED", Toast.LENGTH_SHORT).show()
+        return content
+    }
+
+    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Playlist>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Playlist>
+            ois.close();
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
         return content
     }
 }

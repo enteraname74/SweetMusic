@@ -2,6 +2,8 @@ package com.example.musicplayer
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -137,9 +139,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
     override fun onPlaylistClick(position: Int) {
         Log.d("PLAYLIST POSITION", position.toString())
 
-        val currentPlaylist = playlists[position]
         val intent = Intent(this@PlaylistsMenuActivity,SelectedPlaylistActivity::class.java)
-        intent.putExtra("LIST",currentPlaylist)
         intent.putExtra("POSITION", position)
 
         startActivity(intent)
@@ -171,11 +171,25 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
         val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
         mediaPlayer.reset()
         try {
             mediaPlayer.setDataSource(currentSong.path)
             mediaPlayer.prepare()
             mediaPlayer.start()
+
+            if (currentSong.albumCover != null){
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = currentSong.albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                albumCoverInfo.setImageBitmap(bitmap)
+            } else {
+                albumCoverInfo.setImageResource(R.drawable.michael)
+            }
+
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
         } catch (e: IOException) {
