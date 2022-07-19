@@ -1,10 +1,10 @@
 package com.example.musicplayer
+
+import android.R.drawable
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,8 +12,11 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.palette.graphics.Palette
 import java.io.*
+
 
 // Classe représentant la lecture d'une musique :
 class MusicPlayerActivity : AppCompatActivity() {
@@ -114,6 +117,10 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         background.setBackgroundColor(backgroundColor?.rgb as Int)
         titleTv.setTextColor(backgroundColor?.titleTextColor as Int)
+        seekBar.thumb.setTint(backgroundColor?.titleTextColor as Int)
+        seekBar.progressDrawable.setTint(backgroundColor?.titleTextColor as Int)
+        setDrawableColor(backgroundColor?.titleTextColor as Int)
+
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration as Long)
@@ -125,6 +132,38 @@ class MusicPlayerActivity : AppCompatActivity() {
         favoriteBtn.setOnClickListener(View.OnClickListener { setFavorite() })
 
         playMusic()
+    }
+
+    private fun setDrawableColor(color : Int){
+
+        var unwrappedDrawable : Drawable? = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_pause_circle_outline_24)
+        var wrappedDrawable : Drawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
+        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_play_circle_outline_24)
+        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
+        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_skip_next_24)
+        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
+        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_skip_previous_24)
+        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
+        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_sync_24)
+        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
+        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_favorite_24)
+        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
+        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_favorite_border_24)
+        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
+        DrawableCompat.setTint(wrappedDrawable, color)
+
     }
 
     private fun playMusic(){
