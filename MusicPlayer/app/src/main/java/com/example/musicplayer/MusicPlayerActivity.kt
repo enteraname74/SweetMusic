@@ -1,17 +1,18 @@
 package com.example.musicplayer
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.SeekBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.palette.graphics.Palette
 import java.io.*
 
 // Classe représentant la lecture d'une musique :
@@ -84,21 +85,35 @@ class MusicPlayerActivity : AppCompatActivity() {
 
     private fun setRessourcesWithMusic(){
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-
+        val background = findViewById<RelativeLayout>(R.id.music_player)
+        var bitmap : Bitmap? = null
+        var backgroundColor : Palette.Swatch?
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         Log.d("CURRENT SONG", currentSong.toString())
         if (currentSong.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
             val bytes = currentSong.albumCover
-            var bitmap: Bitmap? = null
             if (bytes != null && bytes.isNotEmpty()) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
             musicIcon.setImageBitmap(bitmap)
         } else {
             musicIcon.setImageResource(R.drawable.michael)
+            val drawable = musicIcon.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            bitmap = bitmapDrawable.bitmap
+        }
+        Log.d("BITMAP", bitmap.toString())
+        Log.d("palette",Palette.from(bitmap as Bitmap).generate().swatches[0].toString())
+        backgroundColor = if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null){
+            Log.d("here","")
+            Palette.from(bitmap as Bitmap).generate().swatches[0]
+        } else {
+            Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
         }
 
+        background.setBackgroundColor(backgroundColor?.rgb as Int)
+        titleTv.setTextColor(backgroundColor?.titleTextColor as Int)
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration as Long)
