@@ -37,10 +37,12 @@
 
             <TextView
                 android:id="@+id/playlist_name"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="PLAYLIST NAME"
-                android:textColor="@color/third_color">
+                android:textColor="@color/third_color"
+                android:textSize="20sp"
+                android:gravity="center_horizontal">
 
             </TextView>
 
