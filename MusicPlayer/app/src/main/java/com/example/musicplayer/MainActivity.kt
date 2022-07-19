@@ -351,6 +351,12 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
+            2 -> {
+                val intent = Intent(this@MainActivity,ModifyMusicInfo::class.java)
+                intent.putExtra("MUSIC", musics[item.groupId])
+                startActivity(intent)
+                true
+            }
             else -> {
                 onContextItemSelected(item)
             }

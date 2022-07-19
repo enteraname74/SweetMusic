@@ -40,20 +40,17 @@
         android:layout_height="200dp"
         android:layout_below="@+id/album_art"
         android:layout_marginTop="10dp"
-        android:src="@drawable/michael">
-    </ImageView>
+        android:src="@drawable/michael"></ImageView>
 
     <TextView
         android:id="@+id/music_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/album_image"
+        android:layout_marginTop="10dp"
         android:text="Name of the song :"
         android:textColor="@color/third_color"
-        android:layout_below="@+id/album_image"
-        android:textSize="17sp"
-        android:layout_marginTop="10dp"
-        >
-    </TextView>
+        android:textSize="17sp"></TextView>
 
     <EditText
         android:id="@+id/edit_music_name"
@@ -91,12 +88,11 @@
         android:id="@+id/artist_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Name of the song :"
-        android:textColor="@color/third_color"
         android:layout_below="@+id/edit_album_name"
-        android:textSize="17sp"
         android:layout_marginTop="10dp"
-        >
+        android:text="Artist :"
+        android:textColor="@color/third_color"
+        android:textSize="17sp">
     </TextView>
 
     <EditText
@@ -128,7 +124,7 @@
                 android:backgroundTint="@color/secondary_color"
                 android:text="Cancel"
                 android:textColor="@color/third_color"
-                android:textSize="12dp"
+                android:textSize="14dp"
                 android:layout_marginTop="50dp">
             </Button>
 
@@ -139,7 +135,7 @@
                 android:backgroundTint="@color/secondary_color"
                 android:text="Ok"
                 android:textColor="@color/third_color"
-                android:textSize="12dp"
+                android:textSize="14dp"
                 android:layout_marginTop="50dp"
                 android:layout_toRightOf="@id/cancel_button">
             </Button>
