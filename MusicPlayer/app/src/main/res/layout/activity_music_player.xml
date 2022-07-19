@@ -25,13 +25,13 @@
     </TextView>
 
     <ImageView
-        android:contentDescription="album art"
         android:id="@+id/album_cover_big"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_above="@id/controls"
         android:layout_marginTop="70dp"
         android:layout_marginBottom="-5dp"
+        android:contentDescription="album art"
         android:src="@drawable/icone_musique">
 
     </ImageView>

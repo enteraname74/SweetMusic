@@ -14,6 +14,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.318" />
         <entry key="app/src/main/res/drawable/michael_background.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_modify_music_info.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/layout/activity_music_player.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_music_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_playlists_menu.xml" value="0.33" />
