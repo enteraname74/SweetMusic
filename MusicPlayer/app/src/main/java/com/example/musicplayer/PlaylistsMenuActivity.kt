@@ -67,6 +67,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         // On met en place les données du menu situé tout en bas de l'écran :
         if (MyMediaPlayer.currentIndex == -1){
@@ -77,6 +78,17 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                albumCoverInfo.setImageBitmap(bitmap)
+            } else {
+                albumCoverInfo.setImageResource(R.drawable.michael)
+            }
 
             // Mise en places des boutons :
             pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
@@ -110,6 +122,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
             noSongPlaying.visibility = View.VISIBLE
 
@@ -117,6 +130,17 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 noSongPlaying.visibility = View.GONE
                 infoSongPlaying.visibility = View.VISIBLE
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    albumCoverInfo.setImageBitmap(bitmap)
+                } else {
+                    albumCoverInfo.setImageResource(R.drawable.michael)
+                }
 
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })

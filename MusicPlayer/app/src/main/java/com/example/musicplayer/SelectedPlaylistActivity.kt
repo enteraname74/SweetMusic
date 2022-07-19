@@ -47,6 +47,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         if (MyMediaPlayer.currentIndex == -1){
             noSongPlaying.visibility = View.VISIBLE
@@ -55,6 +56,18 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                albumCoverInfo.setImageBitmap(bitmap)
+            } else {
+                albumCoverInfo.setImageResource(R.drawable.michael)
+            }
+
             bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
             songTitleInfo?.setSelected(true)
         }
@@ -78,12 +91,25 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             val nextBtn = findViewById<ImageView>(R.id.next)
             val previousBtn = findViewById<ImageView>(R.id.previous)
             val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+
             noSongPlaying.visibility = View.VISIBLE
 
             if (MyMediaPlayer.currentIndex != -1){
                 noSongPlaying.visibility = View.GONE
                 infoSongPlaying.visibility = View.VISIBLE
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    albumCoverInfo.setImageBitmap(bitmap)
+                } else {
+                    albumCoverInfo.setImageResource(R.drawable.michael)
+                }
 
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
                 nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })

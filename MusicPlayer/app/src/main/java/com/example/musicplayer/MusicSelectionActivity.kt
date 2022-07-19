@@ -1,6 +1,8 @@
 package com.example.musicplayer
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -42,6 +44,7 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         if (MyMediaPlayer.currentIndex == -1){
             noSongPlaying.visibility = View.VISIBLE
@@ -63,6 +66,32 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         val cancelButton = findViewById<Button>(R.id.cancel)
         validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
         cancelButton.setOnClickListener(View.OnClickListener { onCancelButtonClick() })
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+
+        if (MyMediaPlayer.currentIndex != -1){
+            infoSongPlaying.visibility = View.VISIBLE
+            songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                albumCoverInfo.setImageBitmap(bitmap)
+            } else {
+                albumCoverInfo.setImageResource(R.drawable.michael)
+            }
+
+            songTitleInfo?.setSelected(true)
+        }
     }
 
     private fun onBottomMenuClick(position : Int){
