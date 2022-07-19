@@ -1,12 +1,11 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.R.attr.bitmap
+import android.app.Activity
 import android.content.ContentUris
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -14,12 +13,12 @@ import android.util.Size
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.*
 
 
@@ -352,14 +351,22 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 true
             }
             2 -> {
-                val intent = Intent(this@MainActivity,ModifyMusicInfo::class.java)
-                intent.putExtra("MUSIC", musics[item.groupId])
-                startActivity(intent)
+                val intent = Intent(this@MainActivity,ModifyMusicInfoActivity::class.java)
+                intent.putExtra("POSITION",item.groupId)
+                resultLauncher.launch(intent)
                 true
             }
             else -> {
                 onContextItemSelected(item)
             }
+        }
+    }
+
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // On récupère les musiques avec la modification effectuée :
+            musics = readAllMusicsFromFile(saveFile)
+            adapter.musics = musics
         }
     }
 
@@ -402,7 +409,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
 
     private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
         val byteStream = ByteArrayOutputStream()
-        bitmap?.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
         return byteStream.toByteArray()
     }
 }

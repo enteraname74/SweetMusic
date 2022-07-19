@@ -21,6 +21,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
     private var saveFile = "allPlaylists.playlists"
+    private val saveMusicsFile = "allMusics.musics"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,10 +110,11 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
 
     var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val data = result.data?.getSerializableExtra("addedSongs") as ArrayList<Music>
-            for (song in data){
-                if (song !in musics){
-                    musics.add(song)
+            val data = result.data?.getSerializableExtra("addedSongs") as ArrayList<Int>
+            val allMusics = readAllMusicsFromFile(saveMusicsFile)
+            for (position in data){
+                if (allMusics[position] !in musics){
+                    musics.add(allMusics[position])
                 }
             }
             playlist.musicList = musics
@@ -121,7 +123,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
 
             val playlists = readAllPlaylistsFromFile(saveFile)
             playlists[playlistPosition].musicList = musics
-            writeObjectToFile(saveFile, playlists)
+            writePlaylistsToFile(saveFile, playlists)
         }
     }
 
@@ -238,7 +240,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
                 // Mettons à jour l'état des playlists :
                 val playlists = readAllPlaylistsFromFile(saveFile)
                 playlists[playlistPosition].musicList = musics
-                writeObjectToFile(saveFile, playlists)
+                writePlaylistsToFile(saveFile, playlists)
 
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
@@ -249,7 +251,7 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
         }
     }
 
-    private fun writeObjectToFile(filename : String, content : ArrayList<Playlist>){
+    private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
@@ -271,6 +273,20 @@ class SelectedPlaylistActivity : AppCompatActivity(), MusicList.OnMusicListener 
             Log.d("Error","")
         }
 
+        return content
+    }
+
+    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Music>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            content = ois.readObject() as ArrayList<Music>
+            ois.close();
+        } catch (error : IOException){
+            Log.d("Error",error.toString())
+        }
+        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
         return content
     }
 }

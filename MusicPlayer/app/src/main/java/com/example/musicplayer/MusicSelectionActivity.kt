@@ -17,7 +17,6 @@ import java.io.ObjectInputStream
 class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicListener {
     private var musics = ArrayList<Music>()
     private lateinit var adapter : MusicListSelection
-    private var selectedMusics = ArrayList<Music>()
     private var selectedMusicsPositions = ArrayList<Int>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
@@ -134,13 +133,10 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
     }
 
     override fun onMusicClick(position: Int) {
-        val selectedMusic = musics[position]
 
-        if (selectedMusic in selectedMusics){
-            selectedMusics.remove(selectedMusic)
+        if (position in selectedMusicsPositions){
             selectedMusicsPositions.remove(position)
         } else {
-            selectedMusics.add(selectedMusic)
             selectedMusicsPositions.add(position)
         }
 
@@ -149,7 +145,7 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
 
     private fun onValidateButtonClick(){
         val returnIntent = Intent()
-        returnIntent.putExtra("addedSongs", selectedMusics)
+        returnIntent.putExtra("addedSongs", selectedMusicsPositions)
         setResult(RESULT_OK, returnIntent)
         finish()
     }
