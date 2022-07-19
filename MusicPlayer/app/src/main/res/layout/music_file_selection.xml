@@ -7,9 +7,9 @@
     android:layout_height="wrap_content"
     android:background="@color/secondary_color"
     tools:context=".MainActivity"
-    android:layout_marginLeft="3dp"
-    android:layout_marginRight="3dp"
-    android:layout_marginTop="3dp">
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp">
 
     <ImageView
         android:id="@+id/album_cover"
@@ -19,7 +19,7 @@
         android:src="@drawable/icone_musique" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:layout_marginLeft="4dp"

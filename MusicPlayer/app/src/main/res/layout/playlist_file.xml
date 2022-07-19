@@ -17,7 +17,6 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:contentDescription="Playlist Cover"
-        android:backgroundTint="@drawable/shape"
         android:src="@drawable/michael" />
 
     <TextView
