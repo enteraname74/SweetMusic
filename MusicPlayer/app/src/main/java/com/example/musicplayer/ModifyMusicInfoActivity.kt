@@ -101,7 +101,6 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         musicFile.albumCover = byteArray
 
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
-
         val allMusics = readAllMusicsFromFile(saveMusicsFile)
         var position = allMusics.indexOf(allMusics.first{it.path == musicFile.path})
         allMusics[position] = musicFile
@@ -121,6 +120,11 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         }
         writePlaylistToFile(savePlaylistsFile, playlists)
 
+        // Enfin, pensons à modifier les infos de la musique qui se joue actuellement si c'est celle qu'on est en train de modifier :
+        if (MyMediaPlayer.currentPlaylist.size != 0 && MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path){
+            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex] = musicFile
+        }
+        MyMediaPlayer.modifiedSong = true
         setResult(RESULT_OK)
         finish()
     }

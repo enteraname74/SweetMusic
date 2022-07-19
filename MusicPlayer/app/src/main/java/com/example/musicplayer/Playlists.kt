@@ -2,6 +2,8 @@ package com.example.musicplayer
 
 import android.content.Context
 import android.graphics.Color
+import android.util.Log
+import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +18,7 @@ class Playlists (
     private val context : Context,
     private val mOnPlaylistListener : Playlists.OnPlaylistsListener ) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
 
-    class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener {
 
         var albumCover : ImageView? = null
         var playlistName : TextView? = null
@@ -29,10 +31,23 @@ class Playlists (
             playlistName = itemView.findViewById(R.id.playlist_name)
 
             itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
+            itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onClick(v: View?) {
             this.onPlaylistsListener.onPlaylistClick(bindingAdapterPosition)
+        }
+
+        override fun onLongClick(v: View?): Boolean {
+            Log.d("LONG PRESS","")
+            itemView.showContextMenu()
+            return true
+        }
+
+        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+            menu?.add(this.bindingAdapterPosition, 0, 0, "REMOVE")
+            menu?.add(this.bindingAdapterPosition, 1, 0, "MODIFY")
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
@@ -7,12 +8,13 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.*
 
@@ -91,10 +93,10 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             }
 
             // Mise en places des boutons :
-            pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-            nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
-            previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-            bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
+            pausePlay?.setOnClickListener{pausePlay()}
+            nextBtn?.setOnClickListener{playNextSong()}
+            previousBtn?.setOnClickListener{playPreviousSong()}
+            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex)}
             songTitleInfo?.setSelected(true)
         }
 
@@ -270,7 +272,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString())) && (inputText.text.toString() != "Main")) {
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>())
                 playlists.add(newPlaylist)
-                writeObjectToFile(saveFile, playlists)
+                writePlaylistsToFile(saveFile, playlists)
 
                 menuRecyclerView?.visibility = View.VISIBLE
                 noPlaylistsFound.visibility = View.GONE
@@ -291,7 +293,38 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         Log.d("playlist ajouté","")
     }
 
-    private fun writeObjectToFile(filename : String, content : ArrayList<Playlist>){
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            0 -> {playlists.removeAt(item.groupId)
+                adapter.allPlaylists.removeAt(item.groupId)
+                adapter.notifyDataSetChanged()
+
+                writePlaylistsToFile(saveFile,playlists)
+                Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
+                true
+            }
+            1 -> {
+                val intent = Intent(this@PlaylistsMenuActivity,ModifyMusicInfoActivity::class.java)
+                intent.putExtra("PLAYLIST_NAME", "Main")
+                intent.putExtra("POSITION",item.groupId)
+                resultLauncher.launch(intent)
+                true
+            }
+            else -> {
+                onContextItemSelected(item)
+            }
+        }
+    }
+
+    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // On récupère les playlists avec la modification effectuée :
+            playlists = readAllPlaylistsFromFile(saveFile)
+            adapter.allPlaylists = playlists
+        }
+    }
+
+    private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))

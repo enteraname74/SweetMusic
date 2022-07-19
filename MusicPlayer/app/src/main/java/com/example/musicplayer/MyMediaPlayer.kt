@@ -21,6 +21,10 @@ class MyMediaPlayer {
         var currentIndex : Int = -1
         var currentPlaylist = ArrayList<Music>()
         var playlistName = ""
+
+        // Afin de gagner en performances, nous utiliserons la classe  MyMediaPlayer pour faire passer certains infos :
+        // Permet de savoir si on va devoir rafraichir la playlist principale si une musique a été modifiée :
+        var modifiedSong = false
     }
 
 

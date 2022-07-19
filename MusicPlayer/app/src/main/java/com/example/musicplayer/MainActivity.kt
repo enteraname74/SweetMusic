@@ -223,7 +223,10 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            musics = readAllMusicsFromFile(saveFile)
+            if (MyMediaPlayer.modifiedSong){
+                musics = readAllMusicsFromFile(saveFile)
+                MyMediaPlayer.modifiedSong = false
+            }
             adapter.musics = musics
             adapter.notifyItemRangeChanged(0, adapter.getItemCount())
             Log.d("DATA REFRESHED","")
