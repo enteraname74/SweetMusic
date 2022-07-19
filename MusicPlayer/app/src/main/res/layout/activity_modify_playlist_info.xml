@@ -36,7 +36,7 @@
     </TextView>
 
     <ImageView
-        android:id="@+id/playlist_image"
+        android:id="@+id/playlist_cover"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_below="@+id/playlist_art"
@@ -49,7 +49,7 @@
         android:id="@+id/playlist_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/playlist_image"
+        android:layout_below="@+id/playlist_cover"
         android:layout_marginTop="10dp"
         android:text="Name of the playlist :"
         android:textColor="@color/third_color"

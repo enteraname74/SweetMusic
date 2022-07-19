@@ -309,8 +309,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 true
             }
             1 -> {
-                val intent = Intent(this@PlaylistsMenuActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
+                val intent = Intent(this@PlaylistsMenuActivity,ModifyPlaylistInfoActivity::class.java)
                 intent.putExtra("POSITION",item.groupId)
                 resultLauncher.launch(intent)
                 true
