@@ -4,16 +4,10 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.ObjectInputStream
 
 
 class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
@@ -22,14 +16,13 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
     private var selectedMusicsPositions = ArrayList<Int>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
-    private val savedMusicsFile = "allMusics.musics"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_selection)
 
         menuRecyclerView = findViewById(R.id.all_songs_list)
-        musics = readAllMusicsFromFile(savedMusicsFile)
+        musics = MyMediaPlayer.allMusics
 
         adapter = MusicListSelection(musics,selectedMusicsPositions,applicationContext,this)
 
@@ -44,7 +37,6 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         if (MyMediaPlayer.currentIndex == -1){
             noSongPlaying.visibility = View.VISIBLE
@@ -53,19 +45,19 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-            nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
-            previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-            bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
-            songTitleInfo?.setSelected(true)
+            pausePlay?.setOnClickListener{ pausePlay() }
+            nextBtn?.setOnClickListener{ playNextSong() }
+            previousBtn?.setOnClickListener{ playPreviousSong() }
+            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MusicSelectionActivity) }
+            songTitleInfo.isSelected = true
         }
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
 
         val validateButton = findViewById<Button>(R.id.validate)
         val cancelButton = findViewById<Button>(R.id.cancel)
-        validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
-        cancelButton.setOnClickListener(View.OnClickListener { onCancelButtonClick() })
+        validateButton.setOnClickListener{ onValidateButtonClick() }
+        cancelButton.setOnClickListener{ onCancelButtonClick() }
     }
 
     override fun onResume() {
@@ -90,30 +82,8 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
                 albumCoverInfo.setImageResource(R.drawable.michael)
             }
 
-            songTitleInfo?.setSelected(true)
+            songTitleInfo.isSelected = true
         }
-    }
-
-    private fun onBottomMenuClick(position : Int){
-        Log.d("MUSIC POSITION", position.toString())
-        var sameMusic = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
-            sameMusic = false
-        }
-        MyMediaPlayer.currentIndex = position
-        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
-        val intent = Intent(this@MusicSelectionActivity,MusicPlayerActivity::class.java)
-
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-
-        intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", position)
-
-        startActivity(intent)
     }
 
     private fun playNextSong(){
@@ -153,7 +123,7 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
             selectedMusicsPositions.add(position)
         }
 
-        adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
     }
 
     private fun onValidateButtonClick(){

@@ -299,10 +299,13 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
             }
             1 -> {
                 musics.removeAt(item.groupId)
-                adapter.musics.removeAt(item.groupId)
                 adapter.notifyDataSetChanged()
 
-                writeAllMusicsToFile(saveAllMusicsFile, musics)
+
+                GlobalScope.launch(Dispatchers.IO){
+                    launch{writeAllMusicsToFile(saveAllMusicsFile, musics)}
+                }
+
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
