@@ -225,7 +225,6 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
                 - Le nom n'est pas celui de la playlist principale ("Main")
              */
 
-            Log.d("test",playlistsNames.contains(inputText.text.toString()).toString())
             if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString())) && (inputText.text.toString() != "Main")) {
                 playlistsNames.add(inputText.text.toString())
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList(),null)

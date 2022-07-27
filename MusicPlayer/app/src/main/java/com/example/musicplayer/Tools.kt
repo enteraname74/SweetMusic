@@ -4,16 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.coroutines.*
 import java.io.*
-import java.lang.Runnable
 
 open class Tools : AppCompatActivity() {
     val saveAllMusicsFile = "allMusics.musics"

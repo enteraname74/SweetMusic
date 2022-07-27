@@ -87,6 +87,7 @@ class MusicPlayerActivity : Tools() {
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         Log.d("CURRENT SONG", currentSong.toString())
+
         if (currentSong.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
             val bytes = currentSong.albumCover
@@ -100,6 +101,7 @@ class MusicPlayerActivity : Tools() {
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap
         }
+
         Log.d("palette",Palette.from(bitmap as Bitmap).generate().swatches[0].toString())
         val backgroundColor : Palette.Swatch? = if (Palette.from(bitmap).generate().darkVibrantSwatch == null){
             Log.d("here","")
@@ -110,14 +112,17 @@ class MusicPlayerActivity : Tools() {
 
         background.setBackgroundColor(backgroundColor?.rgb as Int)
         titleTv.setTextColor(backgroundColor.titleTextColor)
-        seekBar.thumb.setTint(backgroundColor.titleTextColor)
+        currentTimeTv.setTextColor(backgroundColor.titleTextColor)
+        totalTimeTv.setTextColor(backgroundColor.titleTextColor)
         seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
+
         // Vérifions si la musique est en favoris :
         getFavoriteState()
+
         pausePlay.setOnClickListener{ pausePlay() }
         nextBtn.setOnClickListener{ playNextSong() }
         previousBtn.setOnClickListener{ playPreviousSong() }
