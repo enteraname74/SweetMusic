@@ -167,7 +167,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         // On ajoute nos musiques et playlists dans notre mediaplayer :
 
         GlobalScope.launch(Dispatchers.IO){
-            launch{readAllPlaylistsFromFile(savePlaylistsFile)}
+            launch{readPlaylistsAsync()}
         }
         println("end")
         MyMediaPlayer.allMusics = musics

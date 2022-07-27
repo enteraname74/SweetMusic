@@ -113,13 +113,14 @@ open class Tools : AppCompatActivity() {
 
 
     fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
+        MyMediaPlayer.allMusics = content
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
         } catch (error : IOException){
-            Log.d("ErrorWRITE",error.toString())
+            Log.d("Error write musics",error.toString())
         }
     }
 
@@ -131,19 +132,21 @@ open class Tools : AppCompatActivity() {
             content = ois.readObject() as ArrayList<Music>
             ois.close()
         } catch (error : IOException){
-            Log.d("Error",error.toString())
+            Log.d("Error read musics",error.toString())
         }
+        MyMediaPlayer.allMusics = content
         return content
     }
 
     fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
+        MyMediaPlayer.allPlaylists = content
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error","")
+            Log.d("Error write playlists",error.toString())
         }
     }
 
@@ -155,9 +158,9 @@ open class Tools : AppCompatActivity() {
             content = ois.readObject() as ArrayList<Playlist>
             ois.close()
         } catch (error : IOException){
-            Log.d("Error","")
+            Log.d("Error read playlists",error.toString())
         }
-
+        MyMediaPlayer.allPlaylists = content
         return content
     }
 
@@ -171,5 +174,13 @@ open class Tools : AppCompatActivity() {
         writeAllMusicsToFile(saveAllMusicsFile, musics)
         writePlaylistsToFile(savePlaylistsFile, playlists)
         println("reussie")
+    }
+
+    fun readPlaylistsAsync(){
+        MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+        if (MyMediaPlayer.allPlaylists.size == 0){
+            MyMediaPlayer.allPlaylists.add(Playlist("Favorites",ArrayList(),null,true))
+            writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)
+        }
     }
 }

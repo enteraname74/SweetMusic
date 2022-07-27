@@ -16,6 +16,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.*
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
     private var menuRecyclerView : RecyclerView? = null
@@ -250,8 +252,6 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {
-                Log.d("playlists",adapter.allPlaylists.toString())
-                Log.d("ID", item.groupId.toString())
                 playlists.removeAt(item.groupId)
                 adapter.allPlaylists = playlists
                 adapter.notifyDataSetChanged()
@@ -272,10 +272,10 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
         }
     }
 
-    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les playlists avec la modification effectuée :
-            playlists = readAllPlaylistsFromFile(savePlaylistsFile)
+            playlists = MyMediaPlayer.allPlaylists
             adapter.allPlaylists = playlists
         }
     }

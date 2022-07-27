@@ -7,10 +7,14 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ModifyPlaylistInfoActivity : Tools() {
     private lateinit var playlist : Playlist
@@ -26,7 +30,7 @@ class ModifyPlaylistInfoActivity : Tools() {
         // On récupère notre playlist à modifier :
         position = intent.getSerializableExtra("POSITION") as Int
 
-        allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+        allPlaylists = MyMediaPlayer.allPlaylists
         playlist = allPlaylists[position]
 
         // On récupère les différents champs modifiable :
@@ -83,7 +87,10 @@ class ModifyPlaylistInfoActivity : Tools() {
 
         // Mettons à jour nos playlists :
         allPlaylists[position] = playlist
-        writePlaylistsToFile(savePlaylistsFile, allPlaylists)
+
+        GlobalScope.launch(Dispatchers.IO){
+            launch{writePlaylistsToFile(savePlaylistsFile, allPlaylists)}
+        }
 
         setResult(RESULT_OK)
         finish()
