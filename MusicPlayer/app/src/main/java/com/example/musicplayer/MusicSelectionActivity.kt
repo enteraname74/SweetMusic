@@ -16,7 +16,7 @@ import java.io.IOException
 import java.io.ObjectInputStream
 
 
-class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicListener {
+class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
     private var musics = ArrayList<Music>()
     private lateinit var adapter : MusicListSelection
     private var selectedMusicsPositions = ArrayList<Int>()
@@ -116,22 +116,6 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         startActivity(intent)
     }
 
-    private fun playMusic(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        mediaPlayer.reset()
-        try {
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
     private fun playNextSong(){
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
@@ -150,7 +134,7 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         playMusic()
     }
 
-    private fun pausePlay(){
+    override fun pausePlay(){
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
         if(mediaPlayer.isPlaying){
             mediaPlayer.pause()
@@ -183,19 +167,5 @@ class MusicSelectionActivity : AppCompatActivity(), MusicListSelection.OnMusicLi
         val returnIntent = Intent()
         setResult(RESULT_CANCELED, returnIntent)
         finish()
-    }
-
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Music>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
-        return content
     }
 }
