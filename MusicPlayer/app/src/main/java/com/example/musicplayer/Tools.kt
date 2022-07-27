@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -11,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import java.io.*
+import java.lang.Runnable
 
 open class Tools : AppCompatActivity() {
     val saveAllMusicsFile = "allMusics.musics"
@@ -115,7 +118,6 @@ open class Tools : AppCompatActivity() {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
-            Toast.makeText(this,"ALL SONGS WROTE", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("ErrorWRITE",error.toString())
         }
@@ -128,7 +130,6 @@ open class Tools : AppCompatActivity() {
             val ois = ObjectInputStream(FileInputStream(File(path, filename)))
             content = ois.readObject() as ArrayList<Music>
             ois.close()
-            Toast.makeText(this,"ALL SONGS FETCHED", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error",error.toString())
         }
@@ -141,7 +142,6 @@ open class Tools : AppCompatActivity() {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
-            Toast.makeText(this,"ALL PLAYLISTS WROTE", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
@@ -154,7 +154,6 @@ open class Tools : AppCompatActivity() {
             val ois = ObjectInputStream(FileInputStream(File(path, filename)))
             content = ois.readObject() as ArrayList<Playlist>
             ois.close()
-            Toast.makeText(this,"ALL PLAYLISTS FETCHED", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
@@ -168,10 +167,9 @@ open class Tools : AppCompatActivity() {
         return byteStream.toByteArray()
     }
 
-    fun readPlaylistsAsync() = runBlocking { // this: CoroutineScope
-        launch { // launch a new coroutine and continue
-            MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
-            println("Work done")
-        }
+    fun writeAllAsync(musics : ArrayList<Music>, playlists : ArrayList<Playlist>){
+        writeAllMusicsToFile(saveAllMusicsFile, musics)
+        writePlaylistsToFile(savePlaylistsFile, playlists)
+        println("reussie")
     }
 }

@@ -26,9 +26,9 @@ class ModifyMusicInfoActivity : Tools() {
         val playlistName = intent.getSerializableExtra("PLAYLIST_NAME") as String
 
         currentPlaylist = if (playlistName == "Main"){
-            readAllMusicsFromFile(saveAllMusicsFile)
+            MyMediaPlayer.allMusics
         } else {
-            val allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+            val allPlaylists = MyMediaPlayer.allPlaylists
             allPlaylists.first{it.listName == playlistName}.musicList
         }
 
@@ -93,13 +93,13 @@ class ModifyMusicInfoActivity : Tools() {
         musicFile.albumCover = byteArray
 
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
-        val allMusics = readAllMusicsFromFile(saveAllMusicsFile)
+        val allMusics = MyMediaPlayer.allMusics
         var position = allMusics.indexOf(allMusics.first{it.path == musicFile.path})
         allMusics[position] = musicFile
-        writeAllMusicsToFile(saveAllMusicsFile,allMusics)
+        MyMediaPlayer.allMusics = allMusics
 
         // Ensuite, mettons à jour nos playlists :
-        val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
+        val playlists = MyMediaPlayer.allPlaylists
 
         for (playlist in playlists){
             for (music in playlist.musicList){
@@ -110,7 +110,7 @@ class ModifyMusicInfoActivity : Tools() {
                 }
             }
         }
-        writePlaylistsToFile(savePlaylistsFile, playlists)
+        MyMediaPlayer.allPlaylists = playlists
 
         // Enfin, pensons à modifier les infos de la musique qui se joue actuellement si c'est celle qu'on est en train de modifier :
         if (MyMediaPlayer.currentPlaylist.size != 0 && MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path){
@@ -118,6 +118,7 @@ class ModifyMusicInfoActivity : Tools() {
         }
         MyMediaPlayer.modifiedSong = true
         setResult(RESULT_OK)
+
         finish()
     }
 }

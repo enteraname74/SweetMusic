@@ -19,10 +19,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import java.io.*
-import kotlin.coroutines.CoroutineContext
-
 
 class MainActivity :MusicList.OnMusicListener, Tools() {
 
@@ -54,12 +52,12 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
             //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
             menuRecyclerView?.layoutManager = LinearLayoutManager(this)
             menuRecyclerView?.adapter = adapter
-            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
         } else {
             // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
 
             // Créons d'abord la playlist des favoris :
-            val favoritePlaylist = Playlist("Favorites",ArrayList<Music>(),null)
+            val favoritePlaylist = Playlist("Favorites",ArrayList(),null)
             val playlists = ArrayList<Playlist>()
             playlists.add(favoritePlaylist)
             writePlaylistsToFile(savePlaylistsFile,playlists)
@@ -125,6 +123,8 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
                             musics.add(music)
                         }
                     }
+
+                    cursor.close()
                     musics.reverse()
 
                     writeAllMusicsToFile(saveAllMusicsFile, musics)
@@ -137,7 +137,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
                     //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
                     menuRecyclerView?.layoutManager = LinearLayoutManager(this)
                     menuRecyclerView?.adapter = adapter
-                    adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+                    adapter.notifyItemRangeChanged(0, adapter.getItemCount())
                 }
             }
         }
@@ -162,7 +162,15 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
-        playlistsButton?.setOnClickListener(View.OnClickListener { playlistButton() })
+        playlistsButton?.setOnClickListener{ playlistButton() }
+
+        // On ajoute nos musiques et playlists dans notre mediaplayer :
+
+        GlobalScope.launch(Dispatchers.IO){
+            launch{readAllPlaylistsFromFile(savePlaylistsFile)}
+        }
+        println("end")
+        MyMediaPlayer.allMusics = musics
     }
 
     private fun checkPermission() : Boolean {
@@ -223,12 +231,14 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         super.onResume()
         if(menuRecyclerView!=null){
             if (MyMediaPlayer.modifiedSong){
-                musics = readAllMusicsFromFile(saveAllMusicsFile)
+                GlobalScope.launch(Dispatchers.IO){
+                    launch{writeAllAsync(musics, MyMediaPlayer.allPlaylists)}
+                }
+                println("test")
                 MyMediaPlayer.modifiedSong = false
             }
             adapter.musics = musics
-            adapter.notifyItemRangeChanged(0, adapter.getItemCount())
-            Log.d("DATA REFRESHED","")
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -257,10 +267,10 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
                     albumCoverInfo.setImageResource(R.drawable.michael)
                 }
 
-                pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-                nextBtn?.setOnClickListener(View.OnClickListener { playNextSong(adapter) })
-                previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong(adapter) })
-                bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MainActivity)}
+                pausePlay?.setOnClickListener{ pausePlay() }
+                nextBtn?.setOnClickListener{ playNextSong(adapter) }
+                previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
+                bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@MainActivity) }
                 songTitleInfo?.setSelected(true)
             }
 
@@ -308,7 +318,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         }
     }
 
-    var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
             musics = readAllMusicsFromFile(saveAllMusicsFile)

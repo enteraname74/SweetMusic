@@ -32,10 +32,7 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
 
-        // Si on a déjà enregistré des playlists, on va les chercher dans notre fichier :
-        if (File(applicationContext.filesDir, savePlaylistsFile).exists()){
-            playlists = readAllPlaylistsFromFile(savePlaylistsFile)
-        }
+        playlists = MyMediaPlayer.allPlaylists
 
         // On récupère une liste des noms des playlists :
         for (element in playlists){

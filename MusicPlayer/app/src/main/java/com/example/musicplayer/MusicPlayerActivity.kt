@@ -34,7 +34,6 @@ class MusicPlayerActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
-
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
         val position = intent.getSerializableExtra("POSITION") as Int
 
@@ -265,7 +264,6 @@ class MusicPlayerActivity : Tools() {
             musicPlayerActivity.currentTimeTv.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
 
             Handler(Looper.getMainLooper()).postDelayed(this,1000)
-
         }
     }
 
