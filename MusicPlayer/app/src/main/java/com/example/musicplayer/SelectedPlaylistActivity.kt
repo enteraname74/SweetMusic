@@ -12,6 +12,9 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
     private lateinit var playlist : Playlist
@@ -69,16 +72,21 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
         super.onResume()
         if(menuRecyclerView!=null){
-            val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
-            playlist = playlists[playlistPosition]
-            adapter.musics = playlists[playlistPosition].musicList
-            adapter.notifyItemRangeChanged(0, adapter.getItemCount())
+            if (MyMediaPlayer.modifiedSong){
+                GlobalScope.launch(Dispatchers.IO){
+                    launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
+                }
+                println("test")
+                MyMediaPlayer.modifiedSong = false
+            }
+            adapter.musics = MyMediaPlayer.allPlaylists[playlistPosition].musicList
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
             val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
             val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -108,8 +116,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
                 }
 
                 pausePlay?.setOnClickListener{ pausePlay() }
-                nextBtn?.setOnClickListener{ playNextSong() }
-                previousBtn?.setOnClickListener{ playPreviousSong() }
+                nextBtn?.setOnClickListener{ playNextSong(adapter) }
+                previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
                 bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedPlaylistActivity) }
                 songTitleInfo?.setSelected(true)
             }
@@ -119,7 +127,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
             } else {
                 pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            mediaPlayer.setOnCompletionListener { playNextSong() }
+            mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }
@@ -176,26 +184,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         intent.putExtra("POSITION", position)
 
         startActivity(intent)
-    }
-
-    private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex+=1
-        }
-        adapter.notifyDataSetChanged()
-        playMusic()
-    }
-
-    private fun playPreviousSong(){
-        if(MyMediaPlayer.currentIndex==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex-=1
-        }
-        adapter.notifyDataSetChanged()
-        playMusic()
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {

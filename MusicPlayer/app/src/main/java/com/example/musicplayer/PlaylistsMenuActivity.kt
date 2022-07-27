@@ -15,6 +15,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.*
 import kotlin.system.measureTimeMillis
 import kotlin.time.measureTime
@@ -225,10 +228,12 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
             Log.d("test",playlistsNames.contains(inputText.text.toString()).toString())
             if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString())) && (inputText.text.toString() != "Main")) {
                 playlistsNames.add(inputText.text.toString())
-                val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(),null)
+                val newPlaylist = Playlist(inputText.text.toString(), ArrayList(),null)
                 playlists.add(newPlaylist)
                 adapter.allPlaylists = playlists
-                writePlaylistsToFile(saveAllMusicsFile, playlists)
+                GlobalScope.launch(Dispatchers.IO){
+                    launch{writePlaylistsToFile(savePlaylistsFile, playlists)}
+                }
 
                 menuRecyclerView?.visibility = View.VISIBLE
                 noPlaylistsFound.visibility = View.GONE

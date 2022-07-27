@@ -61,7 +61,10 @@ class ModifyMusicInfoActivity : Tools() {
 
         albumCoverField.setOnClickListener{selectImage()}
         val validateButton = findViewById<Button>(R.id.validate_button)
+        val cancelButton = findViewById<Button>(R.id.cancel_button)
+
         validateButton.setOnClickListener{onValidateButtonClick()}
+        cancelButton.setOnClickListener{ onCancelButtonClick() }
     }
 
     private fun selectImage() {
@@ -119,6 +122,12 @@ class ModifyMusicInfoActivity : Tools() {
         MyMediaPlayer.modifiedSong = true
         setResult(RESULT_OK)
 
+        finish()
+    }
+
+    private fun onCancelButtonClick(){
+        val returnIntent = Intent()
+        setResult(RESULT_CANCELED, returnIntent)
         finish()
     }
 }
