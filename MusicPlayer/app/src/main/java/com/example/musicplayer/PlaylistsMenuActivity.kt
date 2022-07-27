@@ -257,12 +257,16 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {
-                playlists.removeAt(item.groupId)
-                adapter.allPlaylists = playlists
-                adapter.notifyItemRemoved(item.groupId)
+                if (playlists[item.groupId].isFavoriteList){
+                    Toast.makeText(this,"You can't delete the Favorites playlist",Toast.LENGTH_SHORT).show()
+                } else {
+                    playlists.removeAt(item.groupId)
+                    adapter.allPlaylists = playlists
+                    adapter.notifyItemRemoved(item.groupId)
 
-                writePlaylistsToFile(savePlaylistsFile,playlists)
-                Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
+                    writePlaylistsToFile(savePlaylistsFile,playlists)
+                    Toast.makeText(this,"Suppressions de la playlist",Toast.LENGTH_SHORT).show()
+                }
                 true
             }
             1 -> {
