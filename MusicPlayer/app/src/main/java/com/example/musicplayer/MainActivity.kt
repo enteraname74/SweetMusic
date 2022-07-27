@@ -15,7 +15,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,14 +22,12 @@ import androidx.recyclerview.widget.RecyclerView
 import java.io.*
 
 
-class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
+class MainActivity :MusicList.OnMusicListener, Tools() {
 
     private var musics = ArrayList<Music>()
     private lateinit var adapter : MusicList
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
-    private val saveFile = "allMusics.musics"
-    private var savePlaylistsFile = "allPlaylists.playlists"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,7 +125,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                     }
                     musics.reverse()
 
-                    writeObjectToFile(saveFile, musics)
+                    writeAllMusicsToFile(saveFile, musics)
                     menuRecyclerView = findViewById(R.id.menu_recycler_view)
                     menuRecyclerView?.visibility = View.VISIBLE
                     noSongsFound.visibility = View.GONE
@@ -155,12 +152,12 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             noSongPlaying.visibility = View.GONE
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
+            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MainActivity)}
             songTitleInfo?.setSelected(true)
         }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
         playlistsButton?.setOnClickListener(View.OnClickListener { playlistButton() })
@@ -259,9 +256,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 }
 
                 pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-                nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
-                previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-                bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
+                nextBtn?.setOnClickListener(View.OnClickListener { playNextSong(adapter) })
+                previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong(adapter) })
+                bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MainActivity)}
                 songTitleInfo?.setSelected(true)
             }
 
@@ -270,93 +267,9 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             } else {
                 pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            mediaPlayer.setOnCompletionListener { playNextSong()}
+            mediaPlayer.setOnCompletionListener { playNextSong(adapter)}
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
-        }
-    }
-
-    private fun onBottomMenuClick(position : Int){
-        Log.d("MUSIC POSITION", position.toString())
-        var sameMusic = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
-            sameMusic = false
-        }
-        MyMediaPlayer.currentIndex = position
-        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
-        val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
-
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-
-        intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", position)
-
-        startActivity(intent)
-    }
-
-    private fun playMusic(){
-        mediaPlayer.reset()
-        try {
-            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-            val pausePlay = findViewById<ImageView>(R.id.pause_play)
-            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-
-            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo.setImageResource(R.drawable.michael)
-            }
-
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            Log.d("ERROR","")
-            e.printStackTrace()
-        }
-    }
-
-    private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex+=1
-        }
-        adapter.notifyDataSetChanged()
-        playMusic()
-    }
-
-    private fun playPreviousSong(){
-        if(MyMediaPlayer.currentIndex==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex-=1
-        }
-        adapter.notifyDataSetChanged()
-        playMusic()
-    }
-
-    private fun pausePlay(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        if(mediaPlayer.isPlaying){
-            mediaPlayer.pause()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            mediaPlayer.start()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
     }
 
@@ -376,7 +289,7 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
                 adapter.musics.removeAt(item.groupId)
                 adapter.notifyDataSetChanged()
 
-                writeObjectToFile(saveFile, musics)
+                writeAllMusicsToFile(saveFile, musics)
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
@@ -399,48 +312,5 @@ class MainActivity : AppCompatActivity(), MusicList.OnMusicListener {
             musics = readAllMusicsFromFile(saveFile)
             adapter.musics = musics
         }
-    }
-
-    private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("ErrorWRITE",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS WRITE",Toast.LENGTH_SHORT).show()
-    }
-
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Music>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
-        return content
-    }
-
-    private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-    }
-
-    private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
-        val byteStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
-        return byteStream.toByteArray()
     }
 }
