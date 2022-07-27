@@ -13,32 +13,28 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.*
 
-class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener {
+class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
     private var menuRecyclerView : RecyclerView? = null
     private lateinit var adapter : Playlists
     private lateinit var noPlaylistsFound : TextView
     private var playlists = ArrayList<Playlist>()
     private val playlistsNames = ArrayList<String>()
     private var mediaPlayer = MyMediaPlayer.getInstance
-    private var saveFile = "allPlaylists.playlists"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_playlists_menu)
 
-        //writeObjectToFile("allPlaylists.playlists", playlists)
-
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         noPlaylistsFound = findViewById<TextView>(R.id.no_playlists_found)
 
         // Si on a déjà enregistré des playlists, on va les chercher dans notre fichier :
-        if (File(applicationContext.filesDir, saveFile).exists()){
-            playlists = readAllPlaylistsFromFile(saveFile)
+        if (File(applicationContext.filesDir, savePlaylistsFile).exists()){
+            playlists = readAllPlaylistsFromFile(savePlaylistsFile)
         }
 
         // On récupère une liste des noms des playlists :
@@ -101,7 +97,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
 
         // Mise en place du bouton de création de playlist :
         val addPlaylist = findViewById<ImageView>(R.id.add_playlist)
-        addPlaylist?.setOnClickListener(View.OnClickListener { addPlaylist() })
+        addPlaylist?.setOnClickListener{ addPlaylist() }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
@@ -111,9 +107,9 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         super.onResume()
         if(menuRecyclerView!=null){
             Log.d("MAJ","")
-            playlists = readAllPlaylistsFromFile(saveFile)
+            playlists = readAllPlaylistsFromFile(savePlaylistsFile)
             adapter.allPlaylists = playlists
-            adapter.notifyItemRangeChanged(0, adapter.getItemCount());
+            adapter.notifyItemRangeChanged(0, adapter.getItemCount())
 
             val pausePlay = findViewById<ImageView>(R.id.pause_play)
             val nextBtn = findViewById<ImageView>(R.id.next)
@@ -143,10 +139,10 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                     albumCoverInfo.setImageResource(R.drawable.michael)
                 }
 
-                pausePlay?.setOnClickListener(View.OnClickListener{pausePlay()})
-                nextBtn?.setOnClickListener(View.OnClickListener { playNextSong() })
-                previousBtn?.setOnClickListener(View.OnClickListener { playPreviousSong() })
-                bottomInfos.setOnClickListener(View.OnClickListener {onBottomMenuClick(MyMediaPlayer.currentIndex) })
+                pausePlay?.setOnClickListener{ pausePlay() }
+                nextBtn?.setOnClickListener{ playNextSong() }
+                previousBtn?.setOnClickListener{ playPreviousSong() }
+                bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex) }
                 songTitleInfo?.setSelected(true)
             }
 
@@ -192,36 +188,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
         startActivity(intent)
     }
 
-    private fun playMusic(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-        mediaPlayer.reset()
-        try {
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo.setImageResource(R.drawable.michael)
-            }
-
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
     private fun playNextSong(){
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
@@ -238,17 +204,6 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
             MyMediaPlayer.currentIndex-=1
         }
         playMusic()
-    }
-
-    private fun pausePlay(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        if(mediaPlayer.isPlaying){
-            mediaPlayer.pause()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            mediaPlayer.start()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
     }
 
     private fun addPlaylist(){
@@ -274,7 +229,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList<Music>(),null)
                 playlists.add(newPlaylist)
                 adapter.allPlaylists = playlists
-                writePlaylistsToFile(saveFile, playlists)
+                writePlaylistsToFile(saveAllMusicsFile, playlists)
 
                 menuRecyclerView?.visibility = View.VISIBLE
                 noPlaylistsFound.visibility = View.GONE
@@ -304,7 +259,7 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
                 adapter.allPlaylists = playlists
                 adapter.notifyDataSetChanged()
 
-                writePlaylistsToFile(saveFile,playlists)
+                writePlaylistsToFile(savePlaylistsFile,playlists)
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
@@ -323,33 +278,8 @@ class PlaylistsMenuActivity : AppCompatActivity(), Playlists.OnPlaylistsListener
     var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les playlists avec la modification effectuée :
-            playlists = readAllPlaylistsFromFile(saveFile)
+            playlists = readAllPlaylistsFromFile(savePlaylistsFile)
             adapter.allPlaylists = playlists
         }
-    }
-
-    private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-    }
-
-    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Playlist>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Playlist>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-
-        return content
     }
 }

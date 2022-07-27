@@ -9,16 +9,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.*
 import java.io.*
 
 open class Tools : AppCompatActivity() {
-    val saveFile = "allMusics.musics"
-    var savePlaylistsFile = "allPlaylists.playlists"
+    val saveAllMusicsFile = "allMusics.musics"
+    val savePlaylistsFile = "allPlaylists.playlists"
     private var mediaPlayer = MyMediaPlayer.getInstance
 
     /************************ USES THE MEDIAPLAYER : ***************************/
 
-    private fun playMusic(){
+    open fun playMusic(){
         mediaPlayer.reset()
         try {
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
@@ -71,7 +72,7 @@ open class Tools : AppCompatActivity() {
         startActivity(intent)
     }
 
-    fun playNextSong(adapter : MusicList,){
+    open fun playNextSong(adapter : MusicList){
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
@@ -81,7 +82,7 @@ open class Tools : AppCompatActivity() {
         playMusic()
     }
 
-    fun playPreviousSong(adapter : MusicList){
+    open fun playPreviousSong(adapter : MusicList){
         if(MyMediaPlayer.currentIndex==0){
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
@@ -91,7 +92,7 @@ open class Tools : AppCompatActivity() {
         playMusic()
     }
 
-    fun pausePlay(){
+    open fun pausePlay(){
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
         if(mediaPlayer.isPlaying){
             mediaPlayer.pause()
@@ -114,6 +115,7 @@ open class Tools : AppCompatActivity() {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
+            Toast.makeText(this,"ALL SONGS WROTE", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("ErrorWRITE",error.toString())
         }
@@ -123,9 +125,10 @@ open class Tools : AppCompatActivity() {
         val path = applicationContext.filesDir
         var content = ArrayList<Music>()
         try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)))
             content = ois.readObject() as ArrayList<Music>
-            ois.close();
+            ois.close()
+            Toast.makeText(this,"ALL SONGS FETCHED", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error",error.toString())
         }
@@ -138,14 +141,37 @@ open class Tools : AppCompatActivity() {
             val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
             oos.writeObject(content)
             oos.close()
+            Toast.makeText(this,"ALL PLAYLISTS WROTE", Toast.LENGTH_SHORT).show()
         } catch (error : IOException){
             Log.d("Error","")
         }
+    }
+
+    fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Playlist>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, filename)))
+            content = ois.readObject() as ArrayList<Playlist>
+            ois.close()
+            Toast.makeText(this,"ALL PLAYLISTS FETCHED", Toast.LENGTH_SHORT).show()
+        } catch (error : IOException){
+            Log.d("Error","")
+        }
+
+        return content
     }
 
     fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
         val byteStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
         return byteStream.toByteArray()
+    }
+
+    fun readPlaylistsAsync() = runBlocking { // this: CoroutineScope
+        launch { // launch a new coroutine and continue
+            MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+            println("Work done")
+        }
     }
 }

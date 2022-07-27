@@ -7,26 +7,17 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
-import java.io.*
 
-
-class ModifyPlaylistInfoActivity : AppCompatActivity() {
+class ModifyPlaylistInfoActivity : Tools() {
     private lateinit var playlist : Playlist
     private var position : Int = 0
     private lateinit var allPlaylists : ArrayList<Playlist>
     private lateinit var playlistCoverField : ImageView
     private lateinit var playlistNameField : EditText
-    private var savePlaylistsFile = "allPlaylists.playlists"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,9 +48,9 @@ class ModifyPlaylistInfoActivity : AppCompatActivity() {
 
         playlistNameField.setText(playlist.listName)
 
-        playlistCoverField.setOnClickListener(View.OnClickListener { selectImage() })
+        playlistCoverField.setOnClickListener{ selectImage() }
         val validateButton = findViewById<Button>(R.id.validate_button)
-        validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
+        validateButton.setOnClickListener{ onValidateButtonClick() }
     }
 
     private fun selectImage() {
@@ -92,67 +83,9 @@ class ModifyPlaylistInfoActivity : AppCompatActivity() {
 
         // Mettons à jour nos playlists :
         allPlaylists[position] = playlist
-        writePlaylistToFile(savePlaylistsFile, allPlaylists)
+        writePlaylistsToFile(savePlaylistsFile, allPlaylists)
 
         setResult(RESULT_OK)
         finish()
-    }
-
-    private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
-        val byteStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
-        return byteStream.toByteArray()
-    }
-
-    private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("ErrorWRITE",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS WRITE", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun writePlaylistToFile(filename : String, content : ArrayList<Playlist>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-    }
-
-
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Music>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS FETCHED", Toast.LENGTH_SHORT).show()
-        return content
-    }
-
-    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Playlist>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Playlist>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-
-        return content
     }
 }

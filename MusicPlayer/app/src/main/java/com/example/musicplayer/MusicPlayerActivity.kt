@@ -1,25 +1,19 @@
 package com.example.musicplayer
 
-import android.R.drawable
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.palette.graphics.Palette
 import java.io.*
 
 
 // Classe représentant la lecture d'une musique :
-class MusicPlayerActivity : AppCompatActivity() {
+class MusicPlayerActivity : Tools() {
 
     private lateinit var titleTv : TextView
     lateinit var currentTimeTv : TextView
@@ -31,9 +25,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     private lateinit var musicIcon : ImageView
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
-    private val saveFile = "allMusics.musics"
-    private var savePlaylistsFile = "allPlaylists.playlists"
-    private var myThread = Thread(FunctionnalSeekBar(this))
+    private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
     var mediaPlayer = MyMediaPlayer.getInstance
@@ -90,7 +82,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val background = findViewById<RelativeLayout>(R.id.music_player)
         var bitmap : Bitmap? = null
-        var backgroundColor : Palette.Swatch?
+
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         Log.d("CURRENT SONG", currentSong.toString())
         if (currentSong.albumCover != null){
@@ -108,65 +100,32 @@ class MusicPlayerActivity : AppCompatActivity() {
         }
         Log.d("BITMAP", bitmap.toString())
         Log.d("palette",Palette.from(bitmap as Bitmap).generate().swatches[0].toString())
-        backgroundColor = if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null){
+        val backgroundColor : Palette.Swatch? = if (Palette.from(bitmap).generate().darkVibrantSwatch == null){
             Log.d("here","")
-            Palette.from(bitmap as Bitmap).generate().swatches[0]
+            Palette.from(bitmap).generate().swatches[0]
         } else {
-            Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
+            Palette.from(bitmap).generate().darkVibrantSwatch
         }
 
         background.setBackgroundColor(backgroundColor?.rgb as Int)
-        titleTv.setTextColor(backgroundColor?.titleTextColor as Int)
-        seekBar.thumb.setTint(backgroundColor?.titleTextColor as Int)
-        seekBar.progressDrawable.setTint(backgroundColor?.titleTextColor as Int)
-        setDrawableColor(backgroundColor?.titleTextColor as Int)
+        titleTv.setTextColor(backgroundColor.titleTextColor)
+        seekBar.thumb.setTint(backgroundColor.titleTextColor)
+        seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
-        totalTimeTv.text = convertDuration(currentSong.duration as Long)
+        totalTimeTv.text = convertDuration(currentSong.duration)
         // Vérifions si la musique est en favoris :
         getFavoriteState()
-        pausePlay.setOnClickListener(View.OnClickListener{pausePlay()})
-        nextBtn.setOnClickListener(View.OnClickListener { playNextSong() })
-        previousBtn.setOnClickListener(View.OnClickListener { playPreviousSong() })
-        favoriteBtn.setOnClickListener(View.OnClickListener { setFavorite() })
+        pausePlay.setOnClickListener{ pausePlay() }
+        nextBtn.setOnClickListener{ playNextSong() }
+        previousBtn.setOnClickListener{ playPreviousSong() }
+        favoriteBtn.setOnClickListener{ setFavorite() }
 
         playMusic()
     }
 
-    private fun setDrawableColor(color : Int){
-
-        var unwrappedDrawable : Drawable? = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_pause_circle_outline_24)
-        var wrappedDrawable : Drawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_play_circle_outline_24)
-        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_skip_next_24)
-        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_skip_previous_24)
-        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_sync_24)
-        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_favorite_24)
-        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-        unwrappedDrawable = AppCompatResources.getDrawable(this, R.drawable.ic_baseline_favorite_border_24)
-        wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable!!)
-        DrawableCompat.setTint(wrappedDrawable, color)
-
-    }
-
-    private fun playMusic(){
+    override fun playMusic(){
         /*
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
@@ -215,7 +174,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         setRessourcesWithMusic()
     }
 
-    private fun pausePlay(){
+    override fun pausePlay(){
         if(mediaPlayer.isPlaying){
             mediaPlayer.pause()
             pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
@@ -226,7 +185,7 @@ class MusicPlayerActivity : AppCompatActivity() {
     }
 
     // Permet de savoir si une chanson est en favoris :
-    private fun getFavoriteState(){
+    fun getFavoriteState(){
         if(currentSong.favorite){
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {
@@ -249,12 +208,12 @@ class MusicPlayerActivity : AppCompatActivity() {
 
         // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
         // Commencons par la playlist principale :
-        val allSongs  = readAllMusicsFromFile(saveFile)
+        val allSongs  = readAllMusicsFromFile(saveAllMusicsFile)
         for (element in allSongs){
             // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
             if (element.path == currentSong.path){
                 element.favorite = currentSong.favorite
-                writeObjectToFile(saveFile, allSongs)
+                writeAllMusicsToFile(saveAllMusicsFile, allSongs)
                 break
             }
         }
@@ -281,7 +240,7 @@ class MusicPlayerActivity : AppCompatActivity() {
         if (shouldBeInFavoriteList){
             favoritePlaylist.musicList.add(currentSong)
         }
-        writePlaylistToFile(savePlaylistsFile, playlists)
+        writePlaylistsToFile(savePlaylistsFile, playlists)
     }
 
     fun convertDuration(duration: Long): String {
@@ -299,11 +258,11 @@ class MusicPlayerActivity : AppCompatActivity() {
         return "$strMinutes:$strSeconds"
     }
 
-    class FunctionnalSeekBar(private var musicPlayerActivity: MusicPlayerActivity) : Runnable{
+    class FunctionalSeekBar(private var musicPlayerActivity: MusicPlayerActivity) : Runnable{
 
         override fun run() {
-            musicPlayerActivity.seekBar?.progress = musicPlayerActivity.mediaPlayer.currentPosition
-            musicPlayerActivity.currentTimeTv?.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
+            musicPlayerActivity.seekBar.progress = musicPlayerActivity.mediaPlayer.currentPosition
+            musicPlayerActivity.currentTimeTv.text = musicPlayerActivity.convertDuration(musicPlayerActivity.mediaPlayer.currentPosition.toLong())
 
             Handler(Looper.getMainLooper()).postDelayed(this,1000)
 
@@ -313,56 +272,5 @@ class MusicPlayerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
-    }
-
-    private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("ErrorWRITE",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS WRITE",Toast.LENGTH_SHORT).show()
-    }
-
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Music>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS FETCHED",Toast.LENGTH_SHORT).show()
-        return content
-    }
-
-    private fun writePlaylistToFile(filename : String, content : ArrayList<Playlist>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-    }
-
-    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Playlist>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Playlist>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-
-        return content
     }
 }

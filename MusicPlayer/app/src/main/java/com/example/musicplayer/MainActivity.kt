@@ -19,7 +19,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import java.io.*
+import kotlin.coroutines.CoroutineContext
 
 
 class MainActivity :MusicList.OnMusicListener, Tools() {
@@ -40,8 +42,8 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
             requestPermission()
         }
 
-        if (File(applicationContext.filesDir, saveFile).exists()){
-            musics = readAllMusicsFromFile(saveFile)
+        if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
+            musics = readAllMusicsFromFile(saveAllMusicsFile)
 
             menuRecyclerView = findViewById(R.id.menu_recycler_view)
             menuRecyclerView?.visibility = View.VISIBLE
@@ -125,7 +127,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
                     }
                     musics.reverse()
 
-                    writeAllMusicsToFile(saveFile, musics)
+                    writeAllMusicsToFile(saveAllMusicsFile, musics)
                     menuRecyclerView = findViewById(R.id.menu_recycler_view)
                     menuRecyclerView?.visibility = View.VISIBLE
                     noSongsFound.visibility = View.GONE
@@ -221,7 +223,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         super.onResume()
         if(menuRecyclerView!=null){
             if (MyMediaPlayer.modifiedSong){
-                musics = readAllMusicsFromFile(saveFile)
+                musics = readAllMusicsFromFile(saveAllMusicsFile)
                 MyMediaPlayer.modifiedSong = false
             }
             adapter.musics = musics
@@ -289,7 +291,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
                 adapter.musics.removeAt(item.groupId)
                 adapter.notifyDataSetChanged()
 
-                writeAllMusicsToFile(saveFile, musics)
+                writeAllMusicsToFile(saveAllMusicsFile, musics)
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
@@ -309,7 +311,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
     var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
-            musics = readAllMusicsFromFile(saveFile)
+            musics = readAllMusicsFromFile(saveAllMusicsFile)
             adapter.musics = musics
         }
     }

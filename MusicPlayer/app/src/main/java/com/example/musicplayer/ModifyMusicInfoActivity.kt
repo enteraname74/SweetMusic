@@ -7,37 +7,29 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
-import java.io.*
 
-
-class ModifyMusicInfoActivity : AppCompatActivity() {
+class ModifyMusicInfoActivity : Tools() {
     private lateinit var musicFile : Music
     private lateinit var albumCoverField : ImageView
     private lateinit var musicNameField : EditText
     private lateinit var albumNameField : EditText
     private lateinit var artistNameField : EditText
-    private val saveMusicsFile = "allMusics.musics"
-    private var savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var currentPlaylist : ArrayList<Music>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
         val playlistName = intent.getSerializableExtra("PLAYLIST_NAME") as String
-        if (playlistName == "Main"){
-            currentPlaylist = readAllMusicsFromFile(saveMusicsFile)
+
+        currentPlaylist = if (playlistName == "Main"){
+            readAllMusicsFromFile(saveAllMusicsFile)
         } else {
             val allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
-            currentPlaylist = allPlaylists.first{it.listName == playlistName}.musicList
+            allPlaylists.first{it.listName == playlistName}.musicList
         }
 
         // On récupère notre musique à modifier :
@@ -67,9 +59,9 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         albumNameField.setText(musicFile.album)
         artistNameField.setText(musicFile.artist)
 
-        albumCoverField.setOnClickListener(View.OnClickListener { selectImage() })
+        albumCoverField.setOnClickListener{selectImage()}
         val validateButton = findViewById<Button>(R.id.validate_button)
-        validateButton.setOnClickListener(View.OnClickListener { onValidateButtonClick() })
+        validateButton.setOnClickListener{onValidateButtonClick()}
     }
 
     private fun selectImage() {
@@ -77,7 +69,7 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         resultImageLauncher.launch(intent)
     }
 
-    var resultImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private var resultImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.getData()?.data
             val inputStream = contentResolver.openInputStream(uri as Uri)
@@ -101,10 +93,10 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         musicFile.albumCover = byteArray
 
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
-        val allMusics = readAllMusicsFromFile(saveMusicsFile)
+        val allMusics = readAllMusicsFromFile(saveAllMusicsFile)
         var position = allMusics.indexOf(allMusics.first{it.path == musicFile.path})
         allMusics[position] = musicFile
-        writeObjectToFile(saveMusicsFile,allMusics)
+        writeAllMusicsToFile(saveAllMusicsFile,allMusics)
 
         // Ensuite, mettons à jour nos playlists :
         val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
@@ -118,7 +110,7 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
                 }
             }
         }
-        writePlaylistToFile(savePlaylistsFile, playlists)
+        writePlaylistsToFile(savePlaylistsFile, playlists)
 
         // Enfin, pensons à modifier les infos de la musique qui se joue actuellement si c'est celle qu'on est en train de modifier :
         if (MyMediaPlayer.currentPlaylist.size != 0 && MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path){
@@ -127,63 +119,5 @@ class ModifyMusicInfoActivity : AppCompatActivity() {
         MyMediaPlayer.modifiedSong = true
         setResult(RESULT_OK)
         finish()
-    }
-
-    private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
-        val byteStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
-        return byteStream.toByteArray()
-    }
-
-    private fun writeObjectToFile(filename : String, content : ArrayList<Music>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("ErrorWRITE",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS WRITE", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun writePlaylistToFile(filename : String, content : ArrayList<Playlist>){
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-    }
-
-
-    private fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Music>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error",error.toString())
-        }
-        Toast.makeText(this,"ALL SONGS FETCHED", Toast.LENGTH_SHORT).show()
-        return content
-    }
-
-    private fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
-        val path = applicationContext.filesDir
-        var content = ArrayList<Playlist>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, filename)));
-            content = ois.readObject() as ArrayList<Playlist>
-            ois.close();
-        } catch (error : IOException){
-            Log.d("Error","")
-        }
-
-        return content
     }
 }
