@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
 import java.io.*
+import kotlin.system.measureTimeMillis
 
 class MainActivity :MusicList.OnMusicListener, Tools() {
 
@@ -232,7 +233,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         if(menuRecyclerView!=null){
             if (MyMediaPlayer.modifiedSong){
                 GlobalScope.launch(Dispatchers.IO){
-                    launch{writeAllAsync(musics, MyMediaPlayer.allPlaylists)}
+                    launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
                 }
                 println("test")
                 MyMediaPlayer.modifiedSong = false
@@ -321,7 +322,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
-            musics = readAllMusicsFromFile(saveAllMusicsFile)
+            musics = MyMediaPlayer.allMusics
             adapter.musics = musics
         }
     }
