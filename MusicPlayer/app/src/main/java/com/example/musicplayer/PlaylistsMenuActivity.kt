@@ -259,7 +259,7 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
             0 -> {
                 playlists.removeAt(item.groupId)
                 adapter.allPlaylists = playlists
-                adapter.notifyDataSetChanged()
+                adapter.notifyItemRemoved(item.groupId)
 
                 writePlaylistsToFile(savePlaylistsFile,playlists)
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()

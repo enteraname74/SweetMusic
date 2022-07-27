@@ -20,6 +20,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
     private lateinit var playlist : Playlist
     private var playlistPosition : Int = 0
     private lateinit var adapter : MusicList
+    private var allPlaylists = ArrayList<Playlist>()
     private var musics = ArrayList<Music>()
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
@@ -29,7 +30,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         setContentView(R.layout.activity_selected_playlist)
 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
-        val allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+        allPlaylists = MyMediaPlayer.allPlaylists
         playlistPosition = intent.getSerializableExtra("POSITION") as Int
         playlist = allPlaylists[playlistPosition]
         musics = playlist.musicList
@@ -194,19 +195,17 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
             }
             1 -> {
                 musics.removeAt(item.groupId)
-                adapter.musics.removeAt(item.groupId)
-                adapter.notifyDataSetChanged()
+                println(allPlaylists[playlistPosition].musicList)
+                adapter.notifyItemRemoved(item.groupId)
 
-                // Mettons à jour l'état des playlists :
-                val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
-                playlists[playlistPosition].musicList = musics
-                writePlaylistsToFile(savePlaylistsFile, playlists)
+                GlobalScope.launch(Dispatchers.IO){
+                    launch{writePlaylistsToFile(savePlaylistsFile,allPlaylists)}
+                }
 
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
                 true
             }
             2 -> {
-                Log.d("GROUPID", item.groupId.toString())
                 val intent = Intent(this@SelectedPlaylistActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", playlist.listName)
                 intent.putExtra("POSITION",item.groupId)

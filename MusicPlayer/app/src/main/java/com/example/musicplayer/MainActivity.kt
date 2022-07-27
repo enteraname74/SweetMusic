@@ -299,8 +299,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
             }
             1 -> {
                 musics.removeAt(item.groupId)
-                adapter.notifyDataSetChanged()
-
+                adapter.notifyItemRemoved(item.groupId)
 
                 GlobalScope.launch(Dispatchers.IO){
                     launch{writeAllMusicsToFile(saveAllMusicsFile, musics)}
