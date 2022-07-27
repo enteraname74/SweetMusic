@@ -9,6 +9,9 @@ import android.os.Looper
 import android.util.Log
 import android.widget.*
 import androidx.palette.graphics.Palette
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.*
 
 
@@ -51,7 +54,7 @@ class MusicPlayerActivity : Tools() {
         musicIcon = findViewById(R.id.album_cover_big)
         favoriteBtn = findViewById(R.id.favorite)
 
-        titleTv.setSelected(true)
+        titleTv.isSelected = true
 
         setRessourcesWithMusic()
 
@@ -97,7 +100,6 @@ class MusicPlayerActivity : Tools() {
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap
         }
-        Log.d("BITMAP", bitmap.toString())
         Log.d("palette",Palette.from(bitmap as Bitmap).generate().swatches[0].toString())
         val backgroundColor : Palette.Swatch? = if (Palette.from(bitmap).generate().darkVibrantSwatch == null){
             Log.d("here","")
@@ -184,7 +186,7 @@ class MusicPlayerActivity : Tools() {
     }
 
     // Permet de savoir si une chanson est en favoris :
-    fun getFavoriteState(){
+    private fun getFavoriteState(){
         if(currentSong.favorite){
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {
@@ -201,24 +203,22 @@ class MusicPlayerActivity : Tools() {
         } else {
             currentSong.favorite = true
             MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
-
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         }
 
         // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
         // Commencons par la playlist principale :
-        val allSongs  = readAllMusicsFromFile(saveAllMusicsFile)
-        for (element in allSongs){
+        val allMusics  = MyMediaPlayer.allMusics
+        for (element in allMusics){
             // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
             if (element.path == currentSong.path){
                 element.favorite = currentSong.favorite
-                writeAllMusicsToFile(saveAllMusicsFile, allSongs)
                 break
             }
         }
         // Ensuite, mettons à jour nos playlists :
-        val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
-        for (playlist in playlists){
+        val allPlaylists = MyMediaPlayer.allPlaylists
+        for (playlist in allPlaylists){
             for (element in playlist.musicList){
                 if (element.path == currentSong.path){
                     element.favorite = currentSong.favorite
@@ -227,7 +227,7 @@ class MusicPlayerActivity : Tools() {
             }
         }
         // Mettons à jour la playlist favoris :
-        val favoritePlaylist = playlists[0]
+        val favoritePlaylist = allPlaylists[0]
         var shouldBeInFavoriteList = true
         for (element in favoritePlaylist.musicList){
             if (element.path == currentSong.path){
@@ -239,7 +239,10 @@ class MusicPlayerActivity : Tools() {
         if (shouldBeInFavoriteList){
             favoritePlaylist.musicList.add(currentSong)
         }
-        writePlaylistsToFile(savePlaylistsFile, playlists)
+
+        GlobalScope.launch(Dispatchers.IO){
+            launch{writeAllAsync(allMusics,allPlaylists)}
+        }
     }
 
     fun convertDuration(duration: Long): String {
