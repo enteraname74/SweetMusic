@@ -3,10 +3,14 @@ package com.example.musicplayer
 import android.Manifest
 import android.app.Activity
 import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -23,16 +27,52 @@ import kotlinx.coroutines.*
 import java.io.*
 import kotlin.system.measureTimeMillis
 
-class MainActivity :MusicList.OnMusicListener, Tools() {
+class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocusChangeListener  {
 
     private var musics = ArrayList<Music>()
     private lateinit var adapter : MusicList
     private var menuRecyclerView : RecyclerView? = null
     private var mediaPlayer = MyMediaPlayer.getInstance
+    private lateinit var audioManager : AudioManager
+    private lateinit var audioAttributes : AudioAttributes
+    private lateinit var audioFocusRequest : AudioFocusRequest
+    private lateinit var onAudioFocusChange: AudioManager.OnAudioFocusChangeListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
+            Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
+            Log.d("focusChange", focusChange.toString())
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+                else -> {
+                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                        println("loss focus")
+                        mediaPlayer.pause()
+                        val pausePlay = findViewById<ImageView>(R.id.pause_play)
+                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                    Log.d("change does..","")
+                    MyMediaPlayer.doesASongWillBePlaying = false
+                }
+            }
+        }
+
+        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(this)
+            .build()
 
         val noSongsFound = findViewById<TextView>(R.id.no_songs_found)
         noSongsFound.visibility = View.VISIBLE
@@ -271,7 +311,7 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
                 nextBtn?.setOnClickListener{ playNextSong(adapter) }
                 previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
                 bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@MainActivity) }
-                songTitleInfo?.setSelected(true)
+                songTitleInfo?.isSelected = true
             }
 
             if (!mediaPlayer.isPlaying){
@@ -325,6 +365,25 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
             // On récupère les musiques avec la modification effectuée :
             musics = MyMediaPlayer.allMusics
             adapter.musics = musics
+        }
+    }
+
+    override fun onAudioFocusChange(focusChange: Int) {
+        Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
+        Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
+        Log.d("focusChange", focusChange.toString())
+        when (focusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+            else -> {
+                if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                    println("loss focus")
+                    mediaPlayer.pause()
+                    val pausePlay = findViewById<ImageView>(R.id.pause_play)
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                }
+                Log.d("change does..","")
+                MyMediaPlayer.doesASongWillBePlaying = false
+            }
         }
     }
 }

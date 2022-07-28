@@ -4,15 +4,20 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.io.*
 
 open class Tools : AppCompatActivity() {
     val saveAllMusicsFile = "allMusics.musics"
     val savePlaylistsFile = "allPlaylists.playlists"
+
     private var mediaPlayer = MyMediaPlayer.getInstance
 
     /************************ USES THE MEDIAPLAYER : ***************************/
@@ -51,10 +56,12 @@ open class Tools : AppCompatActivity() {
     fun onBottomMenuClick(position : Int, context : Context){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
+        MyMediaPlayer.doesASongWillBePlaying = true
 
         if (position != MyMediaPlayer.currentIndex) {
             MyMediaPlayer.getInstance.reset()
             sameMusic = false
+            MyMediaPlayer.doesASongWillBePlaying = false
         }
         MyMediaPlayer.currentIndex = position
         Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
@@ -92,12 +99,56 @@ open class Tools : AppCompatActivity() {
 
     open fun pausePlay(){
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        if(mediaPlayer.isPlaying){
-            mediaPlayer.pause()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            mediaPlayer.start()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        val onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            Log.d("doesA..", MyMediaPlayer.doesASongWillBePlaying.toString())
+            Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
+            Log.d("focusChange", focusChange.toString())
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+                else -> {
+                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                        println("loss focus")
+                        mediaPlayer.pause()
+                        val pausePlay: ImageView = findViewById(R.id.pause_play)
+                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                    Log.d("change does..", "")
+                    MyMediaPlayer.doesASongWillBePlaying = false
+                }
+            }
+        }
+
+
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .build()
+
+        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+            }
+
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                MyMediaPlayer.doesASongWillBePlaying = true
+                if(mediaPlayer.isPlaying){
+                    mediaPlayer.pause()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                } else {
+                    mediaPlayer.start()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            else -> {
+                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

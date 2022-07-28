@@ -22,7 +22,7 @@ import java.io.*
 
 
 // Classe représentant la lecture d'une musique :
-class MusicPlayerActivity : Tools(), MediaPlayer.OnErrorListener {
+class MusicPlayerActivity : Tools() {
 
     private lateinit var titleTv : TextView
     lateinit var currentTimeTv : TextView
@@ -355,30 +355,4 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnErrorListener {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
     }
-
-    override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
-        Log.d("mp error", "mp error")
-        p0?.reset()
-        return false
-    }
-
-    /*
-    override fun onAudioFocusChange(p0: Int) {
-        Log.d("code",p0.toString())
-        when(p0){
-            AudioManager.AUDIOFOCUS_GAIN -> {
-                if(!mediaPlayer.isPlaying){
-                    setRessourcesWithMusic()
-                }
-            }
-            else -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                }
-            }
-        }
-    }
-     */
-
 }
