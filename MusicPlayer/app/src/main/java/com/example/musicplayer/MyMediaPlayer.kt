@@ -30,6 +30,8 @@ class MyMediaPlayer {
 
         var allMusics = ArrayList<Music>()
         var allPlaylists = ArrayList<Playlist>()
+
+        var doesASongWillBePlaying = true
     }
 
 

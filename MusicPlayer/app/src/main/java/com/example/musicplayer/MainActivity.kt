@@ -198,8 +198,8 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
     }
 
     override fun onMusicClick(position: Int) {
-        Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
+        MyMediaPlayer.doesASongWillBePlaying = true
 
         if (position != MyMediaPlayer.currentIndex) {
             MyMediaPlayer.getInstance.reset()
@@ -207,15 +207,14 @@ class MainActivity :MusicList.OnMusicListener, Tools() {
         }
         // Vérifions si on change de playlist :
         if (musics != MyMediaPlayer.currentPlaylist) {
-            Log.d("CHANGEMENT PLAYLIST","")
             MyMediaPlayer.currentPlaylist = musics
             MyMediaPlayer.playlistName = "Main"
+            MyMediaPlayer.doesASongWillBePlaying = false
             sameMusic = false
         }
 
         MyMediaPlayer.currentIndex = position
 
-        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
         val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
 
         /*On fait passer notre liste de musiques dans notre nouvelle activité pour

@@ -1,8 +1,14 @@
 package com.example.musicplayer
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,7 +22,7 @@ import java.io.*
 
 
 // Classe représentant la lecture d'une musique :
-class MusicPlayerActivity : Tools() {
+class MusicPlayerActivity : Tools(), MediaPlayer.OnErrorListener {
 
     private lateinit var titleTv : TextView
     lateinit var currentTimeTv : TextView
@@ -28,6 +34,11 @@ class MusicPlayerActivity : Tools() {
     private lateinit var musicIcon : ImageView
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
+    private lateinit var sort : ImageView
+    private lateinit var audioManager : AudioManager
+    private lateinit var audioAttributes : AudioAttributes
+    private lateinit var audioFocusRequest : AudioFocusRequest
+    private lateinit var onAudioFocusChange: AudioManager.OnAudioFocusChangeListener
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
@@ -42,8 +53,6 @@ class MusicPlayerActivity : Tools() {
 
         MyMediaPlayer.currentIndex = position
 
-        Log.d("SAME MUSIC ?", sameMusic.toString())
-
         titleTv = findViewById(R.id.song_title)
         currentTimeTv = findViewById(R.id.current_time)
         totalTimeTv = findViewById(R.id.total_time)
@@ -53,31 +62,80 @@ class MusicPlayerActivity : Tools() {
         previousBtn = findViewById(R.id.previous)
         musicIcon = findViewById(R.id.album_cover_big)
         favoriteBtn = findViewById(R.id.favorite)
+        sort = findViewById(R.id.sort)
 
         titleTv.isSelected = true
 
-        setRessourcesWithMusic()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
-        this@MusicPlayerActivity.runOnUiThread(myThread)
+        audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if(fromUser){
-                    Log.d("THERE", progress.toString())
-                    mediaPlayer.seekTo(progress)
+        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
+            Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
+            Log.d("focusChange", focusChange.toString())
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+                else -> {
+                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                        println("loss focus")
+                        mediaPlayer.pause()
+                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                    Log.d("change does..","")
+                    MyMediaPlayer.doesASongWillBePlaying = false
                 }
             }
+        }
 
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .build()
+
+        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                Toast.makeText(this, "Cannot launch the music", Toast.LENGTH_SHORT).show()
             }
 
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                Log.d("start music", "")
+                setRessourcesWithMusic()
+
+                this@MusicPlayerActivity.runOnUiThread(myThread)
+
+                seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        if (fromUser) {
+                            Log.d("THERE", progress.toString())
+                            mediaPlayer.seekTo(progress)
+                        }
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                    }
+
+                })
+
+                // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
+                mediaPlayer.setOnCompletionListener { playNextSong() }
             }
 
-        })
-
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+            else -> {
+                Toast.makeText(this, "AN unknown error has come up", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setRessourcesWithMusic(){
@@ -115,6 +173,12 @@ class MusicPlayerActivity : Tools() {
         currentTimeTv.setTextColor(backgroundColor.titleTextColor)
         totalTimeTv.setTextColor(backgroundColor.titleTextColor)
         seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
+
+        pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
 
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
@@ -181,12 +245,24 @@ class MusicPlayerActivity : Tools() {
     }
 
     override fun pausePlay(){
-        if(mediaPlayer.isPlaying){
-            mediaPlayer.pause()
-            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            mediaPlayer.start()
-            pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        Log.d("ML!,ZF",audioManager.requestAudioFocus(audioFocusRequest).toString())
+        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+            }
+
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                if(mediaPlayer.isPlaying){
+                    mediaPlayer.pause()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                } else {
+                    mediaPlayer.start()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            else -> {
+                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -279,4 +355,30 @@ class MusicPlayerActivity : Tools() {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
     }
+
+    override fun onError(p0: MediaPlayer?, p1: Int, p2: Int): Boolean {
+        Log.d("mp error", "mp error")
+        p0?.reset()
+        return false
+    }
+
+    /*
+    override fun onAudioFocusChange(p0: Int) {
+        Log.d("code",p0.toString())
+        when(p0){
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                if(!mediaPlayer.isPlaying){
+                    setRessourcesWithMusic()
+                }
+            }
+            else -> {
+                if(mediaPlayer.isPlaying){
+                    mediaPlayer.pause()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                }
+            }
+        }
+    }
+     */
+
 }
