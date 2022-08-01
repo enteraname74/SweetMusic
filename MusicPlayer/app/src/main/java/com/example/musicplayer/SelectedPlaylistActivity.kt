@@ -72,7 +72,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
             }
 
             bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedPlaylistActivity) }
-            songTitleInfo?.setSelected(true)
+            songTitleInfo?.isSelected = true
         }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
@@ -123,7 +123,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
                 nextBtn?.setOnClickListener{ playNextSong(adapter) }
                 previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
                 bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedPlaylistActivity) }
-                songTitleInfo?.setSelected(true)
+                songTitleInfo?.isSelected = true
             }
 
             if (!mediaPlayer.isPlaying){
