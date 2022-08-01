@@ -35,10 +35,13 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         playlist = allPlaylists[playlistPosition]
         musics = playlist.musicList
 
-        adapter = MusicList(musics,playlist.listName,applicationContext,this)
-
-        menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-        menuRecyclerView?.adapter = adapter
+        GlobalScope.launch(Dispatchers.IO) {
+            launch {
+                adapter = MusicList(musics, playlist.listName, applicationContext, this@SelectedPlaylistActivity)
+                menuRecyclerView?.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
+                menuRecyclerView?.adapter = adapter
+            }
+        }
 
         val playlistName = findViewById<TextView>(R.id.playlist_name)
         playlistName?.text = playlist.listName
