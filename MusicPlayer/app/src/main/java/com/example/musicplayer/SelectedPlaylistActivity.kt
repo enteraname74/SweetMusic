@@ -170,9 +170,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
             sameMusic = false
         }
         // Vérifions si on change de playlist :
-        if (musics != MyMediaPlayer.currentPlaylist) {
-            Log.d("CHANGEMENT PLAYLIST","")
-            MyMediaPlayer.currentPlaylist = musics
+        if (musics != MyMediaPlayer.initialPlaylist) {
+            MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
+            MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.playlistName = playlist.listName
             sameMusic = false
         }
