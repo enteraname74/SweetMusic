@@ -63,9 +63,11 @@ class MusicPlayerActivity : Tools() {
         musicIcon = findViewById(R.id.album_cover_big)
         favoriteBtn = findViewById(R.id.favorite)
         sort = findViewById(R.id.sort)
+        sort.setImageResource(MyMediaPlayer.iconsList[MyMediaPlayer.iconIndex])
 
         titleTv.isSelected = true
 
+        /*
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         audioAttributes = AudioAttributes.Builder()
@@ -136,6 +138,30 @@ class MusicPlayerActivity : Tools() {
                 Toast.makeText(this, "AN unknown error has come up", Toast.LENGTH_SHORT).show()
             }
         }
+
+         */
+        setRessourcesWithMusic()
+
+        this@MusicPlayerActivity.runOnUiThread(myThread)
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(
+                seekBar: SeekBar?,
+                progress: Int,
+                fromUser: Boolean
+            ) {
+                if (fromUser) {
+                    Log.d("THERE", progress.toString())
+                    mediaPlayer.seekTo(progress)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+            }
+        })
     }
 
     private fun setRessourcesWithMusic(){
@@ -144,7 +170,6 @@ class MusicPlayerActivity : Tools() {
         var bitmap : Bitmap? = null
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-        Log.d("CURRENT SONG", currentSong.toString())
 
         if (currentSong.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
@@ -191,8 +216,39 @@ class MusicPlayerActivity : Tools() {
         nextBtn.setOnClickListener{ playNextSong() }
         previousBtn.setOnClickListener{ playPreviousSong() }
         favoriteBtn.setOnClickListener{ setFavorite() }
+        sort.setOnClickListener{ changeSorting() }
 
         playMusic()
+    }
+
+    private fun changeSorting() {
+        if(MyMediaPlayer.iconIndex == (MyMediaPlayer.iconsList.size)-1){
+            MyMediaPlayer.iconIndex = 0
+        } else {
+            MyMediaPlayer.iconIndex += 1
+        }
+        setSorting()
+    }
+
+    private fun setSorting(){
+        when (MyMediaPlayer.iconIndex){
+            0 -> {
+                MyMediaPlayer.currentPlaylist = MyMediaPlayer.initialPlaylist
+                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+            }
+            1 -> {
+                println("shuffle")
+                MyMediaPlayer.currentPlaylist.shuffle()
+                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+            }
+            2 -> {
+                // On choisit la fonction de replay de la meme musique, on supprime d'abord toute la playlist actuelle :
+                MyMediaPlayer.currentPlaylist.clear()
+                MyMediaPlayer.currentPlaylist.add(currentSong)
+                MyMediaPlayer.currentIndex = 0
+            }
+        }
+        sort.setImageResource(MyMediaPlayer.iconsList[MyMediaPlayer.iconIndex])
     }
 
     override fun playMusic(){
@@ -245,6 +301,7 @@ class MusicPlayerActivity : Tools() {
     }
 
     override fun pausePlay(){
+        /*
         Log.d("ML!,ZF",audioManager.requestAudioFocus(audioFocusRequest).toString())
         when (audioManager.requestAudioFocus(audioFocusRequest)) {
             AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
@@ -252,17 +309,20 @@ class MusicPlayerActivity : Tools() {
             }
 
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                } else {
-                    mediaPlayer.start()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                }
+
             }
             else -> {
                 Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
             }
+        }
+
+         */
+        if(mediaPlayer.isPlaying){
+            mediaPlayer.pause()
+            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+        } else {
+            mediaPlayer.start()
+            pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
     }
 

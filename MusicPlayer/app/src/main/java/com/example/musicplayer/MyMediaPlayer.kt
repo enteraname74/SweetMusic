@@ -19,6 +19,7 @@ class MyMediaPlayer {
         }
 
         var currentIndex : Int = -1
+        var initialPlaylist = ArrayList<Music>()
         var currentPlaylist = ArrayList<Music>()
         var playlistName = ""
 
@@ -32,6 +33,9 @@ class MyMediaPlayer {
         var allPlaylists = ArrayList<Playlist>()
 
         var doesASongWillBePlaying = true
+
+        val iconsList = listOf(R.drawable.ic_baseline_sync_24, R.drawable.ic_baseline_shuffle_24, R.drawable.ic_baseline_replay_24)
+        var iconIndex = 0
     }
 
 

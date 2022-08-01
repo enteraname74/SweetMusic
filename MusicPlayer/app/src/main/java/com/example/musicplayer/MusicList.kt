@@ -70,6 +70,11 @@ data class MusicList(
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
         val currentMusic = musics[position]
+        var currentPlayedMusic: Music? = null
+        try {
+            currentPlayedMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+        } catch (error : ArrayIndexOutOfBoundsException){
+        }
 
         if(currentMusic.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
@@ -87,7 +92,7 @@ data class MusicList(
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
 
-        if(MyMediaPlayer.currentIndex == position && MyMediaPlayer.playlistName == listName){
+        if(MyMediaPlayer.initialPlaylist.indexOf(currentPlayedMusic) == position && MyMediaPlayer.playlistName == listName){
             Log.d("CHANGE COLOR", MyMediaPlayer.currentIndex.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         } else {

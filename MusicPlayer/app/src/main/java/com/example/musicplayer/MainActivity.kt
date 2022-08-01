@@ -247,7 +247,8 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
         }
         // Vérifions si on change de playlist :
         if (musics != MyMediaPlayer.currentPlaylist) {
-            MyMediaPlayer.currentPlaylist = musics
+            MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
+            MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.playlistName = "Main"
             MyMediaPlayer.doesASongWillBePlaying = false
             sameMusic = false
