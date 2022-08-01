@@ -14,7 +14,7 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
     private var musics = ArrayList<Music>()
     private lateinit var adapter : MusicListSelection
     private var selectedMusicsPositions = ArrayList<Int>()
-    private var menuRecyclerView : RecyclerView? = null
+    private lateinit var menuRecyclerView : RecyclerView
     private var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,8 +26,8 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
 
         adapter = MusicListSelection(musics,selectedMusicsPositions,applicationContext,this)
 
-        menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-        menuRecyclerView?.adapter = adapter
+        menuRecyclerView.layoutManager = LinearLayoutManager(this)
+        menuRecyclerView.adapter = adapter
 
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
         val nextBtn = findViewById<ImageView>(R.id.next)

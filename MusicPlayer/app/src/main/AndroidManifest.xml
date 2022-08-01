@@ -18,6 +18,9 @@
         android:theme="@style/Theme.MusicPlayer"
         tools:targetApi="31">
         <activity
+            android:name=".SeeMusicListActivity"
+            android:exported="false" />
+        <activity
             android:name=".ModifyPlaylistInfoActivity"
             android:exported="false" />
         <activity

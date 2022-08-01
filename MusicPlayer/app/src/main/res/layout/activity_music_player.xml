@@ -45,8 +45,27 @@
         android:padding="40dp"
         >
 
+        <ImageView
+            android:id="@+id/initial_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:src="@drawable/ic_baseline_queue_music_24">
+
+        </ImageView>
+
+        <ImageView
+            android:id="@+id/current_playlist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_baseline_playlist_play_24">
+
+        </ImageView>
+
         <SeekBar
             android:id="@+id/seek_bar"
+            android:layout_below="@+id/initial_playlist"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
@@ -78,11 +97,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/seek_bar"
-            android:text="0:00"
             android:layout_alignParentEnd="true"
-            android:textColor="@color/third_color"
-            android:layout_margin="20dp"
-            >
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="20dp"
+            android:text="0:00"
+            android:textColor="@color/third_color">
 
         </TextView>
 

@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
@@ -28,6 +29,8 @@ class MusicPlayerActivity : Tools() {
     lateinit var currentTimeTv : TextView
     private lateinit var totalTimeTv : TextView
     lateinit var seekBar : SeekBar
+    private lateinit var initialList : ImageView
+    private lateinit var currentList : ImageView
     private lateinit var pausePlay : ImageView
     private lateinit var nextBtn : ImageView
     private lateinit var previousBtn : ImageView
@@ -57,6 +60,8 @@ class MusicPlayerActivity : Tools() {
         currentTimeTv = findViewById(R.id.current_time)
         totalTimeTv = findViewById(R.id.total_time)
         seekBar = findViewById(R.id.seek_bar)
+        initialList = findViewById(R.id.initial_playlist)
+        currentList = findViewById(R.id.current_playlist)
         pausePlay = findViewById(R.id.pause_play)
         nextBtn = findViewById(R.id.next)
         previousBtn = findViewById(R.id.previous)
@@ -199,6 +204,8 @@ class MusicPlayerActivity : Tools() {
         totalTimeTv.setTextColor(backgroundColor.titleTextColor)
         seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
+        initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
@@ -212,6 +219,8 @@ class MusicPlayerActivity : Tools() {
         // Vérifions si la musique est en favoris :
         getFavoriteState()
 
+        initialList.setOnClickListener{ seeList("initialList") }
+        currentList.setOnClickListener{ seeList("currentList") }
         pausePlay.setOnClickListener{ pausePlay() }
         nextBtn.setOnClickListener{ playNextSong() }
         previousBtn.setOnClickListener{ playPreviousSong() }
@@ -219,6 +228,12 @@ class MusicPlayerActivity : Tools() {
         sort.setOnClickListener{ changeSorting() }
 
         playMusic()
+    }
+
+    private fun seeList(listType: String) {
+        val intent = Intent(this@MusicPlayerActivity, SeeMusicListActivity::class.java)
+        intent.putExtra("LIST-TYPE", listType)
+        startActivity(intent)
     }
 
     private fun changeSorting() {
@@ -233,7 +248,7 @@ class MusicPlayerActivity : Tools() {
     private fun setSorting(){
         when (MyMediaPlayer.iconIndex){
             0 -> {
-                MyMediaPlayer.currentPlaylist = MyMediaPlayer.initialPlaylist
+                MyMediaPlayer.currentPlaylist = ArrayList(MyMediaPlayer.initialPlaylist.map { it.copy() })
                 MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
             }
             1 -> {
@@ -248,6 +263,7 @@ class MusicPlayerActivity : Tools() {
                 MyMediaPlayer.currentIndex = 0
             }
         }
+        Log.d("INITIAL LIST", MyMediaPlayer.initialPlaylist[0].toString())
         sort.setImageResource(MyMediaPlayer.iconsList[MyMediaPlayer.iconIndex])
     }
 

@@ -12,6 +12,8 @@
         <entry key="app/src/main/res/drawable/ic_baseline_favorite_border_24.xml" value="0.3395" />
         <entry key="app/src/main/res/drawable/ic_baseline_pause_circle_outline_24.xml" value="0.3395" />
         <entry key="app/src/main/res/drawable/ic_baseline_play_circle_outline_24.xml" value="0.323" />
+        <entry key="app/src/main/res/drawable/ic_baseline_playlist_play_24.xml" value="0.329" />
+        <entry key="app/src/main/res/drawable/ic_baseline_queue_music_24.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/ic_baseline_skip_next_24.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/ic_baseline_skip_previous_24.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/ic_baseline_sync_24.xml" value="0.329" />
@@ -22,9 +24,10 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_modify_music_info.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/layout/activity_modify_playlist_info.xml" value="0.35260416666666666" />
-        <entry key="app/src/main/res/layout/activity_music_player.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_music_player.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_music_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_playlists_menu.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_see_music_list.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_playlist.xml" value="0.33" />
         <entry key="app/src/main/res/layout/music_file.xml" value="0.3546875" />
         <entry key="app/src/main/res/layout/music_file_selection.xml" value="0.265625" />

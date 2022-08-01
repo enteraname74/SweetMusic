@@ -73,6 +73,9 @@ data class MusicList(
         var currentPlayedMusic: Music? = null
         try {
             currentPlayedMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            Log.d("INDEX",MyMediaPlayer.initialPlaylist[0].toString())
+            Log.d("MUSIC", currentPlayedMusic.toString())
+            Log.d("position", position.toString())
         } catch (error : ArrayIndexOutOfBoundsException){
         }
 
@@ -93,7 +96,7 @@ data class MusicList(
         holder.albumName?.text = currentMusic.album
 
         if(MyMediaPlayer.initialPlaylist.indexOf(currentPlayedMusic) == position && MyMediaPlayer.playlistName == listName){
-            Log.d("CHANGE COLOR", MyMediaPlayer.currentIndex.toString())
+            Log.d("CHANGE COLOR", currentPlayedMusic.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         } else {
             holder.songName?.setTextColor(Color.parseColor("#7da7c5"))

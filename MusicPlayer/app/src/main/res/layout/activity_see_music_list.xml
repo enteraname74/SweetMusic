@@ -36,10 +36,10 @@
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/playlist_name"
+                android:id="@+id/list_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ADD SONGS"
+                android:text="LIST TYPE"
                 android:textColor="@color/third_color">
 
             </TextView>
@@ -49,12 +49,12 @@
     <RelativeLayout
         android:id="@+id/playlists"
         android:layout_width="match_parent"
-        android:layout_height="534dp"
+        android:layout_height="596dp"
         android:layout_below="@+id/titleMenu"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/all_songs_list"
+            android:id="@+id/songs_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/secondary_color"
@@ -77,46 +77,11 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:id="@+id/validate_selection"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/playlists"
-        android:gravity="center_horizontal|center_vertical"
-        >
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/cancel"
-            android:layout_margin="7dp"
-            android:backgroundTint="@color/secondary_color"
-            android:text="CANCEL"
-            android:textColor="@color/third_color"
-            android:textSize="11sp">
-
-        </Button>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/validate"
-            android:layout_margin="7dp"
-            android:backgroundTint="@color/secondary_color"
-            android:text="OK"
-            android:textColor="@color/third_color"
-            android:textSize="11sp">
-
-        </Button>
-
-    </LinearLayout>
-
-
-    <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:orientation="horizontal"
-        android:layout_below="@+id/validate_selection"
+        android:layout_below="@+id/playlists"
         android:background="@color/primary_color">
 
         <ImageView
