@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class SeeMusicListActivity : AppCompatActivity(),MusicList.OnMusicListener {
     private var list = ArrayList<Music>()
@@ -30,9 +33,13 @@ class SeeMusicListActivity : AppCompatActivity(),MusicList.OnMusicListener {
             list = MyMediaPlayer.currentPlaylist
         }
 
-        adapter = MusicList(list, listName.text as String,applicationContext,this)
-        menuRecyclerView.layoutManager = LinearLayoutManager(this)
-        menuRecyclerView.adapter = adapter
+        GlobalScope.launch(Dispatchers.IO){
+            launch{
+                adapter = MusicList(list, listName.text as String,applicationContext,this@SeeMusicListActivity)
+                menuRecyclerView.layoutManager = LinearLayoutManager(this@SeeMusicListActivity)
+                menuRecyclerView.adapter = adapter
+            }
+        }
 
         /*
         val pausePlay = findViewById<ImageView>(R.id.pause_play)

@@ -73,9 +73,6 @@ data class MusicList(
         var currentPlayedMusic: Music? = null
         try {
             currentPlayedMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            Log.d("INDEX",MyMediaPlayer.initialPlaylist[0].toString())
-            Log.d("MUSIC", currentPlayedMusic.toString())
-            Log.d("position", position.toString())
         } catch (error : ArrayIndexOutOfBoundsException){
         }
 

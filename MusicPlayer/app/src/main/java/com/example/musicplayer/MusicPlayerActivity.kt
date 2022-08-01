@@ -263,7 +263,6 @@ class MusicPlayerActivity : Tools() {
                 MyMediaPlayer.currentIndex = 0
             }
         }
-        Log.d("INITIAL LIST", MyMediaPlayer.initialPlaylist[0].toString())
         sort.setImageResource(MyMediaPlayer.iconsList[MyMediaPlayer.iconIndex])
     }
 
