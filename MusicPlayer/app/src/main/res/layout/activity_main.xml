@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,10 +26,9 @@
 
         </TextView>
 
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="135dp"
+            android:layout_height="wrap_content"
             android:gravity="center_horizontal|center_vertical"
             android:orientation="horizontal">
 
@@ -68,11 +68,21 @@
 
             </Button>
         </LinearLayout>
+
+        <android.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/search_view_shape"
+            android:layout_margin="10dp"
+            app:queryHint="Search a specific music">
+        </android.widget.SearchView>
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="500dp"
+        android:layout_height="452dp"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
