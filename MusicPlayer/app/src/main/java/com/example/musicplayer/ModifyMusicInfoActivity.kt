@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,11 +19,14 @@ class ModifyMusicInfoActivity : Tools() {
     private lateinit var musicNameField : EditText
     private lateinit var albumNameField : EditText
     private lateinit var artistNameField : EditText
+    private var indexCurrentPlaylist = -1
+    private var indexInitialPlaylist = -1
     private lateinit var currentPlaylist : ArrayList<Music>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
+
         val playlistName = intent.getSerializableExtra("PLAYLIST_NAME") as String
 
         currentPlaylist = if (playlistName == "Main"){
@@ -35,6 +39,9 @@ class ModifyMusicInfoActivity : Tools() {
         // On récupère notre musique à modifier :
         val position = intent.getSerializableExtra("POSITION") as Int
         musicFile = currentPlaylist[position]
+
+        indexCurrentPlaylist = MyMediaPlayer.currentPlaylist.indexOf(musicFile)
+        indexInitialPlaylist = MyMediaPlayer.initialPlaylist.indexOf(musicFile)
 
         // On récupère les différents champs modifiable :
         albumCoverField = findViewById(R.id.album_image)
@@ -115,10 +122,16 @@ class ModifyMusicInfoActivity : Tools() {
         }
         MyMediaPlayer.allPlaylists = playlists
 
-        // Enfin, pensons à modifier les infos de la musique qui se joue actuellement si c'est celle qu'on est en train de modifier :
-        if (MyMediaPlayer.currentPlaylist.size != 0 && MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path){
-            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex] = musicFile
+        // Modifions les infos de la musique dans nos deux autres playlists :
+        Log.d("index",MyMediaPlayer.currentPlaylist.indexOf(musicFile).toString())
+        if (MyMediaPlayer.currentPlaylist.size != 0 && indexCurrentPlaylist != -1){
+            MyMediaPlayer.currentPlaylist[indexCurrentPlaylist] = musicFile
         }
+
+        if (MyMediaPlayer.initialPlaylist.size != 0 && indexInitialPlaylist != -1){
+            MyMediaPlayer.initialPlaylist[indexInitialPlaylist] = musicFile
+        }
+
         MyMediaPlayer.modifiedSong = true
         setResult(RESULT_OK)
 

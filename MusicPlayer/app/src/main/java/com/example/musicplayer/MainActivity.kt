@@ -445,6 +445,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                 MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
                 MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
 
+                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
                 MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
                 true
             }
