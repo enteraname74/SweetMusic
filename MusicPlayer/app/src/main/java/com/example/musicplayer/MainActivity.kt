@@ -85,6 +85,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
         if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
             musics = readAllMusicsFromFile(saveAllMusicsFile)
+            allMusicsBackup = ArrayList(musics.map { it.copy() })
 
             menuRecyclerView = findViewById(R.id.menu_recycler_view)
             menuRecyclerView.visibility = View.VISIBLE
@@ -104,7 +105,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                     try {
                         if (p0 != null) {
                             Log.d("TEXTE", p0.toString())
-                            var list = ArrayList<Music>()
+                            val list = ArrayList<Music>()
 
                             if(p0 == ""){
                                 musics = allMusicsBackup
@@ -134,7 +135,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                     try {
                         if (p0 != null) {
                             Log.d("TEXTE", p0.toString())
-                            var list = ArrayList<Music>()
+                            val list = ArrayList<Music>()
 
                             if(p0 == ""){
                                 musics = allMusicsBackup
@@ -278,7 +279,6 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
         }
         println("end")
         MyMediaPlayer.allMusics = musics
-        allMusicsBackup = ArrayList(musics.map { it.copy() })
     }
 
     private fun checkPermission() : Boolean {

@@ -22,7 +22,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
     private lateinit var adapter : MusicList
     private var allPlaylists = ArrayList<Playlist>()
     private var musics = ArrayList<Music>()
-    private var menuRecyclerView : RecyclerView? = null
+    private var allMusicsBackup = ArrayList<Music>()
+    private lateinit var searchView : SearchView
+    private lateinit var menuRecyclerView : RecyclerView
     private var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,16 +32,81 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         setContentView(R.layout.activity_selected_playlist)
 
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
+
         allPlaylists = MyMediaPlayer.allPlaylists
         playlistPosition = intent.getSerializableExtra("POSITION") as Int
         playlist = allPlaylists[playlistPosition]
         musics = playlist.musicList
+        allMusicsBackup = ArrayList(musics.map { it.copy() })
+
+        searchView = findViewById(R.id.search_view)
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
+            override fun onQueryTextSubmit(p0: String?): Boolean {
+                try {
+                    if (p0 != null) {
+                        Log.d("TEXTE", p0.toString())
+                        val list = ArrayList<Music>()
+
+                        if(p0 == ""){
+                            musics = allMusicsBackup
+                            adapter.musics = musics
+                            adapter.notifyDataSetChanged()
+                        } else {
+                            for (music: Music in musics) {
+                                if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                                    list.add(music)
+                                }
+                            }
+
+                            if (list.size > 0) {
+                                musics = list
+                                adapter.musics = musics
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                } catch (error : Error){
+                    Log.d("ERROR",error.toString())
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(p0: String?): Boolean {
+                try {
+                    if (p0 != null) {
+                        Log.d("TEXTE", p0.toString())
+                        val list = ArrayList<Music>()
+
+                        if(p0 == ""){
+                            musics = allMusicsBackup
+                            adapter.musics = musics
+                            adapter.notifyDataSetChanged()
+                        } else {
+                            for (music: Music in musics) {
+                                if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                                    list.add(music)
+                                }
+                            }
+
+                            if (list.size > 0) {
+                                musics = list
+                                adapter.musics = musics
+                                adapter.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                } catch (error : Error){
+                    Log.d("ERROR",error.toString())
+                }
+                return true
+            }
+        })
 
         GlobalScope.launch(Dispatchers.IO) {
             launch {
                 adapter = MusicList(musics, playlist.listName, applicationContext, this@SelectedPlaylistActivity)
-                menuRecyclerView?.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
-                menuRecyclerView?.adapter = adapter
+                menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
+                menuRecyclerView.adapter = adapter
             }
         }
 
@@ -81,60 +148,58 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
 
     override fun onResume() {
         super.onResume()
-        if(menuRecyclerView!=null){
-            if (MyMediaPlayer.modifiedSong){
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
-                }
-                println("test")
-                MyMediaPlayer.modifiedSong = false
+        if (MyMediaPlayer.modifiedSong){
+            GlobalScope.launch(Dispatchers.IO){
+                launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
             }
-            adapter.musics = MyMediaPlayer.allPlaylists[playlistPosition].musicList
-            adapter.notifyItemRangeChanged(0, adapter.itemCount)
-
-            val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-            val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
-            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-            val pausePlay = findViewById<ImageView>(R.id.pause_play)
-            val nextBtn = findViewById<ImageView>(R.id.next)
-            val previousBtn = findViewById<ImageView>(R.id.previous)
-            val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
-            noSongPlaying.visibility = View.VISIBLE
-
-            if (MyMediaPlayer.currentIndex != -1){
-                noSongPlaying.visibility = View.GONE
-                infoSongPlaying.visibility = View.VISIBLE
-                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
-                    // Passons d'abord notre byteArray en bitmap :
-                    val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                    var bitmap: Bitmap? = null
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    }
-                    albumCoverInfo.setImageBitmap(bitmap)
-                } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
-                }
-
-                pausePlay?.setOnClickListener{ pausePlay() }
-                nextBtn?.setOnClickListener{ playNextSong(adapter) }
-                previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
-                bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedPlaylistActivity) }
-                songTitleInfo?.isSelected = true
-            }
-
-            if (!mediaPlayer.isPlaying){
-                pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else {
-                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            }
-            mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
-            Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
-            Log.d("RESUME","resume")
+            println("test")
+            MyMediaPlayer.modifiedSong = false
         }
+        adapter.musics = MyMediaPlayer.allPlaylists[playlistPosition].musicList
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+
+        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        val pausePlay = findViewById<ImageView>(R.id.pause_play)
+        val nextBtn = findViewById<ImageView>(R.id.next)
+        val previousBtn = findViewById<ImageView>(R.id.previous)
+        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+
+        noSongPlaying.visibility = View.VISIBLE
+
+        if (MyMediaPlayer.currentIndex != -1){
+            noSongPlaying.visibility = View.GONE
+            infoSongPlaying.visibility = View.VISIBLE
+            songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                albumCoverInfo.setImageBitmap(bitmap)
+            } else {
+                albumCoverInfo.setImageResource(R.drawable.michael)
+            }
+
+            pausePlay?.setOnClickListener{ pausePlay() }
+            nextBtn?.setOnClickListener{ playNextSong(adapter) }
+            previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
+            bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedPlaylistActivity) }
+            songTitleInfo?.isSelected = true
+        }
+
+        if (!mediaPlayer.isPlaying){
+            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+        } else {
+            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
+        Log.d("RESUME","resume")
 
         val addSongs = findViewById<ImageView>(R.id.add_songs)
         addSongs.setOnClickListener{ onAddSongsClick() }

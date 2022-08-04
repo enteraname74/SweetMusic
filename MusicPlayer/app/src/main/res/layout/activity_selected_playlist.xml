@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
 
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -39,10 +40,10 @@
                 android:id="@+id/playlist_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
                 android:text="PLAYLIST NAME"
                 android:textColor="@color/third_color"
-                android:textSize="20sp"
-                android:gravity="center_horizontal">
+                android:textSize="20sp">
 
             </TextView>
 
@@ -57,12 +58,22 @@
 
 
         </RelativeLayout>
+
+        <android.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/search_view_shape"
+            android:layout_margin="10dp"
+            app:queryHint="Search a specific music">
+        </android.widget.SearchView>
+
     </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/playlists"
         android:layout_width="match_parent"
-        android:layout_height="591dp"
+        android:layout_height="537dp"
         android:layout_below="@+id/titleMenu"
         android:orientation="vertical">
 
