@@ -54,6 +54,7 @@ data class MusicList(
             menu?.add(this.bindingAdapterPosition, 0, 0, "ADD TO")
             menu?.add(this.bindingAdapterPosition, 1, 0, "REMOVE")
             menu?.add(this.bindingAdapterPosition, 2, 0, "MODIFY")
+            menu?.add(this.bindingAdapterPosition, 3, 0, "PLAY NEXT")
         }
 
     }

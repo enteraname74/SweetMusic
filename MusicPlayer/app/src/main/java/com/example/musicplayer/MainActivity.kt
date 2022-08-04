@@ -440,6 +440,14 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                 resultLauncher.launch(intent)
                 true
             }
+            3 -> {
+                // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
+                MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
+                MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
+
+                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
+                true
+            }
             else -> {
                 onContextItemSelected(item)
             }

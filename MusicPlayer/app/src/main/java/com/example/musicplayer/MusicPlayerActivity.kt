@@ -9,7 +9,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.MediaPlayer
+import android.media.MediaRouter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -19,7 +19,7 @@ import androidx.palette.graphics.Palette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.*
+import java.io.IOException
 
 
 // Classe représentant la lecture d'une musique :
@@ -270,6 +270,9 @@ class MusicPlayerActivity : Tools() {
         /*
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
+        var am = getSystemService(AUDIO_SERVICE) as AudioManager
+        var volume_level = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+        Log.d("current level", volume_level.toString())
 
         if (!sameMusic) {
             mediaPlayer.reset()
@@ -291,6 +294,16 @@ class MusicPlayerActivity : Tools() {
                 pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             }
         }
+        am = getSystemService(AUDIO_SERVICE) as AudioManager
+        volume_level = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+
+        val mr = getSystemService(Context.MEDIA_ROUTER_SERVICE) as MediaRouter
+        val ri = mr.getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_AUDIO)
+        Log.d("infos", ri.toString())
+
+        Log.d("current level", volume_level.toString())
+        mediaPlayer.setVolume(0.5F, 0.5F)
+
     }
 
     private fun playNextSong(){
