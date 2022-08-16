@@ -444,5 +444,6 @@ class MusicPlayerActivity : Tools() {
     override fun onResume() {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
+        setRessourcesWithMusic()
     }
 }
