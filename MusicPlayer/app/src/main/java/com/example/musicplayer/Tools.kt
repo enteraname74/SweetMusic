@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.os.Environment
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
@@ -156,7 +157,23 @@ open class Tools : AppCompatActivity() {
 
     /************************ WRITE OR READ INTO FILES : ***************************/
 
-
+    fun retrieveAllMusicsFromApp(){
+        val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, "allMusics.musics")))
+            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error retrieving musics",error.toString())
+        }
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, "allPlaylists.playlists")))
+            oos.writeObject(MyMediaPlayer.allPlaylists)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error retrieving musics",error.toString())
+        }
+    }
 
     fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
         MyMediaPlayer.allMusics = content

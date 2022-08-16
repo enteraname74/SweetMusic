@@ -56,17 +56,16 @@
 
             </Button>
 
-            <Button
-                android:id="@+id/album"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+            <ImageButton
+                android:id="@+id/download"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_margin="7dp"
                 android:backgroundTint="@color/secondary_color"
-                android:text="Albums"
-                android:textColor="@color/third_color"
-                android:textSize="11sp">
+                android:text=""
+                android:src="@drawable/ic_baseline_arrow_downward_24">
 
-            </Button>
+            </ImageButton>
         </LinearLayout>
 
         <android.widget.SearchView

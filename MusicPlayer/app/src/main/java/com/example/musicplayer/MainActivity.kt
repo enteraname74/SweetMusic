@@ -12,6 +12,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
@@ -43,6 +44,9 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        Log.d("DOWNLOAD", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString())
+        Log.d("DOWNLOAD", applicationContext.filesDir.toString())
 
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
@@ -267,9 +271,20 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+        MyMediaPlayer.allMusics = musics
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
-        playlistsButton?.setOnClickListener{ playlistButton() }
+        val downloadButton = findViewById<ImageButton>(R.id.download)
+
+        playlistsButton.setOnClickListener{ playlistButton() }
+        downloadButton.setOnClickListener{
+            GlobalScope.launch(Dispatchers.IO){
+                launch{
+                    retrieveAllMusicsFromApp()
+                }
+            }
+            Toast.makeText(this, "retrieve data", Toast.LENGTH_SHORT).show()
+        }
 
         // On ajoute nos musiques et playlists dans notre mediaplayer :
 
@@ -277,7 +292,6 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
             launch{readPlaylistsAsync()}
         }
         println("end")
-        MyMediaPlayer.allMusics = musics
     }
 
     private fun checkPermission() : Boolean {
