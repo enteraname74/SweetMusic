@@ -135,9 +135,6 @@ class MusicPlayerActivity : Tools() {
                     }
 
                 })
-
-                // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-                mediaPlayer.setOnCompletionListener { playNextSong() }
             }
 
             else -> {
@@ -146,6 +143,9 @@ class MusicPlayerActivity : Tools() {
         }
 
          */
+        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
+        mediaPlayer.setOnCompletionListener { playNextSong() }
+
         setRessourcesWithMusic()
 
         this@MusicPlayerActivity.runOnUiThread(myThread)
