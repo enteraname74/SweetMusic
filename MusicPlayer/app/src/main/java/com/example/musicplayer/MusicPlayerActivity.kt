@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -14,8 +15,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.ContextMenu
+import android.view.MenuItem
+import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.palette.graphics.Palette
+import kotlinx.android.synthetic.main.activity_music_selection.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -48,14 +54,11 @@ class MusicPlayerActivity : Tools() {
     private var sameMusic = false
     var mediaPlayer = MyMediaPlayer.getInstance
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
-        val position = intent.getSerializableExtra("POSITION") as Int
-
-        MyMediaPlayer.currentIndex = position
 
         titleTv = findViewById(R.id.song_title)
         currentTimeTv = findViewById(R.id.current_time)
@@ -174,6 +177,8 @@ class MusicPlayerActivity : Tools() {
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val background = findViewById<RelativeLayout>(R.id.music_player)
 
+        registerForContextMenu(musicIcon)
+
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
             var bitmap : Bitmap? = null
@@ -228,6 +233,40 @@ class MusicPlayerActivity : Tools() {
         sort.setOnClickListener{ changeSorting() }
 
         playMusic()
+    }
+
+    override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu?.add(0, 0, 0, "ADD TO")
+        menu?.add(0, 1, 0, "MODIFY")
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            0 -> {
+                Toast.makeText(this, "Ajout dans une playlist", Toast.LENGTH_SHORT).show()
+                true
+            }
+            1 -> {
+                // MODIFY INFOS :
+                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
+                val position = MyMediaPlayer.allMusics.indexOf(currentSong)
+                val intent = Intent(this@MusicPlayerActivity,ModifyMusicInfoActivity::class.java)
+                intent.putExtra("PLAYLIST_NAME", "Main")
+                intent.putExtra("POSITION",position)
+                resultLauncher.launch(intent)
+                true
+            }
+            else -> {
+                onContextItemSelected(item)
+            }
+        }
+    }
+
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // Rien à faire, tout se fait dans le onResume()
+        }
     }
 
     private fun seeList(listType: String) {
