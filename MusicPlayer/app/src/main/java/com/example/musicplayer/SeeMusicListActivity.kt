@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
@@ -96,7 +97,19 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
     }
 
     override fun onMusicClick(position: Int) {
-        TODO("Not yet implemented")
+        var sameMusic = true
+
+        if (position != MyMediaPlayer.currentIndex) {
+            sameMusic = false
+        }
+
+        MyMediaPlayer.currentIndex = position
+        Log.d("POSITION", position.toString())
+
+        val returnIntent = Intent()
+        returnIntent.putExtra("SAME MUSIC", sameMusic)
+        setResult(RESULT_OK, returnIntent)
+        finish()
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {

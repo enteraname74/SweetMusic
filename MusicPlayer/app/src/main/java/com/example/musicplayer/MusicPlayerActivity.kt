@@ -254,7 +254,7 @@ class MusicPlayerActivity : Tools() {
                 val intent = Intent(this@MusicPlayerActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
                 intent.putExtra("POSITION",position)
-                resultLauncher.launch(intent)
+                modifyMusicLauncher.launch(intent)
                 true
             }
             else -> {
@@ -263,16 +263,22 @@ class MusicPlayerActivity : Tools() {
         }
     }
 
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // Rien à faire, tout se fait dans le onResume()
-        }
+    private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
     }
 
     private fun seeList(listType: String) {
         val intent = Intent(this@MusicPlayerActivity, SeeMusicListActivity::class.java)
         intent.putExtra("LIST-TYPE", listType)
-        startActivity(intent)
+        resultLauncher.launch(intent)
+    }
+
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            sameMusic = result.data?.getSerializableExtra("SAME MUSIC") as Boolean
+            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+            playMusic()
+        }
     }
 
     private fun changeSorting() {
