@@ -254,7 +254,9 @@ class MusicPlayerActivity : Tools() {
             1 -> {
                 println("shuffle")
                 MyMediaPlayer.currentPlaylist.shuffle()
-                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                MyMediaPlayer.currentPlaylist.remove(currentSong)
+                MyMediaPlayer.currentPlaylist.add(0,currentSong)
+                MyMediaPlayer.currentIndex = 0;
             }
             2 -> {
                 // On choisit la fonction de replay de la meme musique, on supprime d'abord toute la playlist actuelle :

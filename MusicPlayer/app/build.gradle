@@ -5,6 +5,10 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        laptop {
+        }
+    }
     compileSdk 32
 
     defaultConfig {
@@ -15,6 +19,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.laptop
     }
 
     buildTypes {

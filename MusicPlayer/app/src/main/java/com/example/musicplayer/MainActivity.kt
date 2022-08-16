@@ -32,7 +32,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var adapter : MusicList
-    private lateinit var menuRecyclerView : RecyclerView
+    private var menuRecyclerView : RecyclerView? = null
     private lateinit var searchView : SearchView
     private var mediaPlayer = MyMediaPlayer.getInstance
     private lateinit var audioManager : AudioManager
@@ -88,14 +88,14 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
             allMusicsBackup = ArrayList(musics.map { it.copy() })
 
             menuRecyclerView = findViewById(R.id.menu_recycler_view)
-            menuRecyclerView.visibility = View.VISIBLE
+            menuRecyclerView?.visibility = View.VISIBLE
             noSongsFound.visibility = View.GONE
 
             adapter = MusicList(musics, "Main",applicationContext, this)
 
             //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-            menuRecyclerView.layoutManager = LinearLayoutManager(this)
-            menuRecyclerView.adapter = adapter
+            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+            menuRecyclerView?.adapter = adapter
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
             searchView = findViewById(R.id.search_view)
@@ -194,11 +194,11 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
             when (cursor?.count) {
                 null -> {
                     Toast.makeText(this, "Couldn't retrieve music files", Toast.LENGTH_SHORT).show()
-                    menuRecyclerView.visibility = View.GONE
+                    menuRecyclerView?.visibility = View.GONE
                     noSongsFound.visibility = View.VISIBLE
                 }
                 0 -> {
-                    menuRecyclerView.visibility = View.GONE
+                    menuRecyclerView?.visibility = View.GONE
                     noSongsFound.visibility = View.VISIBLE
                 }
                 else -> {
@@ -237,14 +237,14 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
                     writeAllMusicsToFile(saveAllMusicsFile, musics)
                     menuRecyclerView = findViewById(R.id.menu_recycler_view)
-                    menuRecyclerView.visibility = View.VISIBLE
+                    menuRecyclerView?.visibility = View.VISIBLE
                     noSongsFound.visibility = View.GONE
                     Log.d("GET ALL MUSICS","")
                     adapter = MusicList(musics,"Main", applicationContext, this)
 
                     //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-                    menuRecyclerView.layoutManager = LinearLayoutManager(this)
-                    menuRecyclerView.adapter = adapter
+                    menuRecyclerView?.layoutManager = LinearLayoutManager(this)
+                    menuRecyclerView?.adapter = adapter
                     adapter.notifyItemRangeChanged(0, adapter.itemCount)
                 }
             }
@@ -447,6 +447,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
                 MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
                 MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
+                Toast.makeText(this,"Musique ajoutée à la file d'attente",Toast.LENGTH_SHORT).show()
                 true
             }
             else -> {
