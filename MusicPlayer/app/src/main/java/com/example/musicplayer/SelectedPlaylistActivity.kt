@@ -275,9 +275,12 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
                 true
             }
             2 -> {
+                // MODIFY INFOS :
+                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
+                val position = allMusicsBackup.indexOf(musics[item.groupId])
                 val intent = Intent(this@SelectedPlaylistActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", playlist.listName)
-                intent.putExtra("POSITION",item.groupId)
+                intent.putExtra("POSITION",position)
                 resultModifyMusic.launch(intent)
                 true
             }
@@ -298,8 +301,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
     private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
-            musics = readAllMusicsFromFile(saveAllMusicsFile)
-            adapter.musics = musics
+            allMusicsBackup = MyMediaPlayer.allPlaylists[playlistPosition].musicList
+            adapter.notifyDataSetChanged()
         }
     }
 }

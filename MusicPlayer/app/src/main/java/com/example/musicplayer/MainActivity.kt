@@ -436,16 +436,19 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                 true
             }
             2 -> {
+                // MODIFY INFOS :
+                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
+                val position = allMusicsBackup.indexOf(musics[item.groupId])
                 val intent = Intent(this@MainActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
-                intent.putExtra("POSITION",item.groupId)
+                intent.putExtra("POSITION",position)
                 resultLauncher.launch(intent)
                 true
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
-                MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
+                MyMediaPlayer.initialPlaylist.remove(musics[item.groupId])
+                MyMediaPlayer.currentPlaylist.remove(musics[item.groupId])
 
                 MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
                 MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
@@ -461,8 +464,8 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
-            musics = MyMediaPlayer.allMusics
-            adapter.musics = musics
+            allMusicsBackup = MyMediaPlayer.allMusics
+            adapter.notifyDataSetChanged()
         }
     }
 
