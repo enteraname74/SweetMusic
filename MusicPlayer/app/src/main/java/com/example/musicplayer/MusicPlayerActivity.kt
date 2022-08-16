@@ -430,6 +430,53 @@ class MusicPlayerActivity : Tools() {
     override fun onResume() {
         super.onResume()
         Log.d("RESUME", "RESUME MUSIC")
-        setRessourcesWithMusic()
+
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        val background = findViewById<RelativeLayout>(R.id.music_player)
+
+        currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+        var bitmap : Bitmap? = null
+        if (currentSong.albumCover != null) {
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentSong.albumCover
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            musicIcon.setImageBitmap(bitmap)
+        } else {
+            musicIcon.setImageResource(R.drawable.michael)
+            val drawable = musicIcon.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            bitmap = bitmapDrawable.bitmap
+        }
+
+        Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
+        val backgroundColor: Palette.Swatch? =
+            if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
+                Palette.from(bitmap).generate().swatches[0]
+            } else {
+                Palette.from(bitmap).generate().darkVibrantSwatch
+            }
+
+        background.setBackgroundColor(backgroundColor?.rgb as Int)
+        titleTv.setTextColor(backgroundColor.titleTextColor)
+        currentTimeTv.setTextColor(backgroundColor.titleTextColor)
+        totalTimeTv.setTextColor(backgroundColor.titleTextColor)
+        seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
+
+        initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        // Vérifions si la musique est en favoris :
+        getFavoriteState()
+
+        titleTv.text = currentSong.name
+        songTitleInfo?.text = currentSong.name
+        totalTimeTv.text = convertDuration(currentSong.duration)
     }
 }
