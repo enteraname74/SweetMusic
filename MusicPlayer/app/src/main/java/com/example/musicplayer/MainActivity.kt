@@ -275,6 +275,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
         val downloadButton = findViewById<ImageButton>(R.id.download)
+        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
 
         playlistsButton.setOnClickListener{ playlistButton() }
         downloadButton.setOnClickListener{
@@ -285,6 +286,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
             }
             Toast.makeText(this, "retrieve data", Toast.LENGTH_SHORT).show()
         }
+        shuffleButton.setOnClickListener { playRandom(musics, this@MainActivity) }
 
         // On ajoute nos musiques et playlists dans notre mediaplayer :
 
@@ -337,13 +339,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
         MyMediaPlayer.currentIndex = position
 
         val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
-
-        /*On fait passer notre liste de musiques dans notre nouvelle activité pour
-        récupérer les données des musiques
-         */
-
         intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", position)
 
         startActivity(intent)
     }

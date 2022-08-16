@@ -142,6 +142,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
             songTitleInfo?.isSelected = true
         }
 
+        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
+        shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
+
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
@@ -231,7 +234,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
     }
 
     override fun onMusicClick(position: Int) {
-        Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
@@ -247,11 +249,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         }
 
         MyMediaPlayer.currentIndex = position
-        Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
         val intent = Intent(this@SelectedPlaylistActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", position)
 
         startActivity(intent)
     }

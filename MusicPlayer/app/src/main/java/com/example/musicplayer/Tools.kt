@@ -54,6 +54,23 @@ open class Tools : AppCompatActivity() {
         }
     }
 
+    fun playRandom(list : ArrayList<Music>, context : Context) {
+        MyMediaPlayer.getInstance.reset()
+        val shuffledList = ArrayList(list.map { it.copy() })
+        shuffledList.shuffle()
+        MyMediaPlayer.currentPlaylist = ArrayList(shuffledList.map { it.copy() })
+        MyMediaPlayer.initialPlaylist = ArrayList(shuffledList.map { it.copy() })
+        val sameMusic = false
+
+        MyMediaPlayer.currentIndex = 0
+
+        val intent = Intent(context,MusicPlayerActivity::class.java)
+
+        intent.putExtra("SAME MUSIC", sameMusic)
+
+        startActivity(intent)
+    }
+
     fun onBottomMenuClick(position : Int, context : Context){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true

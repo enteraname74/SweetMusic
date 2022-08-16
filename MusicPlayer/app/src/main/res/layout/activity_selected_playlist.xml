@@ -64,9 +64,22 @@
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:background="@drawable/search_view_shape"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
             app:queryHint="Search a specific music">
         </android.widget.SearchView>
+
+        <Button
+            android:id="@+id/shuffle_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/secondary_color"
+            android:text="Shuffle"
+            android:textColor="@color/third_color"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="end"
+            >
+        </Button>
 
     </LinearLayout>
 
