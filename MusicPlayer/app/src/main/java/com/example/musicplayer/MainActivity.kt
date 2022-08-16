@@ -111,7 +111,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                                 adapter.musics = musics
                                 adapter.notifyDataSetChanged()
                             } else {
-                                for (music: Music in musics) {
+                                for (music: Music in allMusicsBackup) {
                                     if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                                         list.add(music)
                                     }
@@ -141,7 +141,7 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                                 adapter.musics = musics
                                 adapter.notifyDataSetChanged()
                             } else {
-                                for (music: Music in musics) {
+                                for (music: Music in allMusicsBackup) {
                                     if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                                         list.add(music)
                                     }

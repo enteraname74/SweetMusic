@@ -52,7 +52,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
                             adapter.musics = musics
                             adapter.notifyDataSetChanged()
                         } else {
-                            for (music: Music in musics) {
+                            for (music: Music in allMusicsBackup) {
                                 if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                                     list.add(music)
                                 }
@@ -82,7 +82,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
                             adapter.musics = musics
                             adapter.notifyDataSetChanged()
                         } else {
-                            for (music: Music in musics) {
+                            for (music: Music in allMusicsBackup) {
                                 if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                                     list.add(music)
                                 }
@@ -148,6 +148,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
 
     override fun onResume() {
         super.onResume()
+        searchView.clearFocus()
         if (MyMediaPlayer.modifiedSong){
             GlobalScope.launch(Dispatchers.IO){
                 launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
