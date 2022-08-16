@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.android.synthetic.main.activity_music_player.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -119,14 +120,15 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
                 true
             }
             1 -> {
-                list.removeAt(item.groupId)
-                adapter.notifyItemRemoved(item.groupId)
-
                 if (listType == "initialList"){
-                    MyMediaPlayer.initialPlaylist = list
+                    if (MyMediaPlayer.initialPlaylist.equals(MyMediaPlayer.currentPlaylist)){
+                        MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                    }
+                    MyMediaPlayer.initialPlaylist.remove(list[item.groupId])
                 } else {
-                    MyMediaPlayer.currentPlaylist = list
+                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
                 }
+                adapter.notifyItemRemoved(item.groupId)
 
                 Toast.makeText(
                     this,
@@ -144,17 +146,30 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove(list[item.groupId])
-                MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                val song = list[item.groupId]
 
-                MyMediaPlayer.initialPlaylist.add(
-                    MyMediaPlayer.currentIndex + 1,
-                    list[item.groupId]
-                )
-                MyMediaPlayer.currentPlaylist.add(
-                    MyMediaPlayer.currentIndex + 1,
-                    list[item.groupId]
-                )
+                if (listType == "initialList"){
+                    if (MyMediaPlayer.initialPlaylist.equals(MyMediaPlayer.currentPlaylist)){
+                        MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                        MyMediaPlayer.currentPlaylist.add(
+                            MyMediaPlayer.currentIndex + 1,
+                            song
+                        )
+                    }
+                    MyMediaPlayer.initialPlaylist.remove(list[item.groupId])
+                    MyMediaPlayer.initialPlaylist.add(
+                        MyMediaPlayer.currentIndex + 1,
+                        song
+                    )
+                } else {
+                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                    MyMediaPlayer.currentPlaylist.add(
+                        MyMediaPlayer.currentIndex + 1,
+                        song
+                    )
+                }
+                adapter.notifyItemRemoved(item.groupId)
+                adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
                 true
             }
             else -> {
