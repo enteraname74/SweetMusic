@@ -19,6 +19,7 @@ import androidx.palette.graphics.Palette
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 
@@ -172,52 +173,51 @@ class MusicPlayerActivity : Tools() {
     private fun setRessourcesWithMusic(){
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val background = findViewById<RelativeLayout>(R.id.music_player)
-        var bitmap : Bitmap? = null
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
-        if (currentSong.albumCover != null){
-            // Passons d'abord notre byteArray en bitmap :
-            val bytes = currentSong.albumCover
-            if (bytes != null && bytes.isNotEmpty()) {
-                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            var bitmap : Bitmap? = null
+            if (currentSong.albumCover != null) {
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = currentSong.albumCover
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                musicIcon.setImageBitmap(bitmap)
+            } else {
+                musicIcon.setImageResource(R.drawable.michael)
+                val drawable = musicIcon.drawable
+                val bitmapDrawable = drawable as BitmapDrawable
+                bitmap = bitmapDrawable.bitmap
             }
-            musicIcon.setImageBitmap(bitmap)
-        } else {
-            musicIcon.setImageResource(R.drawable.michael)
-            val drawable = musicIcon.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            bitmap = bitmapDrawable.bitmap
-        }
 
-        Log.d("palette",Palette.from(bitmap as Bitmap).generate().swatches[0].toString())
-        val backgroundColor : Palette.Swatch? = if (Palette.from(bitmap).generate().darkVibrantSwatch == null){
-            Log.d("here","")
-            Palette.from(bitmap).generate().swatches[0]
-        } else {
-            Palette.from(bitmap).generate().darkVibrantSwatch
-        }
+            Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
+            val backgroundColor: Palette.Swatch? =
+                if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
+                    Palette.from(bitmap).generate().swatches[0]
+                } else {
+                    Palette.from(bitmap).generate().darkVibrantSwatch
+                }
 
-        background.setBackgroundColor(backgroundColor?.rgb as Int)
-        titleTv.setTextColor(backgroundColor.titleTextColor)
-        currentTimeTv.setTextColor(backgroundColor.titleTextColor)
-        totalTimeTv.setTextColor(backgroundColor.titleTextColor)
-        seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
+            background.setBackgroundColor(backgroundColor?.rgb as Int)
+            titleTv.setTextColor(backgroundColor.titleTextColor)
+            currentTimeTv.setTextColor(backgroundColor.titleTextColor)
+            totalTimeTv.setTextColor(backgroundColor.titleTextColor)
+            seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
-        initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            // Vérifions si la musique est en favoris :
+            getFavoriteState()
 
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
-
-        // Vérifions si la musique est en favoris :
-        getFavoriteState()
 
         initialList.setOnClickListener{ seeList("initialList") }
         currentList.setOnClickListener{ seeList("currentList") }
@@ -272,10 +272,6 @@ class MusicPlayerActivity : Tools() {
         /*
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
-        var am = getSystemService(AUDIO_SERVICE) as AudioManager
-        var volume_level = am.getStreamVolume(AudioManager.STREAM_MUSIC)
-        Log.d("current level", volume_level.toString())
-
         if (!sameMusic) {
             mediaPlayer.reset()
             try {
@@ -296,16 +292,6 @@ class MusicPlayerActivity : Tools() {
                 pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             }
         }
-        am = getSystemService(AUDIO_SERVICE) as AudioManager
-        volume_level = am.getStreamVolume(AudioManager.STREAM_MUSIC)
-
-        val mr = getSystemService(Context.MEDIA_ROUTER_SERVICE) as MediaRouter
-        val ri = mr.getSelectedRoute(MediaRouter.ROUTE_TYPE_LIVE_AUDIO)
-        Log.d("infos", ri.toString())
-
-        Log.d("current level", volume_level.toString())
-        mediaPlayer.setVolume(0.5F, 0.5F)
-
     }
 
     private fun playNextSong(){

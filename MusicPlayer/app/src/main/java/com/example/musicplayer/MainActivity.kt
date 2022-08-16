@@ -99,7 +99,6 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
             searchView = findViewById(R.id.search_view)
-
             searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
                 override fun onQueryTextSubmit(p0: String?): Boolean {
                     try {
@@ -337,78 +336,81 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
     override fun onResume() {
         super.onResume()
-        if (MyMediaPlayer.modifiedSong) {
-            GlobalScope.launch(Dispatchers.IO) {
-                launch {
-                    writeAllAsync(
-                        MyMediaPlayer.allMusics,
-                        MyMediaPlayer.allPlaylists
-                    )
-                }
-            }
-            println("test")
-            MyMediaPlayer.modifiedSong = false
-        }
-        adapter.musics = musics
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
-
-
-        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val nextBtn = findViewById<ImageView>(R.id.next)
-        val previousBtn = findViewById<ImageView>(R.id.previous)
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
-        noSongPlaying.visibility = View.VISIBLE
-
-        val time = measureTimeMillis {
-
-            if (MyMediaPlayer.currentIndex != -1) {
+        searchView.clearFocus()
+        if (menuRecyclerView != null) {
+            if (MyMediaPlayer.modifiedSong) {
                 GlobalScope.launch(Dispatchers.IO) {
                     launch {
-                        noSongPlaying.visibility = View.GONE
-                        infoSongPlaying.visibility = View.VISIBLE
-                        songTitleInfo.text =
-                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                        if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                            // Passons d'abord notre byteArray en bitmap :
-                            val bytes =
-                                MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                            var bitmap: Bitmap? = null
-                            if (bytes != null && bytes.isNotEmpty()) {
-                                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                            }
-                            albumCoverInfo.setImageBitmap(bitmap)
-                        } else {
-                            albumCoverInfo.setImageResource(R.drawable.michael)
-                        }
+                        writeAllAsync(
+                            MyMediaPlayer.allMusics,
+                            MyMediaPlayer.allPlaylists
+                        )
                     }
                 }
-
-                pausePlay?.setOnClickListener { pausePlay() }
-                nextBtn?.setOnClickListener { playNextSong(adapter) }
-                previousBtn?.setOnClickListener { playPreviousSong(adapter) }
-                bottomInfos.setOnClickListener {
-                    onBottomMenuClick(
-                        MyMediaPlayer.currentIndex,
-                        this@MainActivity
-                    )
-                }
-                songTitleInfo?.isSelected = true
+                println("test")
+                MyMediaPlayer.modifiedSong = false
             }
-        }
+            adapter.musics = musics
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
-        if (!mediaPlayer.isPlaying) {
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
-        Log.d("TIME",time.toString())
+            val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+            val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            val pausePlay = findViewById<ImageView>(R.id.pause_play)
+            val nextBtn = findViewById<ImageView>(R.id.next)
+            val previousBtn = findViewById<ImageView>(R.id.previous)
+            val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+
+            noSongPlaying.visibility = View.VISIBLE
+
+            val time = measureTimeMillis {
+
+                if (MyMediaPlayer.currentIndex != -1) {
+                    GlobalScope.launch(Dispatchers.IO) {
+                        launch {
+                            noSongPlaying.visibility = View.GONE
+                            infoSongPlaying.visibility = View.VISIBLE
+                            songTitleInfo.text =
+                                MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                                // Passons d'abord notre byteArray en bitmap :
+                                val bytes =
+                                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                                var bitmap: Bitmap? = null
+                                if (bytes != null && bytes.isNotEmpty()) {
+                                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                                }
+                                albumCoverInfo.setImageBitmap(bitmap)
+                            } else {
+                                albumCoverInfo.setImageResource(R.drawable.michael)
+                            }
+                        }
+                    }
+
+                    pausePlay?.setOnClickListener { pausePlay() }
+                    nextBtn?.setOnClickListener { playNextSong(adapter) }
+                    previousBtn?.setOnClickListener { playPreviousSong(adapter) }
+                    bottomInfos.setOnClickListener {
+                        onBottomMenuClick(
+                            MyMediaPlayer.currentIndex,
+                            this@MainActivity
+                        )
+                    }
+                    songTitleInfo?.isSelected = true
+                }
+            }
+
+            if (!mediaPlayer.isPlaying) {
+                pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+
+            Log.d("TIME", time.toString())
+        }
     }
 
     private fun playlistButton() {
