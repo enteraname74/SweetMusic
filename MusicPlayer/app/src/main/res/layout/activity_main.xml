@@ -80,16 +80,6 @@
                 </Button>
             </LinearLayout>
 
-            <android.widget.SearchView
-                android:id="@+id/search_view"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="@drawable/search_view_shape"
-                app:queryHint="Search a specific music">
-            </android.widget.SearchView>
-
             <Button
                 android:id="@+id/shuffle_button"
                 android:layout_width="wrap_content"

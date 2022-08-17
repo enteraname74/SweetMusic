@@ -13,11 +13,13 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,13 +28,14 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.ObjectOutputStream
 
-class MusicsFragment : Fragment(), MusicList.OnMusicListener {
+class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
 
     private val saveAllMusicsFile = "allMusics.musics"
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
     private var musics = MyMediaPlayer.allMusics
     private var allMusicsBackup = ArrayList(musics.map { it.copy() })
+    private lateinit var searchView : SearchView
 
     private val mediaPlayer = MyMediaPlayer.getInstance
 
@@ -47,6 +50,11 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_musics, container, false)
+
+        searchView = view.findViewById(R.id.search_view)
+
+        searchView.setOnQueryTextListener(this)
+
         menuRecyclerView = view.findViewById(R.id.menu_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(view.context)
         menuRecyclerView.adapter = adapter
@@ -62,6 +70,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
 
     override fun onResume() {
         super.onResume()
+        searchView.clearFocus()
+        
         Log.d("RESUME FRAG","")
         if (MyMediaPlayer.modifiedSong) {
             println("test")
@@ -96,6 +106,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
         startActivity(intent)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {
@@ -159,7 +170,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
         }
     }
 
-    open fun playNextSong(adapter : MusicList){
+    private fun playNextSong(adapter : MusicList){
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
@@ -169,7 +180,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
         playMusic()
     }
 
-    open fun playPreviousSong(adapter : MusicList){
+    private fun playPreviousSong(adapter : MusicList){
         if(MyMediaPlayer.currentIndex==0){
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
@@ -179,7 +190,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
         playMusic()
     }
 
-    open fun playMusic(){
+    private fun playMusic(){
         mediaPlayer.reset()
         try {
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
@@ -208,5 +219,73 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener {
             Log.d("ERROR","")
             e.printStackTrace()
         }
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        try {
+            if (p0 != null) {
+                Log.d("TEXTE", p0.toString())
+                val list = ArrayList<Music>()
+
+                if(p0 == ""){
+                    musics = allMusicsBackup
+                    adapter.musics = musics
+                    adapter.notifyDataSetChanged()
+                } else {
+                    for (music: Music in allMusicsBackup) {
+                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(music)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        musics = list
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        musics = ArrayList<Music>()
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        try {
+            if (p0 != null) {
+                Log.d("TEXTE", p0.toString())
+                val list = ArrayList<Music>()
+
+                if(p0 == ""){
+                    musics = allMusicsBackup
+                    adapter.musics = musics
+                    adapter.notifyDataSetChanged()
+                } else {
+                    for (music: Music in allMusicsBackup) {
+                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(music)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        musics = list
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        musics = ArrayList<Music>()
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
     }
 }

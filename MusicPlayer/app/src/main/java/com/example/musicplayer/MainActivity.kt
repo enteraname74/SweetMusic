@@ -37,12 +37,9 @@ import kotlin.system.measureTimeMillis
 
 class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocusChangeListener, NavigationView.OnNavigationItemSelectedListener  {
 
-    lateinit var mainActivity : Activity
-
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var adapter : MusicList
-    private lateinit var searchView : SearchView
 
     private lateinit var audioManager : AudioManager
     private lateinit var audioAttributes : AudioAttributes
@@ -106,77 +103,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
             menuRecyclerView?.adapter = adapter
              */
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
-
-            searchView = findViewById(R.id.search_view)
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-                override fun onQueryTextSubmit(p0: String?): Boolean {
-                    try {
-                        if (p0 != null) {
-                            Log.d("TEXTE", p0.toString())
-                            val list = ArrayList<Music>()
-
-                            if(p0 == ""){
-                                musics = allMusicsBackup
-                                adapter.musics = musics
-                                adapter.notifyDataSetChanged()
-                            } else {
-                                for (music: Music in allMusicsBackup) {
-                                    if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                                        list.add(music)
-                                    }
-                                }
-
-                                if (list.size > 0) {
-                                    musics = list
-                                    adapter.musics = musics
-                                    adapter.notifyDataSetChanged()
-                                } else {
-                                    musics = ArrayList<Music>()
-                                    adapter.musics = musics
-                                    adapter.notifyDataSetChanged()
-                                }
-                            }
-                        }
-                    } catch (error : Error){
-                        Log.d("ERROR",error.toString())
-                    }
-                    return true
-                }
-
-                override fun onQueryTextChange(p0: String?): Boolean {
-                    try {
-                        if (p0 != null) {
-                            Log.d("TEXTE", p0.toString())
-                            val list = ArrayList<Music>()
-
-                            if(p0 == ""){
-                                musics = allMusicsBackup
-                                adapter.musics = musics
-                                adapter.notifyDataSetChanged()
-                            } else {
-                                for (music: Music in allMusicsBackup) {
-                                    if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                                        list.add(music)
-                                    }
-                                }
-
-                                if (list.size > 0) {
-                                    musics = list
-                                    adapter.musics = musics
-                                    adapter.notifyDataSetChanged()
-                                } else {
-                                    musics = ArrayList<Music>()
-                                    adapter.musics = musics
-                                    adapter.notifyDataSetChanged()
-                                }
-                            }
-                        }
-                    } catch (error : Error){
-                        Log.d("ERROR",error.toString())
-                    }
-                    return true
-                }
-            })
         } else {
             // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
 
@@ -365,7 +291,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
 
     override fun onResume() {
         super.onResume()
-        searchView.clearFocus()
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
