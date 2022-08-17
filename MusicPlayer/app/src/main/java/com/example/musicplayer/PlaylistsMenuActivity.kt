@@ -28,7 +28,6 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
     private lateinit var noPlaylistsFound : TextView
     private var playlists = ArrayList<Playlist>()
     private val playlistsNames = ArrayList<String>()
-    private var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

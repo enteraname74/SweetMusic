@@ -52,7 +52,6 @@ class MusicPlayerActivity : Tools() {
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
-    var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)

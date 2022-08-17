@@ -2,19 +2,20 @@ package com.example.musicplayer
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.TextView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.activity_music_player.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlin.system.measureTimeMillis
 
 class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
     private var list = ArrayList<Music>()
@@ -45,12 +46,8 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
                 adapter = MusicList(list, listName.text as String,applicationContext,this@SeeMusicListActivity)
                 menuRecyclerView.layoutManager = LinearLayoutManager(this@SeeMusicListActivity)
                 menuRecyclerView.adapter = adapter
-
-
             }
         }
-
-        /*
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
         val nextBtn = findViewById<ImageView>(R.id.next)
         val previousBtn = findViewById<ImageView>(R.id.previous)
@@ -68,15 +65,13 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
             infoSongPlaying.visibility = View.VISIBLE
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
             pausePlay?.setOnClickListener{ pausePlay() }
-            nextBtn?.setOnClickListener{ playNextSong() }
-            previousBtn?.setOnClickListener{ playPreviousSong() }
+            nextBtn?.setOnClickListener{ playNextSong(adapter) }
+            previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
             bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@SeeMusicListActivity) }
             songTitleInfo.isSelected = true
         }
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
-
-         */
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
@@ -95,6 +90,57 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
 
             MyMediaPlayer.modifiedSong = false
         }
+
+        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        val pausePlay = findViewById<ImageView>(R.id.pause_play)
+        val nextBtn = findViewById<ImageView>(R.id.next)
+        val previousBtn = findViewById<ImageView>(R.id.previous)
+        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+
+        noSongPlaying.visibility = View.VISIBLE
+
+        if (MyMediaPlayer.currentIndex != -1) {
+            GlobalScope.launch(Dispatchers.IO) {
+                launch {
+                    noSongPlaying.visibility = View.GONE
+                    infoSongPlaying.visibility = View.VISIBLE
+                    songTitleInfo.text =
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                    if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                        // Passons d'abord notre byteArray en bitmap :
+                        val bytes =
+                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                        var bitmap: Bitmap? = null
+                        if (bytes != null && bytes.isNotEmpty()) {
+                            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        }
+                        albumCoverInfo.setImageBitmap(bitmap)
+                    } else {
+                        albumCoverInfo.setImageResource(R.drawable.michael)
+                    }
+                }
+            }
+
+            pausePlay?.setOnClickListener { pausePlay() }
+            nextBtn?.setOnClickListener { playNextSong(adapter) }
+            previousBtn?.setOnClickListener { playPreviousSong(adapter) }
+            bottomInfos.setOnClickListener {
+                val returnIntent = Intent()
+                setResult(RESULT_CANCELED, returnIntent)
+                finish()
+            }
+            songTitleInfo?.isSelected = true
+        }
+
+        if (!mediaPlayer.isPlaying) {
+            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+        } else {
+            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
@@ -140,7 +186,8 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
             2 -> {
                 val intent = Intent(this@SeeMusicListActivity, ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
-                intent.putExtra("POSITION", item.groupId)
+                val positionMainList = MyMediaPlayer.allMusics.indexOf(list[item.groupId])
+                intent.putExtra("POSITION", positionMainList)
                 resultLauncher.launch(intent)
                 true
             }

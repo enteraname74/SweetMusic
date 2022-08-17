@@ -15,7 +15,6 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
     private lateinit var adapter : MusicListSelection
     private var selectedMusicsPositions = ArrayList<Int>()
     private lateinit var menuRecyclerView : RecyclerView
-    private var mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

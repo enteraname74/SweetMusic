@@ -35,7 +35,6 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
     private lateinit var adapter : MusicList
     private var menuRecyclerView : RecyclerView? = null
     private lateinit var searchView : SearchView
-    private var mediaPlayer = MyMediaPlayer.getInstance
     private lateinit var audioManager : AudioManager
     private lateinit var audioAttributes : AudioAttributes
     private lateinit var audioFocusRequest : AudioFocusRequest
@@ -125,6 +124,10 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                                     musics = list
                                     adapter.musics = musics
                                     adapter.notifyDataSetChanged()
+                                } else {
+                                    musics = ArrayList<Music>()
+                                    adapter.musics = musics
+                                    adapter.notifyDataSetChanged()
                                 }
                             }
                         }
@@ -153,6 +156,10 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
 
                                 if (list.size > 0) {
                                     musics = list
+                                    adapter.musics = musics
+                                    adapter.notifyDataSetChanged()
+                                } else {
+                                    musics = ArrayList<Music>()
                                     adapter.musics = musics
                                     adapter.notifyDataSetChanged()
                                 }
@@ -392,7 +399,9 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                                 if (bytes != null && bytes.isNotEmpty()) {
                                     bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                                 }
-                                albumCoverInfo.setImageBitmap(bitmap)
+                                withContext(Dispatchers.Main){
+                                    albumCoverInfo.setImageBitmap(bitmap)
+                                }
                             } else {
                                 albumCoverInfo.setImageResource(R.drawable.michael)
                             }

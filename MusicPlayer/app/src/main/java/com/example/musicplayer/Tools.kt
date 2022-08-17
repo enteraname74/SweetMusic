@@ -19,7 +19,7 @@ open class Tools : AppCompatActivity() {
     val saveAllMusicsFile = "allMusics.musics"
     val savePlaylistsFile = "allPlaylists.playlists"
 
-    private var mediaPlayer = MyMediaPlayer.getInstance
+    var mediaPlayer = MyMediaPlayer.getInstance
 
     /************************ USES THE MEDIAPLAYER : ***************************/
 
