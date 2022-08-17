@@ -36,7 +36,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     private var musics = MyMediaPlayer.allMusics
     private var allMusicsBackup = ArrayList(musics.map { it.copy() })
     private lateinit var searchView : SearchView
-
     private val mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,7 +70,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        
+
         Log.d("RESUME FRAG","")
         if (MyMediaPlayer.modifiedSong) {
             println("test")
@@ -79,6 +78,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
         adapter.musics = musics
         adapter.notifyItemRangeChanged(0, adapter.itemCount)
+
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
@@ -108,6 +109,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onContextItemSelected(item: MenuItem): Boolean {
+        Log.d("music fragment","")
         return when(item.itemId){
             0 -> {
                 Toast.makeText(context,"Ajout dans une playlist", Toast.LENGTH_SHORT).show()

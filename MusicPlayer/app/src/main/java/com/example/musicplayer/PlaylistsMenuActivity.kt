@@ -43,7 +43,7 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
             playlistsNames.add(element.listName)
         }
 
-        adapter = Playlists(playlists,applicationContext,this)
+        adapter = Playlists(playlists,applicationContext,this,R.layout.playlist_file)
 
         if (playlists.size != 0){
             menuRecyclerView?.visibility = View.VISIBLE

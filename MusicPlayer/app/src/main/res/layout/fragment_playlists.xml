@@ -5,10 +5,29 @@
     android:layout_height="match_parent"
     tools:context=".PlaylistsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="PLAYLISTS" />
+        android:orientation="vertical"
+        android:background="@color/primary_color">
+
+        <ImageView
+            android:id="@+id/add_playlist"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="end"
+            android:src="@drawable/ic_baseline_add_24">
+
+        </ImageView>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/menu_playlist_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/secondary_color"
+            android:visibility="visible">
+
+        </androidx.recyclerview.widget.RecyclerView>
+    </LinearLayout>
 
 </FrameLayout>

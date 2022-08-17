@@ -14,22 +14,30 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
+import java.lang.Error
 
 class Playlists (
     var allPlaylists : ArrayList<Playlist>,
     private val context : Context,
-    private val mOnPlaylistListener : Playlists.OnPlaylistsListener ) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
+    private val mOnPlaylistListener : OnPlaylistsListener ,
+    private val resourceName : Int) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
 
     class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener {
 
         var playlistName : TextView
         var playlistCover : ImageView
+        var songNumber : TextView? = null
 
         init{
             super.itemView
 
             playlistName = itemView.findViewById(R.id.playlist_name)
             playlistCover = itemView.findViewById(R.id.playlist_cover)
+            try {
+                songNumber = itemView.findViewById(R.id.number_of_songs)
+            } catch (error : Error){
+
+            }
 
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
@@ -55,18 +63,22 @@ class Playlists (
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistsViewHolder {
         return PlaylistsViewHolder(
             LayoutInflater.from(context).inflate(
-                R.layout.playlist_file,
+                resourceName,
                 parent,
                 false
             ), mOnPlaylistListener
         )
     }
 
-    override fun onBindViewHolder(holder: Playlists.PlaylistsViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PlaylistsViewHolder, position: Int) {
         val currentPlaylist = allPlaylists[position]
 
 
         holder.playlistName.text = currentPlaylist.listName
+        if (resourceName == R.layout.playlist_file_linear){
+            val text = currentPlaylist.musicList.size.toString() + " songs"
+            holder.songNumber?.text = text
+        }
 
         if (currentPlaylist.playlistCover != null){
             // Passons d'abord notre byteArray en bitmap :
