@@ -78,17 +78,6 @@
                     android:textSize="11sp">
 
                 </Button>
-
-                <ImageButton
-                    android:id="@+id/download"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="7dp"
-                    android:backgroundTint="@color/secondary_color"
-                    android:text=""
-                    android:src="@drawable/ic_baseline_arrow_downward_24">
-
-                </ImageButton>
             </LinearLayout>
 
             <android.widget.SearchView
@@ -113,35 +102,44 @@
                 >
             </Button>
 
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:backgroundTint="@color/primary_color"
+                app:tabTextColor="@color/third_color">
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Musics" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Playlists" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Albums" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Artists" />
+
+            </com.google.android.material.tabs.TabLayout>
+
         </LinearLayout>
 
-        <LinearLayout
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="471dp"
-            android:orientation="vertical">
+            android:layout_height="446dp">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/menu_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/secondary_color"
-                android:visibility="visible"/>
+        </androidx.viewpager2.widget.ViewPager2>
 
-            <TextView
-                android:id="@+id/no_songs_found"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColor="@color/third_color"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:background="@color/secondary_color"
-                android:text="NO SONGS FOUND"
-                android:gravity="center_horizontal|center_vertical"
-                android:visibility="gone">
-            </TextView>
-
-
-        </LinearLayout>
         <LinearLayout
             android:id="@+id/bottom_infos"
             android:layout_width="match_parent"
