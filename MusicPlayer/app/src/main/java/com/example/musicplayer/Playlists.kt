@@ -3,14 +3,12 @@ package com.example.musicplayer
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.util.Log
 import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
@@ -55,8 +53,8 @@ class Playlists (
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 0, 0, "REMOVE")
-            menu?.add(this.bindingAdapterPosition, 1, 0, "MODIFY")
+            menu?.add(this.bindingAdapterPosition, 10, 0, "REMOVE")
+            menu?.add(this.bindingAdapterPosition, 11, 0, "MODIFY")
         }
     }
 

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/background"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/secondary_color"
+    tools:context=".MainActivity"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:layout_marginTop="10dp">
+
+    <ImageView
+        android:id="@+id/album_cover"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:contentDescription="Album Cover"
+        android:src="@drawable/icone_musique" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="4dp"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:id="@+id/album_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Name of the Album"
+            android:singleLine="true"
+            android:textColor="@color/third_color"
+            >
+        </TextView>
+
+        <TextView
+            android:id="@+id/artist_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artist's name"
+            android:singleLine="true"
+            android:textColor="@color/third_color">
+
+        </TextView>
+    </LinearLayout>
+</LinearLayout>

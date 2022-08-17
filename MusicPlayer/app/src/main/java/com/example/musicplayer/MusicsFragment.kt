@@ -109,30 +109,35 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        Log.d("music fragment","")
-        return when(item.itemId){
+        Log.d("music fragment",item.itemId.toString())
+
+        return when (item.itemId) {
             0 -> {
-                Toast.makeText(context,"Ajout dans une playlist", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Ajout dans une playlist", Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
                 musics.removeAt(item.groupId)
                 adapter.notifyItemRemoved(item.groupId)
 
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writeAllMusicsToFile(saveAllMusicsFile, musics)}
+                GlobalScope.launch(Dispatchers.IO) {
+                    launch { writeAllMusicsToFile(saveAllMusicsFile, musics) }
                 }
 
-                Toast.makeText(context,"Suppressions de la musique dans la playlist", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Suppressions de la musique dans la playlist",
+                    Toast.LENGTH_SHORT
+                ).show()
                 true
             }
             2 -> {
                 // MODIFY INFOS :
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
                 val position = allMusicsBackup.indexOf(musics[item.groupId])
-                val intent = Intent(context,ModifyMusicInfoActivity::class.java)
+                val intent = Intent(context, ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
-                intent.putExtra("POSITION",position)
+                intent.putExtra("POSITION", position)
                 resultLauncher.launch(intent)
                 true
             }
@@ -141,13 +146,23 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 MyMediaPlayer.initialPlaylist.remove(musics[item.groupId])
                 MyMediaPlayer.currentPlaylist.remove(musics[item.groupId])
 
-                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
-                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
-                Toast.makeText(context,"Musique ajoutée à la file d'attente", Toast.LENGTH_SHORT).show()
+                MyMediaPlayer.initialPlaylist.add(
+                    MyMediaPlayer.currentIndex + 1,
+                    musics[item.groupId]
+                )
+                MyMediaPlayer.currentPlaylist.add(
+                    MyMediaPlayer.currentIndex + 1,
+                    musics[item.groupId]
+                )
+                Toast.makeText(
+                    context,
+                    "Musique ajoutée à la file d'attente",
+                    Toast.LENGTH_SHORT
+                ).show()
                 true
             }
             else -> {
-                onContextItemSelected(item)
+                super.onContextItemSelected(item)
             }
         }
     }
