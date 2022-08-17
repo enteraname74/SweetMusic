@@ -22,13 +22,15 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.navigation.NavigationView
 import kotlinx.coroutines.*
 import java.io.*
 import kotlin.system.measureTimeMillis
 
-class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocusChangeListener  {
+class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocusChangeListener, NavigationView.OnNavigationItemSelectedListener  {
 
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
@@ -281,18 +283,9 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
         MyMediaPlayer.allMusics = musics
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
-        val downloadButton = findViewById<ImageButton>(R.id.download)
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
 
         playlistsButton.setOnClickListener{ playlistButton() }
-        downloadButton.setOnClickListener{
-            GlobalScope.launch(Dispatchers.IO){
-                launch{
-                    retrieveAllMusicsFromApp()
-                }
-            }
-            Toast.makeText(this, "retrieve data", Toast.LENGTH_SHORT).show()
-        }
         shuffleButton.setOnClickListener { playRandom(musics, this@MainActivity) }
 
         // On ajoute nos musiques et playlists dans notre mediaplayer :
@@ -301,6 +294,17 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
             launch{readPlaylistsAsync()}
         }
         println("end")
+
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val openMenu = findViewById<ImageView>(R.id.open_menu)
+        val navigationView = findViewById<NavigationView>(R.id.navigation_view)
+        navigationView.setNavigationItemSelectedListener(this)
+
+        openMenu.setOnClickListener { openNavigationMenu(drawerLayout) }
+    }
+
+    private fun selectItemNavigation(item : MenuItem) : Boolean {
+        return true
     }
 
     private fun checkPermission() : Boolean {
@@ -503,6 +507,25 @@ class MainActivity :MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocus
                 }
                 Log.d("change does..","")
                 MyMediaPlayer.doesASongWillBePlaying = false
+            }
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        Log.d("LOG", item.itemId.toString())
+        return when(item.itemId){
+            R.id.download_data -> {
+                GlobalScope.launch(Dispatchers.IO){
+                    launch{
+                        retrieveAllMusicsFromApp()
+                    }
+                }
+                Toast.makeText(this, "Data retrieved", Toast.LENGTH_SHORT).show()
+                true
+            }
+            else -> {
+                true
             }
         }
     }

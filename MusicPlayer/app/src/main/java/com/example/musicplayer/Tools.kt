@@ -13,6 +13,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import java.io.*
 
 open class Tools : AppCompatActivity() {
@@ -262,5 +264,11 @@ open class Tools : AppCompatActivity() {
             MyMediaPlayer.allPlaylists.add(Playlist("Favorites",ArrayList(),null,true))
             writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)
         }
+    }
+
+    /****************************** OTHERS : **********************************/
+
+    fun openNavigationMenu(drawerLayout : DrawerLayout){
+        drawerLayout.openDrawer(GravityCompat.START)
     }
 }
