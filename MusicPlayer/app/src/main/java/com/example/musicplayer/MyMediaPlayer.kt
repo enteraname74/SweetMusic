@@ -36,6 +36,8 @@ class MyMediaPlayer {
 
         val iconsList = listOf(R.drawable.ic_baseline_sync_24, R.drawable.ic_baseline_shuffle_24, R.drawable.ic_baseline_replay_24)
         var iconIndex = 0
+
+        var allAlbums = ArrayList<Album>()
     }
 
 

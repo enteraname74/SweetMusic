@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -23,8 +24,8 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
 
+        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
         var currentAlbum : Album
         // Trions d'abord notre liste par album et artiste :
         copiedMusics.sortWith(compareBy<Music> {it.album}.thenBy { it.artist })
@@ -39,9 +40,10 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
                 albums.add(currentAlbum)
                 // On change ensuite l'album actuelle
                 currentAlbum = Album(music.album,ArrayList<Music>(),music.albumCover,music.artist)
+                currentAlbum.albumList.add(music)
             }
         }
-
+        MyMediaPlayer.allAlbums = albums
         adapter = Albums(albums,context as Context,this)
 
         mediaPlayer.setOnCompletionListener { playNextSong() }
@@ -52,9 +54,9 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_playlists, container, false)
+        val view = inflater.inflate(R.layout.fragment_album, container, false)
 
-        menuRecyclerView = view.findViewById(R.id.menu_playlist_recycler_view)
+        menuRecyclerView = view.findViewById(R.id.menu_album_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
         menuRecyclerView.adapter = adapter
 
@@ -68,7 +70,31 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
     }
 
     override fun onResume() {
+        Log.d("RESUME ALB FRAG","")
         super.onResume()
+        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+        var currentAlbum : Album
+        // Trions d'abord notre liste par album et artiste :
+        copiedMusics.sortWith(compareBy<Music> {it.album}.thenBy { it.artist })
+        currentAlbum = Album(copiedMusics[0].album,ArrayList<Music>(),copiedMusics[0].albumCover,copiedMusics[0].artist)
+
+        for(music in copiedMusics){
+            if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist){
+                currentAlbum.albumList.add(music)
+            } else {
+                // On passe à un autre album :
+                // On ajoute d'abord notre album à notre liste :
+                albums.add(currentAlbum)
+                // On change ensuite l'album actuelle
+                currentAlbum = Album(music.album,ArrayList<Music>(),music.albumCover,music.artist)
+                currentAlbum.albumList.add(music)
+            }
+        }
+        MyMediaPlayer.allAlbums = albums
+        Log.d("album",albums[13].albumList.size.toString())
+        adapter.allAlbums = albums
+        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+
     }
 
     private fun playNextSong(){
@@ -122,6 +148,9 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
     }
 
     override fun onAlbumClick(position: Int) {
-        TODO("Not yet implemented")
+        val intent = Intent(context,SelectedAlbumActivity::class.java)
+        intent.putExtra("POSITION", position)
+
+        startActivity(intent)
     }
 }
