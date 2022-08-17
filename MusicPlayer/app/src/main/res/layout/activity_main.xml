@@ -209,10 +209,10 @@
                         android:id="@+id/next"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_baseline_skip_next_24"
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/pause_play"
-                        >
+                        android:src="@drawable/ic_baseline_skip_next_24">
+
                     </ImageView>
 
                     <ImageView

@@ -37,6 +37,8 @@ import kotlin.system.measureTimeMillis
 
 class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocusChangeListener, NavigationView.OnNavigationItemSelectedListener  {
 
+    lateinit var mainActivity : Activity
+
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var adapter : MusicList
@@ -364,28 +366,11 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        if (MyMediaPlayer.modifiedSong) {
-            GlobalScope.launch(Dispatchers.IO) {
-                launch {
-                    writeAllAsync(
-                        MyMediaPlayer.allMusics,
-                        MyMediaPlayer.allPlaylists
-                    )
-                }
-            }
-            println("test")
-            MyMediaPlayer.modifiedSong = false
-        }
-        adapter.musics = musics
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
-
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val nextBtn = findViewById<ImageView>(R.id.next)
-        val previousBtn = findViewById<ImageView>(R.id.previous)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
@@ -420,8 +405,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
                 }
 
                 pausePlay?.setOnClickListener { pausePlay() }
-                nextBtn?.setOnClickListener { playNextSong(adapter) }
-                previousBtn?.setOnClickListener { playPreviousSong(adapter) }
                 bottomInfos.setOnClickListener {
                     onBottomMenuClick(
                         MyMediaPlayer.currentIndex,
@@ -445,57 +428,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
     private fun playlistButton() {
         val intent = Intent(this@MainActivity,PlaylistsMenuActivity::class.java)
         startActivity(intent)
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            0 -> {
-                Toast.makeText(this,"Ajout dans une playlist",Toast.LENGTH_SHORT).show()
-                true
-            }
-            1 -> {
-                musics.removeAt(item.groupId)
-                adapter.notifyItemRemoved(item.groupId)
-
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writeAllMusicsToFile(saveAllMusicsFile, musics)}
-                }
-
-                Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
-                true
-            }
-            2 -> {
-                // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = allMusicsBackup.indexOf(musics[item.groupId])
-                val intent = Intent(this@MainActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
-                intent.putExtra("POSITION",position)
-                resultLauncher.launch(intent)
-                true
-            }
-            3 -> {
-                // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove(musics[item.groupId])
-                MyMediaPlayer.currentPlaylist.remove(musics[item.groupId])
-
-                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
-                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
-                Toast.makeText(this,"Musique ajoutée à la file d'attente",Toast.LENGTH_SHORT).show()
-                true
-            }
-            else -> {
-                onContextItemSelected(item)
-            }
-        }
-    }
-
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // On récupère les musiques avec la modification effectuée :
-            allMusicsBackup = MyMediaPlayer.allMusics
-            adapter.notifyDataSetChanged()
-        }
     }
 
     override fun onAudioFocusChange(focusChange: Int) {

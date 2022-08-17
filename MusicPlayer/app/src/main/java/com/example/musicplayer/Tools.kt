@@ -135,7 +135,7 @@ open class Tools : AppCompatActivity() {
                     if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
                         println("loss focus")
                         mediaPlayer.pause()
-                        val pausePlay: ImageView = findViewById(R.id.pause_play)
+                        val pauseAndPlay: ImageView = findViewById(R.id.pause_play)
                         pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
                     }
                     Log.d("change does..", "")

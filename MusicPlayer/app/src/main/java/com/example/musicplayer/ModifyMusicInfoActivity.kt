@@ -12,6 +12,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ModifyMusicInfoActivity : Tools() {
     private lateinit var musicFile : Music
@@ -135,6 +138,14 @@ class ModifyMusicInfoActivity : Tools() {
         MyMediaPlayer.modifiedSong = true
         setResult(RESULT_OK)
 
+        GlobalScope.launch(Dispatchers.IO) {
+            launch {
+                writeAllAsync(
+                    MyMediaPlayer.allMusics,
+                    MyMediaPlayer.allPlaylists
+                )
+            }
+        }
         finish()
     }
 
