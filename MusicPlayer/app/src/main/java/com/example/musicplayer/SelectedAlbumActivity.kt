@@ -186,8 +186,9 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             }
             2 -> {
                 // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = allMusicsBackup.indexOf(musics[item.groupId])
+                // On s'assure de séléctionner la bonne position dans la playlist principale :
+                val position = MyMediaPlayer.allMusics.indexOf(musics[item.groupId])
+                Log.d("POSITION", position.toString())
                 val intent = Intent(this@SelectedAlbumActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
                 intent.putExtra("POSITION",position)
@@ -195,7 +196,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 true
             }
             3 -> {
-                // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
+                // Lorsque l'on veut jouer une musique après celle qui se joue actuellement, on supprime d'abord la musique de la playlist :
                 MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
                 MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
 
@@ -237,6 +238,10 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                         musics = list
                         adapter.musics = musics
                         adapter.notifyDataSetChanged()
+                    } else {
+                        musics = ArrayList<Music>()
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
                     }
                 }
             }
@@ -265,6 +270,10 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
                     if (list.size > 0) {
                         musics = list
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        musics = ArrayList<Music>()
                         adapter.musics = musics
                         adapter.notifyDataSetChanged()
                     }

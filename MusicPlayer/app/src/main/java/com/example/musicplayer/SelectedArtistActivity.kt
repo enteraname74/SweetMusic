@@ -183,7 +183,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             2 -> {
                 // MODIFY INFOS :
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = allMusicsBackup.indexOf(musics[item.groupId])
+                val position = MyMediaPlayer.allMusics.indexOf(musics[item.groupId])
                 val intent = Intent(this@SelectedArtistActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
                 intent.putExtra("POSITION",position)
@@ -233,6 +233,10 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                         musics = list
                         adapter.musics = musics
                         adapter.notifyDataSetChanged()
+                    } else {
+                        musics = ArrayList<Music>()
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
                     }
                 }
             }
@@ -261,6 +265,10 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
                     if (list.size > 0) {
                         musics = list
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        musics = ArrayList<Music>()
                         adapter.musics = musics
                         adapter.notifyDataSetChanged()
                     }
