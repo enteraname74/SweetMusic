@@ -151,10 +151,7 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
 
         MyMediaPlayer.allMusics = musics
 
-        val playlistsButton = findViewById<Button>(R.id.playlists)
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-
-        playlistsButton.setOnClickListener{ playlistButton() }
         shuffleButton.setOnClickListener { playRandom(musics, this@MainActivity) }
 
         // On ajoute nos musiques et playlists dans notre mediaplayer :

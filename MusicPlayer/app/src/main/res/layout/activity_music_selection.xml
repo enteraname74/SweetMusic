@@ -110,11 +110,10 @@
 
     </LinearLayout>
 
-
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
-        android:layout_height="62dp"
+        android:layout_height="70dp"
         android:orientation="horizontal"
         android:layout_below="@+id/validate_selection"
         android:background="@color/primary_color">
@@ -129,18 +128,6 @@
             android:src="@drawable/icone_musique">
 
         </ImageView>
-
-        <TextView
-            android:id="@+id/no_song_playing"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/third_color"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:text="NO SONG IS PLAYING"
-            android:gravity="center_horizontal|center_vertical"
-            android:visibility="gone">
-        </TextView>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -157,10 +144,10 @@
                     android:id="@+id/song_title_info"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:ellipsize="marquee"
                     android:singleLine="true"
                     android:text="Name of the Song"
-                    android:ellipsize="marquee"
-                    android:layout_centerVertical="true"
                     android:textColor="@color/third_color">
 
                 </TextView>

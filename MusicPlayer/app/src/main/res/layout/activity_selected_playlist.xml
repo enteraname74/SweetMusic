@@ -115,7 +115,7 @@
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
-        android:layout_height="62dp"
+        android:layout_height="70dp"
         android:orientation="horizontal"
         android:layout_below="@+id/playlists"
         android:background="@color/primary_color">

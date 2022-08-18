@@ -23,7 +23,7 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="100dp">
 
                 <ImageView
                     android:id="@+id/open_menu"
@@ -31,7 +31,6 @@
                     android:layout_height="36dp"
                     android:layout_alignParentStart="true"
                     android:src="@drawable/ic_baseline_menu_24"
-                    android:layout_centerInParent="true"
                     android:layout_marginStart="10dp">
                 </ImageView>
 
@@ -46,39 +45,7 @@
                     android:textStyle="bold">
 
                 </TextView>
-
             </RelativeLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal|center_vertical"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/playlists"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="7dp"
-                    android:backgroundTint="@color/secondary_color"
-                    android:text="Playlists"
-                    android:textColor="@color/third_color"
-                    android:textSize="11sp">
-
-                </Button>
-
-                <Button
-                    android:id="@+id/likes"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="7dp"
-                    android:backgroundTint="@color/secondary_color"
-                    android:text="Favorites"
-                    android:textColor="@color/third_color"
-                    android:textSize="11sp">
-
-                </Button>
-            </LinearLayout>
 
             <Button
                 android:id="@+id/shuffle_button"
@@ -96,8 +63,14 @@
                 android:id="@+id/tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:backgroundTint="@color/primary_color"
-                app:tabTextColor="@color/third_color">
+                android:background="@color/primary_color"
+                app:tabMode="fixed"
+                app:tabIndicatorGravity="bottom"
+                app:tabTextColor="@color/third_color"
+                app:tabSelectedTextColor="@color/white"
+                app:tabIndicatorAnimationMode="elastic"
+                app:tabIndicatorHeight="4dp"
+                app:tabIndicatorColor="@color/secondary_color">
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
@@ -126,14 +99,15 @@
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
-            android:layout_height="446dp">
+            android:layout_weight="1"
+            android:layout_height="0dp">
 
         </androidx.viewpager2.widget.ViewPager2>
 
         <LinearLayout
             android:id="@+id/bottom_infos"
             android:layout_width="match_parent"
-            android:layout_height="62dp"
+            android:layout_height="70dp"
             android:orientation="horizontal"
             android:background="@color/primary_color">
 
@@ -177,6 +151,8 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:ellipsize="marquee"
+                        android:scrollHorizontally="true"
+                        android:marqueeRepeatLimit="marquee_forever"
                         android:singleLine="true"
                         android:text="Name of the Song"
                         android:textColor="@color/third_color">
