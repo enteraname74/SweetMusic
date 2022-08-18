@@ -93,9 +93,11 @@ class ModifyMusicInfoActivity : Tools() {
 
     private fun onValidateButtonClick(){
         // On modifie les éléments du fichier :
-        musicFile.name = musicNameField.text.toString()
-        musicFile.album = albumNameField.text.toString()
-        musicFile.artist = artistNameField.text.toString()
+
+        // On enlève les potentiels espaces en trop :
+        musicFile.name = musicNameField.text.toString().trim()
+        musicFile.album = albumNameField.text.toString().trim()
+        musicFile.artist = artistNameField.text.toString().trim()
 
         val drawable = albumCoverField.drawable
         val bitmapDrawable = drawable as BitmapDrawable

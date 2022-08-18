@@ -189,7 +189,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
                 val position = allMusicsBackup.indexOf(musics[item.groupId])
                 val intent = Intent(this@SelectedAlbumActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", album.albumName)
+                intent.putExtra("PLAYLIST_NAME", "Main")
                 intent.putExtra("POSITION",position)
                 resultModifyMusic.launch(intent)
                 true
