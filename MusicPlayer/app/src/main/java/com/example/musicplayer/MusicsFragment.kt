@@ -77,7 +77,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             MyMediaPlayer.modifiedSong = false
         }
         adapter.musics = musics
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        adapter.notifyDataSetChanged()
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.IOException
 
-class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
+class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Albums
     private var albums = ArrayList<Album>()
@@ -54,7 +54,7 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_album, container, false)
+        val view = inflater.inflate(R.layout.fragment_albums, container, false)
 
         menuRecyclerView = view.findViewById(R.id.menu_album_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -70,14 +70,15 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
     }
 
     override fun onResume() {
-        Log.d("RESUME ALB FRAG","")
         super.onResume()
+
         val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
         var currentAlbum : Album
         // Trions d'abord notre liste par album et artiste :
         copiedMusics.sortWith(compareBy<Music> {it.album}.thenBy { it.artist })
         currentAlbum = Album(copiedMusics[0].album,ArrayList<Music>(),copiedMusics[0].albumCover,copiedMusics[0].artist)
-
+        // On vide nos albums pour mettre à jour ensuite ces derniers :
+        albums.clear()
         for(music in copiedMusics){
             if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist){
                 currentAlbum.albumList.add(music)
@@ -91,9 +92,8 @@ class AlbumFragment : Fragment(), Albums.OnAlbumsListener {
             }
         }
         MyMediaPlayer.allAlbums = albums
-        Log.d("album",albums[13].albumList.size.toString())
         adapter.allAlbums = albums
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        adapter.notifyDataSetChanged()
 
     }
 

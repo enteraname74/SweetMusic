@@ -80,7 +80,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         super.onResume()
         playlists = MyMediaPlayer.allPlaylists
         adapter.allPlaylists = playlists
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        adapter.notifyDataSetChanged()
     }
 
     override fun onPlaylistClick(position: Int) {

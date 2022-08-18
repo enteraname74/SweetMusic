@@ -38,6 +38,7 @@ class MyMediaPlayer {
         var iconIndex = 0
 
         var allAlbums = ArrayList<Album>()
+        var allArtists = ArrayList<Artist>()
     }
 
 

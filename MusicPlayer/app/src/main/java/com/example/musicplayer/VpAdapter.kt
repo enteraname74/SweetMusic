@@ -17,7 +17,7 @@ class VpAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragm
         return when(position){
             0 -> { MusicsFragment() }
             1 -> { PlaylistsFragment() }
-            2 -> { AlbumFragment() }
+            2 -> { AlbumsFragment() }
             3 -> { ArtistsFragment() }
             else -> { throw Resources.NotFoundException("Position not found")}
         }

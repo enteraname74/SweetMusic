@@ -254,7 +254,7 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
-            0 -> {
+            10 -> {
                 if (playlists[item.groupId].isFavoriteList){
                     Toast.makeText(this,"You can't delete the Favorites playlist",Toast.LENGTH_SHORT).show()
                 } else {
@@ -267,7 +267,7 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
                 }
                 true
             }
-            1 -> {
+            11 -> {
                 val intent = Intent(this@PlaylistsMenuActivity,ModifyPlaylistInfoActivity::class.java)
                 intent.putExtra("POSITION",item.groupId)
                 resultLauncher.launch(intent)

@@ -16,9 +16,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener{
-    private lateinit var album : Album
-    private var albumPosition : Int = 0
+class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
+    private lateinit var artist : Artist
+    private var artistPosition : Int = 0
     private lateinit var adapter : MusicList
     private var allPlaylists = ArrayList<Playlist>()
     private var musics = ArrayList<Music>()
@@ -28,28 +28,24 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_selected_album)
+        setContentView(R.layout.activity_selected_artist)
 
-        menuRecyclerView = findViewById(R.id.menu_album_recycler_view)
-        albumPosition = intent.getSerializableExtra("POSITION") as Int
+        menuRecyclerView = findViewById(R.id.menu_artist_recycler_view)
+        artistPosition = intent.getSerializableExtra("POSITION") as Int
 
-        album = MyMediaPlayer.allAlbums[albumPosition]
-        musics = album.albumList
+        artist = MyMediaPlayer.allArtists[artistPosition]
+        musics = artist.musicList
         allMusicsBackup = ArrayList(musics.map { it.copy() })
 
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 
-        GlobalScope.launch(Dispatchers.IO) {
-            launch {
-                adapter = MusicList(musics, album.albumName, applicationContext, this@SelectedAlbumActivity)
-                menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedAlbumActivity)
-                menuRecyclerView.adapter = adapter
-            }
-        }
+        adapter = MusicList(musics, artist.artistName, applicationContext, this@SelectedArtistActivity)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedArtistActivity)
+        menuRecyclerView.adapter = adapter
 
-        val albumName = findViewById<TextView>(R.id.album_name)
-        albumName?.text = album.albumName
+        val albumName = findViewById<TextView>(R.id.artist_name)
+        albumName?.text = artist.artistName
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -76,12 +72,12 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 albumCoverInfo.setImageResource(R.drawable.michael)
             }
 
-            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedAlbumActivity) }
+            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedArtistActivity) }
             songTitleInfo?.isSelected = true
         }
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-        shuffleButton.setOnClickListener { playRandom(musics, this@SelectedAlbumActivity) }
+        shuffleButton.setOnClickListener { playRandom(musics, this@SelectedArtistActivity) }
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
@@ -97,7 +93,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             println("test")
             MyMediaPlayer.modifiedSong = false
         }
-        adapter.musics = MyMediaPlayer.allAlbums[albumPosition].albumList
+        adapter.musics = MyMediaPlayer.allArtists[artistPosition].musicList
         adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
@@ -130,7 +126,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             pausePlay?.setOnClickListener{ pausePlay() }
             nextBtn?.setOnClickListener{ playNextSong(adapter) }
             previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
-            bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedAlbumActivity) }
+            bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedArtistActivity) }
             songTitleInfo?.isSelected = true
         }
 
@@ -155,12 +151,12 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         if (musics != MyMediaPlayer.initialPlaylist) {
             MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.playlistName = album.albumName
+            MyMediaPlayer.playlistName = artist.artistName
             sameMusic = false
         }
 
         MyMediaPlayer.currentIndex = position
-        val intent = Intent(this@SelectedAlbumActivity,MusicPlayerActivity::class.java)
+        val intent = Intent(this@SelectedArtistActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
 
@@ -188,8 +184,8 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 // MODIFY INFOS :
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
                 val position = allMusicsBackup.indexOf(musics[item.groupId])
-                val intent = Intent(this@SelectedAlbumActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", album.albumName)
+                val intent = Intent(this@SelectedArtistActivity,ModifyMusicInfoActivity::class.java)
+                intent.putExtra("PLAYLIST_NAME", artist.artistName)
                 intent.putExtra("POSITION",position)
                 resultModifyMusic.launch(intent)
                 true
@@ -211,7 +207,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
     private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
-            allMusicsBackup = MyMediaPlayer.allAlbums[albumPosition].albumList
+            allMusicsBackup = MyMediaPlayer.allArtists[artistPosition].musicList
             adapter.notifyDataSetChanged()
         }
     }
