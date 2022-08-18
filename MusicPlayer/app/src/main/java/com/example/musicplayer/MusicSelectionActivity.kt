@@ -50,8 +50,6 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
             bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MusicSelectionActivity) }
             songTitleInfo.isSelected = true
         }
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
 
         val validateButton = findViewById<Button>(R.id.validate)
         val cancelButton = findViewById<Button>(R.id.cancel)

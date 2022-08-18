@@ -70,8 +70,6 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
             bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@SeeMusicListActivity) }
             songTitleInfo.isSelected = true
         }
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
@@ -140,7 +138,6 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onMusicClick(position: Int) {

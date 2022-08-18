@@ -78,8 +78,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
         adapter.musics = musics
         adapter.notifyDataSetChanged()
-
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onMusicClick(position: Int) {

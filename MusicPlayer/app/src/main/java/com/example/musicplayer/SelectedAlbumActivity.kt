@@ -82,21 +82,12 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedAlbumActivity) }
-
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        if (MyMediaPlayer.modifiedSong){
-            GlobalScope.launch(Dispatchers.IO){
-                launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
-            }
-            println("test")
-            MyMediaPlayer.modifiedSong = false
-        }
+
         adapter.musics = MyMediaPlayer.allAlbums[albumPosition].albumList
         adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
@@ -139,7 +130,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
         Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
         Log.d("RESUME","resume")
     }
@@ -186,11 +176,12 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             }
             2 -> {
                 // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position dans la playlist principale :
-                val position = MyMediaPlayer.allMusics.indexOf(musics[item.groupId])
+                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
+                val position = allMusicsBackup.indexOf(musics[item.groupId])
                 Log.d("POSITION", position.toString())
                 val intent = Intent(this@SelectedAlbumActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
+                intent.putExtra("PLAYLIST_NAME", "Album")
+                intent.putExtra("ALBUM POSITION", albumPosition)
                 intent.putExtra("POSITION",position)
                 resultModifyMusic.launch(intent)
                 true
@@ -212,15 +203,21 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
     private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les musiques avec la modification effectuée :
+            // Vérifions si la musique modifiée a encore sa place dans l'album (même artiste et nom d'album) :
+            val data = result.data?.getSerializableExtra("POSITION") as Int
+            val modifiedSong = album.albumList[data]
+            if (modifiedSong.album != album.albumName || modifiedSong.artist != album.artist){
+                album.albumList.remove(modifiedSong)
+            }
             allMusicsBackup = MyMediaPlayer.allAlbums[albumPosition].albumList
-            adapter.notifyDataSetChanged()
+            adapter.musics = MyMediaPlayer.allAlbums[albumPosition].albumList
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
         }
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
         try {
             if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
                 val list = ArrayList<Music>()
 
                 if(p0 == ""){
@@ -254,7 +251,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
     override fun onQueryTextChange(p0: String?): Boolean {
         try {
             if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
                 val list = ArrayList<Music>()
 
                 if(p0 == ""){

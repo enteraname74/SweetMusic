@@ -1,16 +1,12 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.app.Activity
 import android.content.ContentUris
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Environment
@@ -20,17 +16,12 @@ import android.util.Size
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.android.car.ui.toolbar.TabLayout
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.io.*
 import kotlin.system.measureTimeMillis
@@ -39,13 +30,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
 
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
-    private lateinit var adapter : MusicList
-
-    private lateinit var audioManager : AudioManager
-    private lateinit var audioAttributes : AudioAttributes
-    private lateinit var audioFocusRequest : AudioFocusRequest
-    private lateinit var onAudioFocusChange: AudioManager.OnAudioFocusChangeListener
-
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
     private lateinit var viewPager : ViewPager2
 
@@ -56,38 +40,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         Log.d("DOWNLOAD", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString())
         Log.d("DOWNLOAD", applicationContext.filesDir.toString())
 
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
-            Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..","")
-                    MyMediaPlayer.doesASongWillBePlaying = false
-                }
-            }
-        }
-
-        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(this)
-            .build()
-
         if (!checkPermission()){
             requestPermission()
         }
@@ -95,17 +47,9 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
             musics = readAllMusicsFromFile(saveAllMusicsFile)
             allMusicsBackup = ArrayList(musics.map { it.copy() })
-            adapter = MusicList(musics, "Main",applicationContext, this)
-
-            //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-            /*
-            menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-            menuRecyclerView?.adapter = adapter
-             */
-            adapter.notifyItemRangeChanged(0, adapter.itemCount)
-        } else {
+        }
+        if (musics.size <= 0){
             // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
-
             // Créons d'abord la playlist des favoris :
             val favoritePlaylist = Playlist("Favorites",ArrayList(),null)
             val playlists = ArrayList<Playlist>()
@@ -172,17 +116,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
                     musics.reverse()
 
                     writeAllMusicsToFile(saveAllMusicsFile, musics)
-
-                    Log.d("GET ALL MUSICS","")
-                    adapter = MusicList(musics,"Main", applicationContext, this)
-
-                    //layoutManager permet de gérer la facon dont on affiche nos elements dans le recyclerView
-                    /*
-                    menuRecyclerView?.layoutManager = LinearLayoutManager(this)
-                    menuRecyclerView?.adapter = adapter
-
-                     */
-                    adapter.notifyItemRangeChanged(0, adapter.itemCount)
                 }
             }
         }
@@ -216,8 +149,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
             songTitleInfo?.isSelected = true
         }
 
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
         MyMediaPlayer.allMusics = musics
 
         val playlistsButton = findViewById<Button>(R.id.playlists)
@@ -345,7 +276,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
         Log.d("TIME", time.toString())
     }

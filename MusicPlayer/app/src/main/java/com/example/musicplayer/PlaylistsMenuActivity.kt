@@ -99,9 +99,6 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
         // Mise en place du bouton de création de playlist :
         val addPlaylist = findViewById<ImageView>(R.id.add_playlist)
         addPlaylist?.setOnClickListener{ addPlaylist() }
-
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onResume() {
@@ -152,7 +149,6 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
             } else {
                 pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            mediaPlayer.setOnCompletionListener { playNextSong() }
             Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
             Log.d("RESUME","resume")
         }

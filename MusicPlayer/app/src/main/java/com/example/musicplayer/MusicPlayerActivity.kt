@@ -176,48 +176,47 @@ class MusicPlayerActivity : Tools() {
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val background = findViewById<RelativeLayout>(R.id.music_player)
 
-        registerForContextMenu(musicIcon)
-
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+        Log.d("CURRENT SONG",currentSong.toString())
 
-            var bitmap : Bitmap? = null
-            if (currentSong.albumCover != null) {
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                musicIcon.setImageBitmap(bitmap)
+        var bitmap : Bitmap? = null
+        if (currentSong.albumCover != null) {
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentSong.albumCover
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            musicIcon.setImageBitmap(bitmap)
+        } else {
+            musicIcon.setImageResource(R.drawable.michael)
+            val drawable = musicIcon.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            bitmap = bitmapDrawable.bitmap
+        }
+
+        Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
+        val backgroundColor: Palette.Swatch? =
+            if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
+                Palette.from(bitmap).generate().swatches[0]
             } else {
-                musicIcon.setImageResource(R.drawable.michael)
-                val drawable = musicIcon.drawable
-                val bitmapDrawable = drawable as BitmapDrawable
-                bitmap = bitmapDrawable.bitmap
+                Palette.from(bitmap).generate().darkVibrantSwatch
             }
 
-            Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
-            val backgroundColor: Palette.Swatch? =
-                if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
-                    Palette.from(bitmap).generate().swatches[0]
-                } else {
-                    Palette.from(bitmap).generate().darkVibrantSwatch
-                }
+        background.setBackgroundColor(backgroundColor?.rgb as Int)
+        titleTv.setTextColor(backgroundColor.titleTextColor)
+        currentTimeTv.setTextColor(backgroundColor.titleTextColor)
+        totalTimeTv.setTextColor(backgroundColor.titleTextColor)
+        seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
-            background.setBackgroundColor(backgroundColor?.rgb as Int)
-            titleTv.setTextColor(backgroundColor.titleTextColor)
-            currentTimeTv.setTextColor(backgroundColor.titleTextColor)
-            totalTimeTv.setTextColor(backgroundColor.titleTextColor)
-            seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
-
-            initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            // Vérifions si la musique est en favoris :
-            getFavoriteState()
+        initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        // Vérifions si la musique est en favoris :
+        getFavoriteState()
 
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
@@ -230,6 +229,8 @@ class MusicPlayerActivity : Tools() {
         previousBtn.setOnClickListener{ playPreviousSong() }
         favoriteBtn.setOnClickListener{ setFavorite() }
         sort.setOnClickListener{ changeSorting() }
+
+        registerForContextMenu(musicIcon)
 
         playMusic()
     }
@@ -346,6 +347,7 @@ class MusicPlayerActivity : Tools() {
             MyMediaPlayer.currentIndex+=1
         }
         mediaPlayer.reset()
+        Log.d("NEXT","")
         setRessourcesWithMusic()
     }
 
@@ -479,6 +481,13 @@ class MusicPlayerActivity : Tools() {
         val background = findViewById<RelativeLayout>(R.id.music_player)
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+
+        if (!mediaPlayer.isPlaying){
+            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+        } else {
+            pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
 
         var bitmap : Bitmap? = null
         if (currentSong.albumCover != null) {

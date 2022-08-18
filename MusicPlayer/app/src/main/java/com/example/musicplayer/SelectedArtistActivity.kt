@@ -78,18 +78,12 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedArtistActivity) }
-
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
         if (MyMediaPlayer.modifiedSong){
-            GlobalScope.launch(Dispatchers.IO){
-                launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
-            }
             println("test")
             MyMediaPlayer.modifiedSong = false
         }
@@ -135,7 +129,6 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
         Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
         Log.d("RESUME","resume")
     }
@@ -183,9 +176,10 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             2 -> {
                 // MODIFY INFOS :
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = MyMediaPlayer.allMusics.indexOf(musics[item.groupId])
+                val position = item.groupId
                 val intent = Intent(this@SelectedArtistActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
+                intent.putExtra("PLAYLIST_NAME", "Artist")
+                intent.putExtra("ALBUM POSITION", artistPosition)
                 intent.putExtra("POSITION",position)
                 resultModifyMusic.launch(intent)
                 true

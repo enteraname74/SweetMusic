@@ -143,9 +143,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
-
-        // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
@@ -200,10 +197,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
-        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
-        Log.d("RESUME","resume")
-
         val addSongs = findViewById<ImageView>(R.id.add_songs)
         addSongs.setOnClickListener{ onAddSongsClick() }
     }

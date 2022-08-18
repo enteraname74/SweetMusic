@@ -22,8 +22,11 @@ class ModifyMusicInfoActivity : Tools() {
     private lateinit var musicNameField : EditText
     private lateinit var albumNameField : EditText
     private lateinit var artistNameField : EditText
+    private var givenPosition = -1
     private var indexCurrentPlaylist = -1
     private var indexInitialPlaylist = -1
+    private var indexCurrentAlbum = -1
+    private var indexCurrentArtist = -1
     private lateinit var currentPlaylist : ArrayList<Music>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,16 +35,22 @@ class ModifyMusicInfoActivity : Tools() {
 
         val playlistName = intent.getSerializableExtra("PLAYLIST_NAME") as String
 
-        currentPlaylist = if (playlistName == "Main"){
+        currentPlaylist = if (playlistName == "Main") {
             MyMediaPlayer.allMusics
+        } else if(playlistName == "Album") {
+            indexCurrentAlbum = intent.getSerializableExtra("ALBUM POSITION") as Int
+            MyMediaPlayer.allAlbums[indexCurrentAlbum].albumList
+        } else if(playlistName == "Artist") {
+            indexCurrentArtist= intent.getSerializableExtra("ARTIST POSITION") as Int
+            MyMediaPlayer.allArtists[indexCurrentArtist].musicList
         } else {
             val allPlaylists = MyMediaPlayer.allPlaylists
             allPlaylists.first{it.listName == playlistName}.musicList
         }
 
         // On récupère notre musique à modifier :
-        val position = intent.getSerializableExtra("POSITION") as Int
-        musicFile = currentPlaylist[position]
+        givenPosition = intent.getSerializableExtra("POSITION") as Int
+        musicFile = currentPlaylist[givenPosition]
 
         indexCurrentPlaylist = MyMediaPlayer.currentPlaylist.indexOf(musicFile)
         indexInitialPlaylist = MyMediaPlayer.initialPlaylist.indexOf(musicFile)
@@ -92,6 +101,7 @@ class ModifyMusicInfoActivity : Tools() {
     }
 
     private fun onValidateButtonClick(){
+        val returnIntent = Intent()
         // On modifie les éléments du fichier :
 
         // On enlève les potentiels espaces en trop :
@@ -136,9 +146,16 @@ class ModifyMusicInfoActivity : Tools() {
         if (MyMediaPlayer.initialPlaylist.size != 0 && indexInitialPlaylist != -1){
             MyMediaPlayer.initialPlaylist[indexInitialPlaylist] = musicFile
         }
-
+        // Si nous venons d'un album ou d'un artiste, changeons aussi les données la bas :
+        if (indexCurrentAlbum != -1){
+            MyMediaPlayer.allAlbums[indexCurrentAlbum].albumList[givenPosition] = musicFile
+        } else if (indexCurrentArtist != -1){
+            MyMediaPlayer.allArtists[indexCurrentArtist].musicList[givenPosition] = musicFile
+        }
         MyMediaPlayer.modifiedSong = true
-        setResult(RESULT_OK)
+
+        returnIntent.putExtra("POSITION", givenPosition)
+        setResult(RESULT_OK,returnIntent)
 
         GlobalScope.launch(Dispatchers.IO) {
             launch {

@@ -25,28 +25,28 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-        var currentAlbum : Album
-        // Trions d'abord notre liste par album et artiste :
-        copiedMusics.sortWith(compareBy<Music> {it.album}.thenBy { it.artist })
-        currentAlbum = Album(copiedMusics[0].album,ArrayList<Music>(),copiedMusics[0].albumCover,copiedMusics[0].artist)
+        if (MyMediaPlayer.allMusics.size > 0){
+            val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+            var currentAlbum : Album
+            // Trions d'abord notre liste par album et artiste :
+            copiedMusics.sortWith(compareBy<Music> {it.album}.thenBy { it.artist })
+            currentAlbum = Album(copiedMusics[0].album,ArrayList<Music>(),copiedMusics[0].albumCover,copiedMusics[0].artist)
 
-        for(music in copiedMusics){
-            if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist){
-                currentAlbum.albumList.add(music)
-            } else {
-                // On passe à un autre album :
-                // On ajoute d'abord notre album à notre liste :
-                albums.add(currentAlbum)
-                // On change ensuite l'album actuelle
-                currentAlbum = Album(music.album,ArrayList<Music>(),music.albumCover,music.artist)
-                currentAlbum.albumList.add(music)
+            for(music in copiedMusics){
+                if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist){
+                    currentAlbum.albumList.add(music)
+                } else {
+                    // On passe à un autre album :
+                    // On ajoute d'abord notre album à notre liste :
+                    albums.add(currentAlbum)
+                    // On change ensuite l'album actuelle
+                    currentAlbum = Album(music.album,ArrayList<Music>(),music.albumCover,music.artist)
+                    currentAlbum.albumList.add(music)
+                }
             }
         }
         MyMediaPlayer.allAlbums = albums
         adapter = Albums(albums,context as Context,this)
-
-        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onCreateView(
@@ -71,30 +71,36 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
 
     override fun onResume() {
         super.onResume()
-
-        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-        var currentAlbum : Album
-        // Trions d'abord notre liste par album et artiste :
-        copiedMusics.sortWith(compareBy<Music> {it.album}.thenBy { it.artist })
-        currentAlbum = Album(copiedMusics[0].album,ArrayList<Music>(),copiedMusics[0].albumCover,copiedMusics[0].artist)
-        // On vide nos albums pour mettre à jour ensuite ces derniers :
-        albums.clear()
-        for(music in copiedMusics){
-            if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist){
-                currentAlbum.albumList.add(music)
-            } else {
-                // On passe à un autre album :
-                // On ajoute d'abord notre album à notre liste :
-                albums.add(currentAlbum)
-                // On change ensuite l'album actuelle
-                currentAlbum = Album(music.album,ArrayList<Music>(),music.albumCover,music.artist)
-                currentAlbum.albumList.add(music)
+        if (MyMediaPlayer.allMusics.size > 0) {
+            val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+            var currentAlbum: Album
+            // Trions d'abord notre liste par album et artiste :
+            copiedMusics.sortWith(compareBy<Music> { it.album }.thenBy { it.artist })
+            currentAlbum = Album(
+                copiedMusics[0].album,
+                ArrayList<Music>(),
+                copiedMusics[0].albumCover,
+                copiedMusics[0].artist
+            )
+            // On vide nos albums pour mettre à jour ensuite ces derniers :
+            albums.clear()
+            for (music in copiedMusics) {
+                if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist) {
+                    currentAlbum.albumList.add(music)
+                } else {
+                    // On passe à un autre album :
+                    // On ajoute d'abord notre album à notre liste :
+                    albums.add(currentAlbum)
+                    // On change ensuite l'album actuelle
+                    currentAlbum =
+                        Album(music.album, ArrayList<Music>(), music.albumCover, music.artist)
+                    currentAlbum.albumList.add(music)
+                }
             }
+            MyMediaPlayer.allAlbums = albums
+            adapter.allAlbums = albums
+            adapter.notifyDataSetChanged()
         }
-        MyMediaPlayer.allAlbums = albums
-        adapter.allAlbums = albums
-        adapter.notifyDataSetChanged()
-
     }
 
     private fun playNextSong(){
