@@ -148,13 +148,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        if (MyMediaPlayer.modifiedSong){
-            GlobalScope.launch(Dispatchers.IO){
-                launch{writeAllAsync(MyMediaPlayer.allMusics, MyMediaPlayer.allPlaylists)}
-            }
-            println("test")
-            MyMediaPlayer.modifiedSong = false
-        }
+
         adapter.musics = MyMediaPlayer.allPlaylists[playlistPosition].musicList
         adapter.notifyItemRangeChanged(0, adapter.itemCount)
 

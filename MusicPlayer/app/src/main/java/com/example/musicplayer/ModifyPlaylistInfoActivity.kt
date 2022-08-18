@@ -100,8 +100,7 @@ class ModifyPlaylistInfoActivity : Tools() {
     }
 
     private fun onCancelButtonClick(){
-        val returnIntent = Intent()
-        setResult(RESULT_CANCELED, returnIntent)
+        setResult(RESULT_CANCELED)
         finish()
     }
 }

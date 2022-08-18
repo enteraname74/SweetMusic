@@ -16,6 +16,7 @@ import android.util.Size
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -156,7 +157,7 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
 
         // On ajoute nos musiques et playlists dans notre mediaplayer :
 
-        GlobalScope.launch(Dispatchers.IO){
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO){
             launch{readPlaylistsAsync()}
         }
         println("end")
@@ -232,7 +233,7 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         val time = measureTimeMillis {
 
             if (MyMediaPlayer.currentIndex != -1) {
-                GlobalScope.launch(Dispatchers.IO) {
+                CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
                     launch {
                         withContext(Dispatchers.Main) {
                             noSongPlaying.visibility = View.GONE
@@ -277,11 +278,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         Log.d("TIME", time.toString())
     }
 
-    private fun playlistButton() {
-        val intent = Intent(this@MainActivity,PlaylistsMenuActivity::class.java)
-        startActivity(intent)
-    }
-
     override fun onAudioFocusChange(focusChange: Int) {
         Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
         Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
@@ -301,11 +297,10 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             R.id.download_data -> {
-                GlobalScope.launch(Dispatchers.IO){
+                CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO){
                     launch{
                         retrieveAllMusicsFromApp()
                     }
@@ -313,9 +308,16 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
                 Toast.makeText(this, "Data retrieved", Toast.LENGTH_SHORT).show()
                 true
             }
+            R.id.set_data -> {
+                val intent = Intent(this@MainActivity,SetDataActivity::class.java)
+                setDataResult.launch(intent)
+                true
+            }
             else -> {
                 true
             }
         }
     }
+
+    private var setDataResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 }

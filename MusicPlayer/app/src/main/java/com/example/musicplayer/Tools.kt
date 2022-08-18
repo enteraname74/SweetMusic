@@ -206,7 +206,7 @@ open class Tools : AppCompatActivity() {
         }
     }
 
-    fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
+    open fun readAllMusicsFromFile(filename : String) : ArrayList<Music> {
         val path = applicationContext.filesDir
         var content = ArrayList<Music>()
         try {
@@ -232,7 +232,7 @@ open class Tools : AppCompatActivity() {
         }
     }
 
-    fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
+    open fun readAllPlaylistsFromFile(filename : String) : ArrayList<Playlist> {
         val path = applicationContext.filesDir
         var content = ArrayList<Playlist>()
         try {

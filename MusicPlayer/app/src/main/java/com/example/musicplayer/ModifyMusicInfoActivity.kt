@@ -93,7 +93,7 @@ class ModifyMusicInfoActivity : Tools() {
 
     private var resultImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            val uri : Uri? = result.getData()?.data
+            val uri : Uri? = result.data?.data
             val inputStream = contentResolver.openInputStream(uri as Uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
             albumCoverField.setImageBitmap(bitmap)
@@ -179,8 +179,7 @@ class ModifyMusicInfoActivity : Tools() {
     }
 
     private fun onCancelButtonClick(){
-        val returnIntent = Intent()
-        setResult(RESULT_CANCELED, returnIntent)
+        setResult(RESULT_CANCELED)
         finish()
     }
 }
