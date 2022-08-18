@@ -27,6 +27,8 @@ class MyMediaPlayer {
         // Permet de savoir si on va devoir rafraichir la playlist principale si une musique a été modifiée :
         var modifiedSong = false
 
+
+        var dataWasChanged = false
         //Permet d'éviter de chercher à chaque fois dans les fichiers toutes les musiques/playlists :
 
         var allMusics = ArrayList<Music>()

@@ -103,6 +103,7 @@ class SetDataActivity : Tools() {
                 writeAllAsync(allMusics,allPlaylists)
             }
             Log.d("after","")
+            MyMediaPlayer.dataWasChanged = true
 
             setResult(RESULT_OK)
             finish()

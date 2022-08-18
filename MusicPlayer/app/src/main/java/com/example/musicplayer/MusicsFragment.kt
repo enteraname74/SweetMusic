@@ -72,12 +72,14 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         searchView.clearFocus()
 
         Log.d("RESUME FRAG","")
-        if (MyMediaPlayer.modifiedSong) {
-            println("test")
-            MyMediaPlayer.modifiedSong = false
-        }
+
         allMusicsBackup = MyMediaPlayer.allMusics
-        adapter.musics = musics
+        adapter.musics = MyMediaPlayer.allMusics
+        if (MyMediaPlayer.dataWasChanged){
+            // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
+            musics = MyMediaPlayer.allMusics
+            MyMediaPlayer.dataWasChanged = false
+        }
         adapter.notifyDataSetChanged()
     }
 
@@ -133,6 +135,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             2 -> {
                 // MODIFY INFOS :
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
+                Log.d("element", allMusicsBackup[2].toString())
+                Log.d("supposed", musics[item.groupId].toString())
                 val position = allMusicsBackup.indexOf(musics[item.groupId])
                 val intent = Intent(context, ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Main")
