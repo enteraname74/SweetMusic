@@ -76,6 +76,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             println("test")
             MyMediaPlayer.modifiedSong = false
         }
+        allMusicsBackup = MyMediaPlayer.allMusics
         adapter.musics = musics
         adapter.notifyDataSetChanged()
     }
@@ -165,13 +166,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
     }
 
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // On récupère les musiques avec la modification effectuée :
-            allMusicsBackup = MyMediaPlayer.allMusics
-            adapter.notifyDataSetChanged()
-        }
-    }
+    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     private fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
         MyMediaPlayer.allMusics = content

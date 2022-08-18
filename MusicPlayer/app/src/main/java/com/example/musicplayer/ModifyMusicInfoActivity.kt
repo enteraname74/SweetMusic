@@ -148,9 +148,19 @@ class ModifyMusicInfoActivity : Tools() {
         }
         // Si nous venons d'un album ou d'un artiste, changeons aussi les données la bas :
         if (indexCurrentAlbum != -1){
-            MyMediaPlayer.allAlbums[indexCurrentAlbum].albumList[givenPosition] = musicFile
+            val album = MyMediaPlayer.allAlbums[indexCurrentAlbum]
+            if (musicFile.album != album.albumName || musicFile.artist != album.artist){
+                album.albumList.remove(musicFile)
+            } else {
+                MyMediaPlayer.allAlbums[indexCurrentAlbum].albumList[givenPosition] = musicFile
+            }
         } else if (indexCurrentArtist != -1){
-            MyMediaPlayer.allArtists[indexCurrentArtist].musicList[givenPosition] = musicFile
+            val artist = MyMediaPlayer.allArtists[indexCurrentArtist]
+            if (musicFile.artist != artist.artistName){
+                artist.musicList.remove(musicFile)
+            } else {
+                MyMediaPlayer.allArtists[indexCurrentArtist].musicList[givenPosition] = musicFile
+            }
         }
         MyMediaPlayer.modifiedSong = true
 

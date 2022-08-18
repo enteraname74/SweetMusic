@@ -88,8 +88,9 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         super.onResume()
         searchView.clearFocus()
 
+        allMusicsBackup = MyMediaPlayer.allAlbums[albumPosition].albumList
         adapter.musics = MyMediaPlayer.allAlbums[albumPosition].albumList
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        adapter.notifyDataSetChanged()
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -130,8 +131,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
-        Log.d("RESUME","resume")
     }
 
     override fun onMusicClick(position: Int) {
@@ -200,20 +199,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         }
     }
 
-    private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // On récupère les musiques avec la modification effectuée :
-            // Vérifions si la musique modifiée a encore sa place dans l'album (même artiste et nom d'album) :
-            val data = result.data?.getSerializableExtra("POSITION") as Int
-            val modifiedSong = album.albumList[data]
-            if (modifiedSong.album != album.albumName || modifiedSong.artist != album.artist){
-                album.albumList.remove(modifiedSong)
-            }
-            allMusicsBackup = MyMediaPlayer.allAlbums[albumPosition].albumList
-            adapter.musics = MyMediaPlayer.allAlbums[albumPosition].albumList
-            adapter.notifyItemRangeChanged(0, adapter.itemCount)
-        }
-    }
+    private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
         try {

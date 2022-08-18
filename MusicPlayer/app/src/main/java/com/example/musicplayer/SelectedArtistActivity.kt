@@ -83,12 +83,10 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        if (MyMediaPlayer.modifiedSong){
-            println("test")
-            MyMediaPlayer.modifiedSong = false
-        }
+
+        allMusicsBackup = MyMediaPlayer.allArtists[artistPosition].musicList
         adapter.musics = MyMediaPlayer.allArtists[artistPosition].musicList
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        adapter.notifyDataSetChanged()
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -129,8 +127,6 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        Log.d("CURRENT SONG",MyMediaPlayer.currentIndex.toString())
-        Log.d("RESUME","resume")
     }
 
     override fun onMusicClick(position: Int) {
@@ -176,10 +172,11 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             2 -> {
                 // MODIFY INFOS :
                 // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = item.groupId
+                val position = allMusicsBackup.indexOf(musics[item.groupId])
+                Log.d("POSITION", position.toString())
                 val intent = Intent(this@SelectedArtistActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PLAYLIST_NAME", "Artist")
-                intent.putExtra("ALBUM POSITION", artistPosition)
+                intent.putExtra("ARTIST POSITION", artistPosition)
                 intent.putExtra("POSITION",position)
                 resultModifyMusic.launch(intent)
                 true
@@ -198,13 +195,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         }
     }
 
-    private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // On récupère les musiques avec la modification effectuée :
-            allMusicsBackup = MyMediaPlayer.allArtists[artistPosition].musicList
-            adapter.notifyDataSetChanged()
-        }
-    }
+    private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
         try {
