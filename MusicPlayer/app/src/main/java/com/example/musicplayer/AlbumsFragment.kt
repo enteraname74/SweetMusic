@@ -72,6 +72,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
 
     override fun onResume() {
         super.onResume()
+        Log.d("FRAG ALBUM RES","")
         if (MyMediaPlayer.allMusics.size > 0) {
             val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
             var currentAlbum: Album

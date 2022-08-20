@@ -49,6 +49,8 @@ class MusicPlayerActivity : Tools() {
     private lateinit var audioAttributes : AudioAttributes
     private lateinit var audioFocusRequest : AudioFocusRequest
     private lateinit var onAudioFocusChange: AudioManager.OnAudioFocusChangeListener
+    private var albumPosition = -1
+    private var artistPosition = -1
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
@@ -56,8 +58,6 @@ class MusicPlayerActivity : Tools() {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
-
-        sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
 
         titleTv = findViewById(R.id.song_title)
         currentTimeTv = findViewById(R.id.current_time)
@@ -249,11 +249,8 @@ class MusicPlayerActivity : Tools() {
             }
             1 -> {
                 // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = MyMediaPlayer.allMusics.indexOf(currentSong)
                 val intent = Intent(this@MusicPlayerActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
-                intent.putExtra("POSITION",position)
+                intent.putExtra("PATH",currentSong.path)
                 modifyMusicLauncher.launch(intent)
                 true
             }

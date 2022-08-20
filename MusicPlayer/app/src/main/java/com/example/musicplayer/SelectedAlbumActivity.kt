@@ -24,6 +24,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var searchView : SearchView
+    private var searchIsOn = false
     private lateinit var menuRecyclerView : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,13 +41,9 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 
-        GlobalScope.launch(Dispatchers.IO) {
-            launch {
-                adapter = MusicList(musics, album.albumName, applicationContext, this@SelectedAlbumActivity)
-                menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedAlbumActivity)
-                menuRecyclerView.adapter = adapter
-            }
-        }
+        adapter = MusicList(musics, album.albumName, applicationContext, this@SelectedAlbumActivity)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedAlbumActivity)
+        menuRecyclerView.adapter = adapter
 
         val albumName = findViewById<TextView>(R.id.album_name)
         albumName?.text = album.albumName
@@ -91,7 +88,11 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         searchView.clearFocus()
 
         allMusicsBackup = MyMediaPlayer.allAlbums[albumPosition].albumList
-        adapter.musics = MyMediaPlayer.allAlbums[albumPosition].albumList
+        if(!searchIsOn){
+            musics = MyMediaPlayer.allAlbums[albumPosition].albumList
+            adapter.musics = musics
+        }
+
         adapter.notifyDataSetChanged()
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
@@ -148,7 +149,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         if (musics != MyMediaPlayer.initialPlaylist) {
             MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.playlistName = album.albumName
+            MyMediaPlayer.playlistName = "Album"
             sameMusic = false
         }
 
@@ -156,6 +157,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         val intent = Intent(this@SelectedAlbumActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
+        intent.putExtra("ALBUM POSITION", albumPosition)
 
         startActivity(intent)
     }
@@ -179,13 +181,8 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             }
             2 -> {
                 // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = allMusicsBackup.indexOf(musics[item.groupId])
-                Log.d("POSITION", position.toString())
                 val intent = Intent(this@SelectedAlbumActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Album")
-                intent.putExtra("ALBUM POSITION", albumPosition)
-                intent.putExtra("POSITION",position)
+                intent.putExtra("PATH", musics[item.groupId].path)
                 resultModifyMusic.launch(intent)
                 true
             }
@@ -206,48 +203,25 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
     private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
-        try {
-            if (p0 != null) {
-                val list = ArrayList<Music>()
-
-                if(p0 == ""){
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
-                } else {
-                    for (music: Music in allMusicsBackup) {
-                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                            list.add(music)
-                        }
-                    }
-
-                    if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    } else {
-                        musics = ArrayList<Music>()
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-            }
-        } catch (error : Error){
-            Log.d("ERROR",error.toString())
-        }
-        return true
+        return manageSearchBarEvents(p0)
     }
 
     override fun onQueryTextChange(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
         try {
             if (p0 != null) {
                 val list = ArrayList<Music>()
 
                 if(p0 == ""){
+                    searchIsOn = false
                     musics = allMusicsBackup
                     adapter.musics = musics
                     adapter.notifyDataSetChanged()
                 } else {
+                    searchIsOn = true
                     for (music: Music in allMusicsBackup) {
                         if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                             list.add(music)

@@ -179,6 +179,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         val intent = Intent(this@SelectedPlaylistActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
+        intent.putExtra("POSITION", allMusicsBackup.indexOf(musics[position]))
 
         startActivity(intent)
     }
@@ -203,11 +204,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             }
             2 -> {
                 // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                val position = allMusicsBackup.indexOf(musics[item.groupId])
                 val intent = Intent(this@SelectedPlaylistActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", playlist.listName)
-                intent.putExtra("POSITION",position)
+                intent.putExtra("PATH",musics[item.groupId].path)
                 resultModifyMusic.launch(intent)
                 true
             }

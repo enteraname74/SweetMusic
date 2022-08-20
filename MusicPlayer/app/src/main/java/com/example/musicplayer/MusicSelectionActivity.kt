@@ -28,29 +28,6 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
 
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val nextBtn = findViewById<ImageView>(R.id.next)
-        val previousBtn = findViewById<ImageView>(R.id.previous)
-
-        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-
-        if (MyMediaPlayer.currentIndex == -1){
-            noSongPlaying.visibility = View.VISIBLE
-            infoSongPlaying.visibility = View.GONE
-        } else {
-            noSongPlaying.visibility = View.GONE
-            infoSongPlaying.visibility = View.VISIBLE
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            pausePlay?.setOnClickListener{ pausePlay() }
-            nextBtn?.setOnClickListener{ playNextSong() }
-            previousBtn?.setOnClickListener{ playPreviousSong() }
-            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MusicSelectionActivity) }
-            songTitleInfo.isSelected = true
-        }
-
         val validateButton = findViewById<Button>(R.id.validate)
         val cancelButton = findViewById<Button>(R.id.cancel)
         validateButton.setOnClickListener{ onValidateButtonClick() }
@@ -80,35 +57,6 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
             }
 
             songTitleInfo.isSelected = true
-        }
-    }
-
-    private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex+=1
-        }
-        playMusic()
-    }
-
-    private fun playPreviousSong(){
-        if(MyMediaPlayer.currentIndex==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex-=1
-        }
-        playMusic()
-    }
-
-    override fun pausePlay(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        if(mediaPlayer.isPlaying){
-            mediaPlayer.pause()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            mediaPlayer.start()
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
     }
 

@@ -79,6 +79,11 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         super.onResume()
         playlists = MyMediaPlayer.allPlaylists
         adapter.allPlaylists = playlists
+        if (MyMediaPlayer.dataWasChanged){
+            // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
+            playlists = MyMediaPlayer.allPlaylists
+            MyMediaPlayer.dataWasChanged = false
+        }
         adapter.notifyDataSetChanged()
         mediaPlayer.setOnCompletionListener { playNextSong() }
     }

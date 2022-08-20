@@ -34,8 +34,9 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
     private var musics = MyMediaPlayer.allMusics
-    private var allMusicsBackup = ArrayList(musics.map { it.copy() })
+    private var allMusicsBackup = MyMediaPlayer.allMusics
     private lateinit var searchView : SearchView
+    private var searchIsOn = false
     private val mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,11 +72,13 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-
         Log.d("RESUME FRAG","")
 
         allMusicsBackup = MyMediaPlayer.allMusics
-        adapter.musics = MyMediaPlayer.allMusics
+        // Si on est dans la barre e recherche, on ne met pas tout de suite à jour les musiques pour rester dans la barre :
+        if(!searchIsOn){
+            musics = MyMediaPlayer.allMusics
+        }
         if (MyMediaPlayer.dataWasChanged){
             // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
             musics = MyMediaPlayer.allMusics
@@ -137,13 +140,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             }
             2 -> {
                 // MODIFY INFOS :
-                // On s'assure de séléctionner la bonne position au cas où on utilise la barre de recherche :
-                Log.d("element", allMusicsBackup[2].toString())
-                Log.d("supposed", musics[item.groupId].toString())
-                val position = allMusicsBackup.indexOf(musics[item.groupId])
                 val intent = Intent(context, ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
-                intent.putExtra("POSITION", position)
+                intent.putExtra("PATH", musics[item.groupId].path)
                 resultLauncher.launch(intent)
                 true
             }
@@ -239,50 +237,25 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
-        try {
-            if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
-                val list = ArrayList<Music>()
-
-                if(p0 == ""){
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
-                } else {
-                    for (music: Music in allMusicsBackup) {
-                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                            list.add(music)
-                        }
-                    }
-
-                    if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    } else {
-                        musics = ArrayList<Music>()
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-            }
-        } catch (error : Error){
-            Log.d("ERROR",error.toString())
-        }
-        return true
+        return manageSearchBarEvents(p0)
     }
 
     override fun onQueryTextChange(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
         try {
             if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
                 val list = ArrayList<Music>()
 
                 if(p0 == ""){
+                    searchIsOn = false
                     musics = allMusicsBackup
                     adapter.musics = musics
                     adapter.notifyDataSetChanged()
                 } else {
+                    searchIsOn = true
                     for (music: Music in allMusicsBackup) {
                         if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                             list.add(music)

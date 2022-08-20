@@ -12,8 +12,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ModifyMusicInfoActivity : Tools() {
@@ -22,38 +22,48 @@ class ModifyMusicInfoActivity : Tools() {
     private lateinit var musicNameField : EditText
     private lateinit var albumNameField : EditText
     private lateinit var artistNameField : EditText
-    private var givenPosition = -1
     private var indexCurrentPlaylist = -1
     private var indexInitialPlaylist = -1
-    private var indexCurrentAlbum = -1
-    private var indexCurrentArtist = -1
-    private lateinit var currentPlaylist : ArrayList<Music>
+
+    private var albumPosition = -1
+    private var positionInAlbum = -1
+    private var artistPosition = -1
+    private var positionInArtist = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
 
-        val playlistName = intent.getSerializableExtra("PLAYLIST_NAME") as String
-
-        currentPlaylist = if (playlistName == "Main") {
-            MyMediaPlayer.allMusics
-        } else if(playlistName == "Album") {
-            indexCurrentAlbum = intent.getSerializableExtra("ALBUM POSITION") as Int
-            MyMediaPlayer.allAlbums[indexCurrentAlbum].albumList
-        } else if(playlistName == "Artist") {
-            indexCurrentArtist= intent.getSerializableExtra("ARTIST POSITION") as Int
-            MyMediaPlayer.allArtists[indexCurrentArtist].musicList
-        } else {
-            val allPlaylists = MyMediaPlayer.allPlaylists
-            allPlaylists.first{it.listName == playlistName}.musicList
-        }
-
         // On récupère notre musique à modifier :
-        givenPosition = intent.getSerializableExtra("POSITION") as Int
-        musicFile = currentPlaylist[givenPosition]
+        val path = intent.getSerializableExtra("PATH") as String
+        musicFile = MyMediaPlayer.allMusics.first{it.path == path}
 
+        // On récupère la position de notre musique dans les playlists utilisés par le lecteur :
         indexCurrentPlaylist = MyMediaPlayer.currentPlaylist.indexOf(musicFile)
         indexInitialPlaylist = MyMediaPlayer.initialPlaylist.indexOf(musicFile)
+
+        // Si on a déjà initialisé la liste d'albums/artistes (par ex : si on est dans un album/artiste), on récupère l'album et la position dans l'album :
+        if (MyMediaPlayer.allAlbums.size > 0){
+            for (position in 0 until MyMediaPlayer.allAlbums.size){
+                if (MyMediaPlayer.allAlbums[position].albumList.contains(musicFile)){
+                    albumPosition = position
+                    positionInAlbum = MyMediaPlayer.allAlbums[position].albumList.indexOf(musicFile)
+                    break
+                }
+            }
+        }
+
+        if (MyMediaPlayer.allArtists.size > 0){
+            for (position in 0 until MyMediaPlayer.allArtists.size){
+                if (MyMediaPlayer.allArtists[position].musicList.contains(musicFile)){
+                    artistPosition = position
+                    positionInArtist = MyMediaPlayer.allArtists[position].musicList.indexOf(musicFile)
+                    break
+                }
+            }
+        }
+        Log.d("position Artist", artistPosition.toString())
+        Log.d("position in Artist", positionInArtist.toString())
 
         // On récupère les différents champs modifiable :
         albumCoverField = findViewById(R.id.album_image)
@@ -147,27 +157,27 @@ class ModifyMusicInfoActivity : Tools() {
             MyMediaPlayer.initialPlaylist[indexInitialPlaylist] = musicFile
         }
         // Si nous venons d'un album ou d'un artiste, changeons aussi les données la bas :
-        if (indexCurrentAlbum != -1){
-            val album = MyMediaPlayer.allAlbums[indexCurrentAlbum]
+        if (albumPosition != -1){
+            val album = MyMediaPlayer.allAlbums[albumPosition]
             if (musicFile.album != album.albumName || musicFile.artist != album.artist){
-                album.albumList.remove(musicFile)
+                album.albumList.removeAt(positionInAlbum)
             } else {
-                MyMediaPlayer.allAlbums[indexCurrentAlbum].albumList[givenPosition] = musicFile
+                MyMediaPlayer.allAlbums[albumPosition].albumList[positionInAlbum] = musicFile
             }
-        } else if (indexCurrentArtist != -1){
-            val artist = MyMediaPlayer.allArtists[indexCurrentArtist]
+        }
+        if (artistPosition != -1){
+            val artist = MyMediaPlayer.allArtists[artistPosition]
             if (musicFile.artist != artist.artistName){
-                artist.musicList.remove(musicFile)
+                artist.musicList.removeAt(positionInArtist)
             } else {
-                MyMediaPlayer.allArtists[indexCurrentArtist].musicList[givenPosition] = musicFile
+                MyMediaPlayer.allArtists[artistPosition].musicList[positionInArtist] = musicFile
             }
         }
         MyMediaPlayer.modifiedSong = true
 
-        returnIntent.putExtra("POSITION", givenPosition)
         setResult(RESULT_OK,returnIntent)
 
-        GlobalScope.launch(Dispatchers.IO) {
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
             launch {
                 writeAllAsync(
                     MyMediaPlayer.allMusics,
