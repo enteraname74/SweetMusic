@@ -11,16 +11,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.IOException
 
-class ArtistsFragment : Fragment(), Artists.OnArtistsListener {
+class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQueryTextListener {
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var adapter: Artists
     private var artists = ArrayList<Artist>()
     private val mediaPlayer = MyMediaPlayer.getInstance
+    private lateinit var searchView : SearchView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +63,9 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_artists, container, false)
 
+        searchView = view.findViewById(R.id.search_view)
+        searchView.setOnQueryTextListener(this)
+
         menuRecyclerView = view.findViewById(R.id.menu_artist_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
         menuRecyclerView.adapter = adapter
@@ -76,6 +81,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener {
 
     override fun onResume() {
         super.onResume()
+        searchView.clearFocus()
         if (MyMediaPlayer.allMusics.size > 0) {
             val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
             var currentArtist: Artist
@@ -159,8 +165,48 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener {
 
     override fun onArtistClick(position: Int) {
         val intent = Intent(context, SelectedArtistActivity::class.java)
-        intent.putExtra("POSITION", position)
+        val artist = artists[position]
+        val globalPosition = MyMediaPlayer.allArtists.indexOf(artist)
+
+        intent.putExtra("POSITION", globalPosition)
 
         startActivity(intent)
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
+        try {
+            if (p0 != null) {
+                val list = ArrayList<Artist>()
+
+                artists = if(p0 == ""){
+                    MyMediaPlayer.allArtists
+                } else {
+                    for (artist: Artist in MyMediaPlayer.allArtists) {
+                        if (artist.artistName.lowercase().contains(p0.lowercase())){
+                            list.add(artist)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        list
+                    } else {
+                        ArrayList<Artist>()
+                    }
+                }
+                adapter.allArtists = artists
+                adapter.notifyDataSetChanged()
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
     }
 }
