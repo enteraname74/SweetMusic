@@ -41,6 +41,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = MusicList(musics, "Main",activity?.applicationContext as Context, this)
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onCreateView(
@@ -81,6 +82,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             MyMediaPlayer.dataWasChanged = false
         }
         adapter.notifyDataSetChanged()
+
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onMusicClick(position: Int) {

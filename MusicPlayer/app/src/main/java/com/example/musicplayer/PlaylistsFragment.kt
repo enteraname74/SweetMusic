@@ -48,7 +48,6 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
             playlistsNames.add(element.listName)
         }
         adapter = Playlists(playlists,context as Context,this,R.layout.playlist_file_linear)
-
         mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
@@ -81,6 +80,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         playlists = MyMediaPlayer.allPlaylists
         adapter.allPlaylists = playlists
         adapter.notifyDataSetChanged()
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onPlaylistClick(position: Int) {

@@ -274,8 +274,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-
-        Log.d("TIME", time.toString())
     }
 
     override fun onAudioFocusChange(focusChange: Int) {

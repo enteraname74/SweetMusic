@@ -78,6 +78,9 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedArtistActivity) }
+
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+
     }
 
     override fun onResume() {
@@ -127,6 +130,9 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
+
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+
     }
 
     override fun onMusicClick(position: Int) {

@@ -531,5 +531,7 @@ class MusicPlayerActivity : Tools() {
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
+
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 }

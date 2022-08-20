@@ -16,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
+class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
     private lateinit var playlist : Playlist
     private var playlistPosition : Int = 0
     private lateinit var adapter : MusicList
@@ -39,75 +39,11 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         allMusicsBackup = ArrayList(musics.map { it.copy() })
 
         searchView = findViewById(R.id.search_view)
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-            override fun onQueryTextSubmit(p0: String?): Boolean {
-                try {
-                    if (p0 != null) {
-                        Log.d("TEXTE", p0.toString())
-                        val list = ArrayList<Music>()
+        searchView.setOnQueryTextListener(this)
 
-                        if(p0 == ""){
-                            musics = allMusicsBackup
-                            adapter.musics = musics
-                            adapter.notifyDataSetChanged()
-                        } else {
-                            for (music: Music in allMusicsBackup) {
-                                if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                                    list.add(music)
-                                }
-                            }
-
-                            if (list.size > 0) {
-                                musics = list
-                                adapter.musics = musics
-                                adapter.notifyDataSetChanged()
-                            }
-                        }
-                    }
-                } catch (error : Error){
-                    Log.d("ERROR",error.toString())
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(p0: String?): Boolean {
-                try {
-                    if (p0 != null) {
-                        Log.d("TEXTE", p0.toString())
-                        val list = ArrayList<Music>()
-
-                        if(p0 == ""){
-                            musics = allMusicsBackup
-                            adapter.musics = musics
-                            adapter.notifyDataSetChanged()
-                        } else {
-                            for (music: Music in allMusicsBackup) {
-                                if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                                    list.add(music)
-                                }
-                            }
-
-                            if (list.size > 0) {
-                                musics = list
-                                adapter.musics = musics
-                                adapter.notifyDataSetChanged()
-                            }
-                        }
-                    }
-                } catch (error : Error){
-                    Log.d("ERROR",error.toString())
-                }
-                return true
-            }
-        })
-
-        GlobalScope.launch(Dispatchers.IO) {
-            launch {
-                adapter = MusicList(musics, playlist.listName, applicationContext, this@SelectedPlaylistActivity)
-                menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
-                menuRecyclerView.adapter = adapter
-            }
-        }
+        adapter = MusicList(musics, playlist.listName, applicationContext, this@SelectedPlaylistActivity)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
+        menuRecyclerView.adapter = adapter
 
         val playlistName = findViewById<TextView>(R.id.playlist_name)
         playlistName?.text = playlist.listName
@@ -143,6 +79,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
+
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onResume() {
@@ -193,6 +131,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
         }
         val addSongs = findViewById<ImageView>(R.id.add_songs)
         addSongs.setOnClickListener{ onAddSongsClick() }
+
+        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+
     }
 
     private fun onAddSongsClick(){
@@ -290,5 +231,65 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener {
             allMusicsBackup = MyMediaPlayer.allPlaylists[playlistPosition].musicList
             adapter.notifyDataSetChanged()
         }
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        try {
+            if (p0 != null) {
+                Log.d("TEXTE", p0.toString())
+                val list = ArrayList<Music>()
+
+                if(p0 == ""){
+                    musics = allMusicsBackup
+                    adapter.musics = musics
+                    adapter.notifyDataSetChanged()
+                } else {
+                    for (music: Music in allMusicsBackup) {
+                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(music)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        musics = list
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        try {
+            if (p0 != null) {
+                Log.d("TEXTE", p0.toString())
+                val list = ArrayList<Music>()
+
+                if(p0 == ""){
+                    musics = allMusicsBackup
+                    adapter.musics = musics
+                    adapter.notifyDataSetChanged()
+                } else {
+                    for (music: Music in allMusicsBackup) {
+                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(music)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        musics = list
+                        adapter.musics = musics
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
     }
 }

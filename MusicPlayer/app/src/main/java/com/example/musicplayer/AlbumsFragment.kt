@@ -47,6 +47,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
         }
         MyMediaPlayer.allAlbums = albums
         adapter = Albums(albums,context as Context,this)
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onCreateView(
@@ -100,6 +101,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
             MyMediaPlayer.allAlbums = albums
             adapter.allAlbums = albums
             adapter.notifyDataSetChanged()
+            mediaPlayer.setOnCompletionListener { playNextSong() }
         }
     }
 
