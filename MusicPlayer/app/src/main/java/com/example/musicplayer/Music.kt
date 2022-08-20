@@ -10,5 +10,4 @@ data class Music(
     var albumCover: ByteArray?,
     var duration: Long,
     var path: String,
-    var favorite: Boolean = false
-        ) : Serializable
+    var favorite: Boolean = false ) : Serializable

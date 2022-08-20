@@ -11,6 +11,14 @@
         android:orientation="vertical"
         android:background="@color/primary_color">
 
+        <android.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/search_view_shape">
+        </android.widget.SearchView>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menu_album_recycler_view"
             android:layout_width="match_parent"

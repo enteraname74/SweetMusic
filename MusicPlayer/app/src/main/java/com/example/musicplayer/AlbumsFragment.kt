@@ -11,15 +11,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.IOException
 
-class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
+class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTextListener {
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Albums
     private var albums = ArrayList<Album>()
+    private lateinit var searchView : SearchView
     private val mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +59,9 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_albums, container, false)
 
+        searchView = view.findViewById(R.id.search_view)
+        searchView.setOnQueryTextListener(this)
+
         menuRecyclerView = view.findViewById(R.id.menu_album_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
         menuRecyclerView.adapter = adapter
@@ -72,7 +77,9 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
 
     override fun onResume() {
         super.onResume()
+        searchView.clearFocus()
         Log.d("FRAG ALBUM RES","")
+
         if (MyMediaPlayer.allMusics.size > 0) {
             val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
             var currentAlbum: Album
@@ -101,9 +108,9 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
             }
             MyMediaPlayer.allAlbums = albums
             adapter.allAlbums = albums
-            adapter.notifyDataSetChanged()
-            mediaPlayer.setOnCompletionListener { playNextSong() }
         }
+        adapter.notifyDataSetChanged()
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     private fun playNextSong(){
@@ -158,8 +165,52 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener {
 
     override fun onAlbumClick(position: Int) {
         val intent = Intent(context,SelectedAlbumActivity::class.java)
-        intent.putExtra("POSITION", position)
+        val album = albums[position]
+        val globalPosition = MyMediaPlayer.allAlbums.indexOf(album)
+
+        intent.putExtra("POSITION", globalPosition)
 
         startActivity(intent)
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
+        try {
+            if (p0 != null) {
+                val list = ArrayList<Album>()
+
+                if(p0 == ""){
+                    albums = MyMediaPlayer.allAlbums
+                    adapter.allAlbums = albums
+                    adapter.notifyDataSetChanged()
+                } else {
+                    for (album: Album in MyMediaPlayer.allAlbums) {
+                        if ((album.albumName.lowercase().contains(p0.lowercase())) || (album.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(album)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        albums = list
+                        adapter.allAlbums = albums
+                        adapter.notifyDataSetChanged()
+                    } else {
+                        albums = ArrayList<Album>()
+                        adapter.allAlbums = albums
+                        adapter.notifyDataSetChanged()
+                    }
+                }
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
     }
 }

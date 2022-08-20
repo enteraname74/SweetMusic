@@ -53,7 +53,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         val view = inflater.inflate(R.layout.fragment_musics, container, false)
 
         searchView = view.findViewById(R.id.search_view)
-
         searchView.setOnQueryTextListener(this)
 
         menuRecyclerView = view.findViewById(R.id.menu_recycler_view)
