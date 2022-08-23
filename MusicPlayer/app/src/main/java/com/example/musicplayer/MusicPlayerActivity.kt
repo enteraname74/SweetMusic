@@ -7,10 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.media.MediaRouter
+import android.media.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -30,7 +27,7 @@ import java.io.IOException
 
 
 // Classe représentant la lecture d'une musique :
-class MusicPlayerActivity : Tools() {
+class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     private lateinit var titleTv : TextView
     lateinit var currentTimeTv : TextView
@@ -45,12 +42,6 @@ class MusicPlayerActivity : Tools() {
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
     private lateinit var sort : ImageView
-    private lateinit var audioManager : AudioManager
-    private lateinit var audioAttributes : AudioAttributes
-    private lateinit var audioFocusRequest : AudioFocusRequest
-    private lateinit var onAudioFocusChange: AudioManager.OnAudioFocusChangeListener
-    private var albumPosition = -1
-    private var artistPosition = -1
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
@@ -58,6 +49,9 @@ class MusicPlayerActivity : Tools() {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
+        println("create")
+
+        sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
 
         titleTv = findViewById(R.id.song_title)
         currentTimeTv = findViewById(R.id.current_time)
@@ -75,76 +69,6 @@ class MusicPlayerActivity : Tools() {
 
         titleTv.isSelected = true
 
-        /*
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
-            Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..","")
-                    MyMediaPlayer.doesASongWillBePlaying = false
-                }
-            }
-        }
-
-        audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
-            .build()
-
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this, "Cannot launch the music", Toast.LENGTH_SHORT).show()
-            }
-
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                Log.d("start music", "")
-                setRessourcesWithMusic()
-
-                this@MusicPlayerActivity.runOnUiThread(myThread)
-
-                seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                    override fun onProgressChanged(
-                        seekBar: SeekBar?,
-                        progress: Int,
-                        fromUser: Boolean
-                    ) {
-                        if (fromUser) {
-                            Log.d("THERE", progress.toString())
-                            mediaPlayer.seekTo(progress)
-                        }
-                    }
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    }
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    }
-
-                })
-            }
-
-            else -> {
-                Toast.makeText(this, "AN unknown error has come up", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-         */
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
 
@@ -315,15 +239,15 @@ class MusicPlayerActivity : Tools() {
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
         if (!sameMusic) {
+            Log.d("before reset","")
             mediaPlayer.reset()
+            Log.d("after reset","")
             try {
                 mediaPlayer.setDataSource(currentSong.path)
-                mediaPlayer.prepare()
-                mediaPlayer.start()
-                seekBar.progress = 0
-                seekBar.max = mediaPlayer.duration
-                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                mediaPlayer.setOnPreparedListener(this)
+                mediaPlayer.prepareAsync()
             } catch (e: IOException) {
+                Log.e("ERROR MEDIA PLAYER", e.toString())
                 e.printStackTrace()
             }
         } else {
@@ -360,22 +284,6 @@ class MusicPlayerActivity : Tools() {
     }
 
     override fun pausePlay(){
-        /*
-        Log.d("ML!,ZF",audioManager.requestAudioFocus(audioFocusRequest).toString())
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-            }
-
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-
-            }
-            else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-         */
         if(mediaPlayer.isPlaying){
             mediaPlayer.pause()
             pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
@@ -530,5 +438,13 @@ class MusicPlayerActivity : Tools() {
         totalTimeTv.text = convertDuration(currentSong.duration)
 
         mediaPlayer.setOnCompletionListener { playNextSong() }
+    }
+
+    override fun onPrepared(p0: MediaPlayer?) {
+        Log.d("MEDIA PLAYER", "PREPARED")
+        mediaPlayer.start()
+        seekBar.progress = 0
+        seekBar.max = mediaPlayer.duration
+        pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
     }
 }

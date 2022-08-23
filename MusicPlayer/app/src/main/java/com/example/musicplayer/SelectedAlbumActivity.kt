@@ -142,7 +142,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
             sameMusic = false
         }
         // Vérifions si on change de playlist :
@@ -158,6 +157,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("ALBUM POSITION", albumPosition)
+        println("start mp activity")
 
         startActivity(intent)
     }

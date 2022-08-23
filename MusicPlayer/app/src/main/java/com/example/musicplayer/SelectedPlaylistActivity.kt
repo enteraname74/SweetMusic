@@ -164,7 +164,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
             sameMusic = false
         }
         // Vérifions si on change de playlist :
