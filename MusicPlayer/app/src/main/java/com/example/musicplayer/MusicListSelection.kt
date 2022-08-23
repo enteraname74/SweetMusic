@@ -15,7 +15,7 @@ import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
 data class MusicListSelection(
-    val musics : ArrayList<Music>,
+    var musics : ArrayList<Music>,
     val selectedMusicsPositions : ArrayList<Int>,
     private val context : Context,
     private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicListSelection.MusicListViewHolder>(), Serializable {

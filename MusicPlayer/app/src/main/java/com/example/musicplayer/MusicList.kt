@@ -92,8 +92,7 @@ data class MusicList(
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
-        Log.d("sameMusic ?", (currentMusic == currentPlayedMusic).toString())
-        Log.d("samePlaylist ?", (MyMediaPlayer.playlistName == listName).toString())
+
         if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
             Log.d("CHANGE COLOR", currentPlayedMusic.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))

@@ -4,15 +4,17 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 
-class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
-    private var musics = ArrayList<Music>()
+class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, SearchView.OnQueryTextListener {
     private lateinit var adapter : MusicListSelection
+    private lateinit var searchView : SearchView
+    private var searchIsOn = false
     private var selectedMusicsPositions = ArrayList<Int>()
     private lateinit var menuRecyclerView : RecyclerView
 
@@ -20,10 +22,12 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_selection)
 
-        menuRecyclerView = findViewById(R.id.all_songs_list)
-        musics = MyMediaPlayer.allMusics
+        searchView = findViewById(R.id.search_view)
+        searchView.setOnQueryTextListener(this)
 
-        adapter = MusicListSelection(musics,selectedMusicsPositions,applicationContext,this)
+        menuRecyclerView = findViewById(R.id.all_songs_list)
+
+        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsPositions,applicationContext,this)
 
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
@@ -34,41 +38,18 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
         cancelButton.setOnClickListener{ onCancelButtonClick() }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
-        if (MyMediaPlayer.currentIndex != -1){
-            infoSongPlaying.visibility = View.VISIBLE
-            songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo.setImageResource(R.drawable.michael)
-            }
-
-            songTitleInfo.isSelected = true
-        }
-    }
-
     override fun onMusicClick(position: Int) {
 
-        if (position in selectedMusicsPositions){
-            selectedMusicsPositions.remove(position)
+        val selectedMusic = adapter.musics[position]
+        val globalPosition = MyMediaPlayer.allMusics.indexOf(selectedMusic)
+
+        if (globalPosition in selectedMusicsPositions){
+            selectedMusicsPositions.remove(globalPosition)
         } else {
-            selectedMusicsPositions.add(position)
+            selectedMusicsPositions.add(globalPosition)
         }
 
-        adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        adapter.notifyDataSetChanged()
     }
 
     private fun onValidateButtonClick(){
@@ -82,5 +63,43 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener {
         val returnIntent = Intent()
         setResult(RESULT_CANCELED, returnIntent)
         finish()
+    }
+
+    override fun onQueryTextSubmit(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    override fun onQueryTextChange(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
+        try {
+            if (p0 != null) {
+                val list = ArrayList<Music>()
+
+                if(p0 == ""){
+                    searchIsOn = false
+                    adapter.musics = MyMediaPlayer.allMusics
+                } else {
+                    searchIsOn = true
+                    for (music: Music in MyMediaPlayer.allMusics) {
+                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(music)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        adapter.musics = list
+                    } else {
+                        adapter.musics = ArrayList<Music>()
+                    }
+                }
+                adapter.notifyDataSetChanged()
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
     }
 }

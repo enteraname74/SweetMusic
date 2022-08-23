@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
     android:orientation="vertical"
@@ -8,79 +8,49 @@
     android:background="@color/primary_color"
     tools:context=".MusicSelectionActivity">
 
-    <LinearLayout
-        android:id="@+id/titleMenu"
+    <TextView
+        android:gravity="center_horizontal|center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/primary_color">
+        android:textColor="@color/third_color"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
+        android:text="@string/app_name">
 
-        <TextView
-            android:gravity="center_horizontal|center_vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/third_color"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="5dp"
-            android:text="@string/app_name">
+    </TextView>
 
-        </TextView>
-
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal|center_vertical"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/playlist_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ADD SONGS"
-                android:textColor="@color/third_color">
-
-            </TextView>
-        </RelativeLayout>
-    </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/playlists"
+    <TextView
+        android:id="@+id/playlist_name"
         android:layout_width="match_parent"
-        android:layout_height="534dp"
-        android:layout_below="@+id/titleMenu"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:text="ADD SONGS"
+        android:gravity="center_horizontal"
+        android:textColor="@color/third_color">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/all_songs_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/secondary_color"
-            android:visibility="visible" />
-
-        <TextView
-            android:id="@+id/no_playlists_found"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/third_color"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:background="@color/secondary_color"
-            android:text="NO PLAYLISTS FOUND"
-            android:gravity="center_horizontal|center_vertical"
-            android:visibility="gone">
-        </TextView>
+    </TextView>
 
 
-    </RelativeLayout>
+    <android.widget.SearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_margin="10dp"
+        android:background="@drawable/search_view_shape">
+    </android.widget.SearchView>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/all_songs_list"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:layout_height="0dp"
+        android:background="@color/secondary_color"
+        android:visibility="visible" />
 
     <LinearLayout
         android:id="@+id/validate_selection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/playlists"
         android:gravity="center_horizontal|center_vertical">
 
         <Button
@@ -108,4 +78,4 @@
         </Button>
 
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

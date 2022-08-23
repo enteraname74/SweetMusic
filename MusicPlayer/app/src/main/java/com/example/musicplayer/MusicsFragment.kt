@@ -28,7 +28,7 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.ObjectOutputStream
 
-class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener, MediaPlayer.OnPreparedListener {
+class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private val saveAllMusicsFile = "allMusics.musics"
     private lateinit var adapter : MusicList
@@ -52,6 +52,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         searchView = view.findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
+        searchView.setOnCloseListener(this)
 
         menuRecyclerView = view.findViewById(R.id.menu_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(view.context)
@@ -273,7 +274,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         return true
     }
 
-    override fun onPrepared(p0: MediaPlayer?) {
-        TODO("Not yet implemented")
+    override fun onClose(): Boolean {
+        searchView.clearFocus()
+        return true
     }
 }
