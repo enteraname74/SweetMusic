@@ -186,10 +186,8 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
             if (p0 != null) {
                 val list = ArrayList<Album>()
 
-                if(p0 == ""){
-                    albums = MyMediaPlayer.allAlbums
-                    adapter.allAlbums = albums
-                    adapter.notifyDataSetChanged()
+                albums = if(p0 == ""){
+                    MyMediaPlayer.allAlbums
                 } else {
                     for (album: Album in MyMediaPlayer.allAlbums) {
                         if ((album.albumName.lowercase().contains(p0.lowercase())) || (album.artist.lowercase().contains(p0.lowercase()))){
@@ -198,15 +196,13 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                     }
 
                     if (list.size > 0) {
-                        albums = list
-                        adapter.allAlbums = albums
-                        adapter.notifyDataSetChanged()
+                        list
                     } else {
-                        albums = ArrayList<Album>()
-                        adapter.allAlbums = albums
-                        adapter.notifyDataSetChanged()
+                        ArrayList<Album>()
                     }
                 }
+                adapter.allAlbums = albums
+                adapter.notifyDataSetChanged()
             }
         } catch (error : Error){
             Log.d("ERROR",error.toString())

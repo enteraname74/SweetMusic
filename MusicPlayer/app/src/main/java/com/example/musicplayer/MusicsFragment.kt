@@ -1,10 +1,10 @@
 package com.example.musicplayer
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -28,20 +28,18 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.ObjectOutputStream
 
-class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
+class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener, MediaPlayer.OnPreparedListener {
 
     private val saveAllMusicsFile = "allMusics.musics"
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
-    private var musics = MyMediaPlayer.allMusics
-    private var allMusicsBackup = MyMediaPlayer.allMusics
     private lateinit var searchView : SearchView
     private var searchIsOn = false
     private val mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = MusicList(musics, "Main",activity?.applicationContext as Context, this)
+        adapter = MusicList(ArrayList<Music>(), "Main",activity?.applicationContext as Context, this)
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
@@ -73,14 +71,13 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         searchView.clearFocus()
         Log.d("RESUME FRAG","")
 
-        allMusicsBackup = MyMediaPlayer.allMusics
         // Si on est dans la barre e recherche, on ne met pas tout de suite à jour les musiques pour rester dans la barre :
         if(!searchIsOn){
-            musics = MyMediaPlayer.allMusics
+            adapter.musics = MyMediaPlayer.allMusics
         }
         if (MyMediaPlayer.dataWasChanged){
             // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
-            musics = MyMediaPlayer.allMusics
+            adapter.musics = MyMediaPlayer.allMusics
             MyMediaPlayer.dataWasChanged = false
         }
         adapter.notifyDataSetChanged()
@@ -96,10 +93,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             sameMusic = false
         }
         // Vérifions si on change de playlist :
-        if (!musics.equals(MyMediaPlayer.initialPlaylist)) {
+        if (adapter.musics != MyMediaPlayer.initialPlaylist) {
             println("there")
-            MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
+            MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
+            MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.playlistName = "Main"
             MyMediaPlayer.doesASongWillBePlaying = false
             sameMusic = false
@@ -124,11 +121,13 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 true
             }
             1 -> {
-                musics.removeAt(item.groupId)
+                val musicToRemove = adapter.musics[item.groupId]
+                adapter.musics.removeAt(item.groupId)
                 adapter.notifyItemRemoved(item.groupId)
+                MyMediaPlayer.allMusics.remove(musicToRemove)
 
                 GlobalScope.launch(Dispatchers.IO) {
-                    launch { writeAllMusicsToFile(saveAllMusicsFile, musics) }
+                    launch { writeAllMusicsToFile(MyMediaPlayer.allMusics) }
                 }
 
                 Toast.makeText(
@@ -141,22 +140,22 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             2 -> {
                 // MODIFY INFOS :
                 val intent = Intent(context, ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH", musics[item.groupId].path)
+                intent.putExtra("PATH", adapter.musics[item.groupId].path)
                 resultLauncher.launch(intent)
                 true
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove(musics[item.groupId])
-                MyMediaPlayer.currentPlaylist.remove(musics[item.groupId])
+                MyMediaPlayer.initialPlaylist.remove(adapter.musics[item.groupId])
+                MyMediaPlayer.currentPlaylist.remove(adapter.musics[item.groupId])
 
                 MyMediaPlayer.initialPlaylist.add(
                     MyMediaPlayer.currentIndex + 1,
-                    musics[item.groupId]
+                    adapter.musics[item.groupId]
                 )
                 MyMediaPlayer.currentPlaylist.add(
                     MyMediaPlayer.currentIndex + 1,
-                    musics[item.groupId]
+                    adapter.musics[item.groupId]
                 )
                 Toast.makeText(
                     context,
@@ -173,11 +172,11 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
-    private fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
+    private fun writeAllMusicsToFile(content : ArrayList<Music>){
         MyMediaPlayer.allMusics = content
         val path = context?.applicationContext?.filesDir
         try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllMusicsFile)))
             oos.writeObject(content)
             oos.close()
         } catch (error : IOException){
@@ -251,31 +250,30 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
                 if(p0 == ""){
                     searchIsOn = false
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
+                    adapter.musics = MyMediaPlayer.allMusics
                 } else {
                     searchIsOn = true
-                    for (music: Music in allMusicsBackup) {
+                    for (music: Music in MyMediaPlayer.allMusics) {
                         if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                             list.add(music)
                         }
                     }
 
                     if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
+                        adapter.musics = list
                     } else {
-                        musics = ArrayList<Music>()
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
+                        adapter.musics = ArrayList<Music>()
                     }
                 }
+                adapter.notifyDataSetChanged()
             }
         } catch (error : Error){
             Log.d("ERROR",error.toString())
         }
         return true
+    }
+
+    override fun onPrepared(p0: MediaPlayer?) {
+        TODO("Not yet implemented")
     }
 }

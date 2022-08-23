@@ -7,7 +7,6 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.AudioManager
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -25,9 +24,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import java.io.*
-import kotlin.system.measureTimeMillis
 
-class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocusChangeListener, NavigationView.OnNavigationItemSelectedListener  {
+class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
@@ -193,31 +191,6 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
         }
     }
 
-    override fun onMusicClick(position: Int) {
-        var sameMusic = true
-        MyMediaPlayer.doesASongWillBePlaying = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            MyMediaPlayer.getInstance.reset()
-            sameMusic = false
-        }
-        // Vérifions si on change de playlist :
-        if (musics != MyMediaPlayer.initialPlaylist) {
-            MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.playlistName = "Main"
-            MyMediaPlayer.doesASongWillBePlaying = false
-            sameMusic = false
-        }
-
-        MyMediaPlayer.currentIndex = position
-
-        val intent = Intent(this@MainActivity,MusicPlayerActivity::class.java)
-        intent.putExtra("SAME MUSIC", sameMusic)
-
-        startActivity(intent)
-    }
-
     override fun onResume() {
         super.onResume()
 
@@ -230,68 +203,46 @@ class MainActivity : MusicList.OnMusicListener, Tools(),AudioManager.OnAudioFocu
 
         noSongPlaying.visibility = View.VISIBLE
 
-        val time = measureTimeMillis {
-
-            if (MyMediaPlayer.currentIndex != -1) {
-                CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
-                    launch {
-                        withContext(Dispatchers.Main) {
-                            noSongPlaying.visibility = View.GONE
-                            infoSongPlaying.visibility = View.VISIBLE
-                            songTitleInfo.text =
-                                MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                                // Passons d'abord notre byteArray en bitmap :
-                                val bytes =
-                                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                                var bitmap: Bitmap? = null
-                                if (bytes != null && bytes.isNotEmpty()) {
-                                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                                }
-                                withContext(Dispatchers.Main) {
-                                    albumCoverInfo.setImageBitmap(bitmap)
-                                }
-                            } else {
-                                albumCoverInfo.setImageResource(R.drawable.michael)
+        if (MyMediaPlayer.currentIndex != -1) {
+            CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+                launch {
+                    withContext(Dispatchers.Main) {
+                        noSongPlaying.visibility = View.GONE
+                        infoSongPlaying.visibility = View.VISIBLE
+                        songTitleInfo.text =
+                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                        if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                            // Passons d'abord notre byteArray en bitmap :
+                            val bytes =
+                                MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                            var bitmap: Bitmap? = null
+                            if (bytes != null && bytes.isNotEmpty()) {
+                                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                             }
+                            withContext(Dispatchers.Main) {
+                                albumCoverInfo.setImageBitmap(bitmap)
+                            }
+                        } else {
+                            albumCoverInfo.setImageResource(R.drawable.michael)
                         }
                     }
                 }
-
-                pausePlay?.setOnClickListener { pausePlay() }
-                bottomInfos.setOnClickListener {
-                    onBottomMenuClick(
-                        MyMediaPlayer.currentIndex,
-                        this@MainActivity
-                    )
-                }
-                songTitleInfo?.isSelected = true
             }
+
+            pausePlay?.setOnClickListener { pausePlay() }
+            bottomInfos.setOnClickListener {
+                onBottomMenuClick(
+                    MyMediaPlayer.currentIndex,
+                    this@MainActivity
+                )
+            }
+            songTitleInfo?.isSelected = true
         }
 
         if (!mediaPlayer.isPlaying) {
             pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
         } else {
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
-    }
-
-    override fun onAudioFocusChange(focusChange: Int) {
-        Log.d("doesA..",MyMediaPlayer.doesASongWillBePlaying.toString())
-        Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
-        Log.d("focusChange", focusChange.toString())
-        when (focusChange) {
-            AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-            else -> {
-                if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
-                    println("loss focus")
-                    mediaPlayer.pause()
-                    val pausePlay = findViewById<ImageView>(R.id.pause_play)
-                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                }
-                Log.d("change does..","")
-                MyMediaPlayer.doesASongWillBePlaying = false
-            }
         }
     }
 
