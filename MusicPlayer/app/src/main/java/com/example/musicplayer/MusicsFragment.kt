@@ -83,6 +83,11 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
         adapter.notifyDataSetChanged()
 
+        val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
+        val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
+
+        nextButton.setOnClickListener { playNextSong(adapter) }
+        previousButton.setOnClickListener { playPreviousSong(adapter) }
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 

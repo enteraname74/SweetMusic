@@ -190,12 +190,30 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 true
             }
             1 -> {
+                val musicToRemove = adapter.musics[item.groupId]
                 musics.removeAt(item.groupId)
-                println(allPlaylists[playlistPosition].musicList)
                 adapter.notifyItemRemoved(item.groupId)
+                MyMediaPlayer.allPlaylists[playlistPosition].musicList.remove(musicToRemove)
+
+                // Si la musique est retirée de la playlist favorites, on enlève son statut de favoris :
+                if (musicToRemove.favorite){
+                    val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
+                    MyMediaPlayer.allMusics[globalPosition].favorite = false
+
+                    GlobalScope.launch(Dispatchers.IO){
+                        launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
+                    }
+
+                    for (playlist in MyMediaPlayer.allPlaylists){
+                        if (playlist.musicList.contains(musicToRemove)){
+                            val position = playlist.musicList.indexOf(musicToRemove)
+                            playlist.musicList[position].favorite = false
+                        }
+                    }
+                }
 
                 GlobalScope.launch(Dispatchers.IO){
-                    launch{writePlaylistsToFile(savePlaylistsFile,allPlaylists)}
+                    launch{writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)}
                 }
 
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
