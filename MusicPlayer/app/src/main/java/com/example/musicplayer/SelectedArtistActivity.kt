@@ -1,6 +1,5 @@
 package com.example.musicplayer
 
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -20,7 +19,6 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     private lateinit var artist : Artist
     private var artistPosition : Int = 0
     private lateinit var adapter : MusicList
-    private var allPlaylists = ArrayList<Playlist>()
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var searchView : SearchView
@@ -165,11 +163,13 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 true
             }
             1 -> {
+                val musicToRemove = adapter.musics[item.groupId]
                 musics.removeAt(item.groupId)
                 adapter.notifyItemRemoved(item.groupId)
+                MyMediaPlayer.allMusics.remove(musicToRemove)
 
                 GlobalScope.launch(Dispatchers.IO){
-                    launch{writePlaylistsToFile(savePlaylistsFile,allPlaylists)}
+                    launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
                 }
 
                 Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
