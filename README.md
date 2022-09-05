@@ -3,16 +3,17 @@
 ## Current functionalities :
 
 Currently, with this app, you can :
-    - Fetch all the music files in your device
-    - Create playlists and add songs to it
-    - Add your favourites songs in the dedicated Favorites playlist
-    - Modify the infos of your songs (Album cover, songs's name, artist's name, album's name)
-    - Listen to your albums and artists
-    - Search a specific music, album or artist
-    - shuffle your current playlist or just listen to the current song that is played constantly
-    - Add or remove songs from the song queue
-    - Download the current state of your songs (more details below)
-    - Set data for your songs (more details below)
+
+- Fetch all the music files in your device
+- Create playlists and add songs to it
+- Add your favourites songs in the dedicated Favorites playlist
+- Modify the infos of your songs (Album cover, songs's name, artist's name, album's name)
+- Listen to your albums and artists
+- Search a specific music, album or artist
+- shuffle your current playlist or just listen to the current song that is played constantly
+- Add or remove songs from the song queue
+- Download the current state of your songs (more details below)
+- Set data for your songs (more details below)
     
 ## Downloading / Setting data :
 
