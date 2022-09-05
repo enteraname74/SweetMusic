@@ -21,8 +21,9 @@ Currently, with this app, you can :
 
 With this app you can download the current state of your data (in the main menu, swiping left to right from the border of the screen shows a sliding menu).
 Downloading the data of the app will save two files :
-    - allMusics.musics : a file that contains all the infos about your musics
-    - allPlaylists.playlists : a file that contains all the infos about your playlists
+
+- allMusics.musics : a file that contains all the infos about your musics
+- allPlaylists.playlists : a file that contains all the infos about your playlists
 
 It's an interesting tool when you want to be sure that you have a backup of your infos (not the songs themselves but the infos about them (album, name, artist, album)) 
 Those files will be downloaded inside your Download folder.
