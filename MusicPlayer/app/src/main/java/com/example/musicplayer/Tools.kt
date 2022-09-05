@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.Image
 import android.os.Environment
 import android.util.Log
 import android.widget.ImageView
@@ -116,63 +117,6 @@ open class Tools : AppCompatActivity() {
         adapter.notifyDataSetChanged()
         playMusic()
     }
-
-    open fun pausePlay(){
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
-        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        val onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("doesA..", MyMediaPlayer.doesASongWillBePlaying.toString())
-            Log.d("MediaPlayer state", mediaPlayer.isPlaying.toString())
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        val pauseAndPlay: ImageView = findViewById(R.id.pause_play)
-                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..", "")
-                    MyMediaPlayer.doesASongWillBePlaying = false
-                }
-            }
-        }
-
-
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
-            .build()
-
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-            }
-
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                MyMediaPlayer.doesASongWillBePlaying = true
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                } else {
-                    mediaPlayer.start()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                }
-            }
-            else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-
 
     /************************ WRITE OR READ INTO FILES : ***************************/
 

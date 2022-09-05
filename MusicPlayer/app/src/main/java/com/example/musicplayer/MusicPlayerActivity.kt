@@ -18,11 +18,9 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.palette.graphics.Palette
-import kotlinx.android.synthetic.main.activity_music_selection.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.IOException
 
 
@@ -42,6 +40,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
     private lateinit var sort : ImageView
+    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
+    private lateinit var audioAttributes : AudioAttributes
+    private lateinit var audioManager : AudioManager
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
@@ -71,6 +72,28 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
+
+        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            Log.d("focusChange", focusChange.toString())
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+                else -> {
+                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                        println("loss focus")
+                        mediaPlayer.pause()
+                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                    Log.d("change does..", "")
+                    MyMediaPlayer.doesASongWillBePlaying = false
+                }
+            }
+        }
 
         setRessourcesWithMusic()
 
@@ -239,13 +262,28 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
         if (!sameMusic) {
-            Log.d("before reset","")
             mediaPlayer.reset()
-            Log.d("after reset","")
             try {
-                mediaPlayer.setDataSource(currentSong.path)
-                mediaPlayer.setOnPreparedListener(this)
-                mediaPlayer.prepareAsync()
+                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(audioAttributes)
+                    .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                    .build()
+
+                when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                    AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                        Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                    }
+
+                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                        mediaPlayer.setDataSource(currentSong.path)
+                        mediaPlayer.setOnPreparedListener(this)
+                        mediaPlayer.prepareAsync()
+                    }
+                    else -> {
+                        Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } catch (e: IOException) {
                 Log.e("ERROR MEDIA PLAYER", e.toString())
                 e.printStackTrace()
@@ -283,13 +321,30 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         setRessourcesWithMusic()
     }
 
-    override fun pausePlay(){
-        if(mediaPlayer.isPlaying){
-            mediaPlayer.pause()
-            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-        } else {
-            mediaPlayer.start()
-            pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+    private fun pausePlay(){
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .build()
+
+        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+            }
+
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                if(mediaPlayer.isPlaying){
+                    mediaPlayer.pause()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                } else {
+                    mediaPlayer.start()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            else -> {
+                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

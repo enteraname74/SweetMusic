@@ -1,8 +1,12 @@
 package com.example.musicplayer
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -24,10 +28,17 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     private lateinit var searchView : SearchView
     private lateinit var menuRecyclerView : RecyclerView
 
+    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
+    private lateinit var audioAttributes : AudioAttributes
+    private lateinit var audioManager : AudioManager
+
+    private lateinit var pausePlayButton : ImageView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_artist)
 
+        pausePlayButton = findViewById(R.id.pause_play)
         menuRecyclerView = findViewById(R.id.menu_artist_recycler_view)
         artistPosition = intent.getSerializableExtra("POSITION") as Int
 
@@ -79,6 +90,27 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
+        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            Log.d("focusChange", focusChange.toString())
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+                else -> {
+                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                        println("loss focus")
+                        mediaPlayer.pause()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                    Log.d("change does..", "")
+                    MyMediaPlayer.doesASongWillBePlaying = false
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -92,7 +124,6 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val pausePlay = findViewById<ImageView>(R.id.pause_play)
         val nextBtn = findViewById<ImageView>(R.id.next)
         val previousBtn = findViewById<ImageView>(R.id.previous)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
@@ -116,7 +147,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 albumCoverInfo.setImageResource(R.drawable.michael)
             }
 
-            pausePlay?.setOnClickListener{ pausePlay() }
+            pausePlayButton.setOnClickListener{ pausePlay() }
             nextBtn?.setOnClickListener{ playNextSong(adapter) }
             previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
             bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedArtistActivity) }
@@ -124,9 +155,9 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         }
 
         if (!mediaPlayer.isPlaying){
-            pausePlay?.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
         } else {
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
@@ -264,5 +295,32 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             Log.d("ERROR",error.toString())
         }
         return true
+    }
+
+    private fun pausePlay() {
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .build()
+
+        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+            }
+
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                if(mediaPlayer.isPlaying){
+                    mediaPlayer.pause()
+                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                } else {
+                    mediaPlayer.start()
+                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            else -> {
+                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
