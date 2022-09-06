@@ -19,16 +19,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.ObjectOutputStream
 
-class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener, SearchView.OnCloseListener {
+class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
 
     private val saveAllMusicsFile = "allMusics.musics"
     private lateinit var adapter : MusicList
@@ -52,7 +49,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         searchView = view.findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
-        searchView.setOnCloseListener(this)
 
         menuRecyclerView = view.findViewById(R.id.menu_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(view.context)
@@ -117,7 +113,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         startActivity(intent)
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onContextItemSelected(item: MenuItem): Boolean {
         Log.d("music fragment",item.itemId.toString())
 
@@ -132,9 +127,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
-                GlobalScope.launch(Dispatchers.IO) {
-                    launch { writeAllMusicsToFile(MyMediaPlayer.allMusics) }
-                }
+                CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile(MyMediaPlayer.allMusics) }
 
                 Toast.makeText(
                     context,
@@ -276,11 +269,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         } catch (error : Error){
             Log.d("ERROR",error.toString())
         }
-        return true
-    }
-
-    override fun onClose(): Boolean {
-        searchView.clearFocus()
         return true
     }
 }
