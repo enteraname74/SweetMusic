@@ -178,7 +178,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             val data = result.data?.getSerializableExtra("addedSongs") as ArrayList<Int>
             val allMusics = readAllMusicsFromFile(saveAllMusicsFile)
             for (position in data){
-                if (allMusics[position] !in musics){
+                if (musics.find { it.path == allMusics[position].path } == null){
                     musics.add(allMusics[position])
                 }
             }
