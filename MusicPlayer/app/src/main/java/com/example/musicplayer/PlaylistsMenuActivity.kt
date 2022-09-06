@@ -121,13 +121,12 @@ class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
             when (focusChange) {
                 AudioManager.AUDIOFOCUS_GAIN -> println("gain")
                 else -> {
-                    if (mediaPlayer.isPlaying && !MyMediaPlayer.doesASongWillBePlaying) {
+                    if (mediaPlayer.isPlaying) {
                         println("loss focus")
                         mediaPlayer.pause()
                         pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
                     }
                     Log.d("change does..", "")
-                    MyMediaPlayer.doesASongWillBePlaying = false
                 }
             }
         }

@@ -89,7 +89,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     override fun onMusicClick(position: Int) {
         var sameMusic = true
-        MyMediaPlayer.doesASongWillBePlaying = true
 
         if (position != MyMediaPlayer.currentIndex) {
             sameMusic = false
@@ -100,7 +99,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.playlistName = "Main"
-            MyMediaPlayer.doesASongWillBePlaying = false
             sameMusic = false
         }
 

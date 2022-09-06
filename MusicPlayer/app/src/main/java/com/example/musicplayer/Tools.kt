@@ -79,12 +79,10 @@ open class Tools : AppCompatActivity() {
     fun onBottomMenuClick(position : Int, context : Context){
         Log.d("MUSIC POSITION", position.toString())
         var sameMusic = true
-        MyMediaPlayer.doesASongWillBePlaying = true
 
         if (position != MyMediaPlayer.currentIndex) {
             MyMediaPlayer.getInstance.reset()
             sameMusic = false
-            MyMediaPlayer.doesASongWillBePlaying = false
         }
         MyMediaPlayer.currentIndex = position
         Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
