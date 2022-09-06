@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -104,8 +105,11 @@ class ModifyMusicInfoActivity : Tools() {
     private var resultImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.data?.data
-            val inputStream = contentResolver.openInputStream(uri as Uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
+            val bitmap = contentResolver.loadThumbnail(
+                uri as Uri,
+                Size(400, 400),
+                null
+            )
             albumCoverField.setImageBitmap(bitmap)
         }
     }

@@ -18,8 +18,8 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.palette.graphics.Palette
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -95,7 +95,19 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             }
         }
 
-        setRessourcesWithMusic()
+        currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+        initialList.setOnClickListener{ seeList("initialList") }
+        currentList.setOnClickListener{ seeList("currentList") }
+        pausePlay.setOnClickListener{ pausePlay() }
+        nextBtn.setOnClickListener{ playNextSong() }
+        previousBtn.setOnClickListener{ playPreviousSong() }
+        favoriteBtn.setOnClickListener{ setFavorite() }
+        sort.setOnClickListener{ changeSorting() }
+
+        registerForContextMenu(musicIcon)
+
+        playMusic()
 
         this@MusicPlayerActivity.runOnUiThread(myThread)
 
@@ -119,7 +131,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         })
     }
 
-    private fun setRessourcesWithMusic(){
+    private fun setResourcesWithMusic(){
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val background = findViewById<RelativeLayout>(R.id.music_player)
 
@@ -141,12 +153,12 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             bitmap = bitmapDrawable.bitmap
         }
 
-        Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
         val backgroundColor: Palette.Swatch? =
-            if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
-                Palette.from(bitmap).generate().swatches[0]
+            if (Palette.from(bitmap as Bitmap).generate().dominantSwatch == null) {
+                Log.d("CAN'T CHOOSE COLOR","")
+                Palette.from(bitmap as Bitmap).generate().swatches[0]
             } else {
-                Palette.from(bitmap).generate().darkVibrantSwatch
+                Palette.from(bitmap as Bitmap).generate().dominantSwatch
             }
 
         background.setBackgroundColor(backgroundColor?.rgb as Int)
@@ -307,7 +319,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         }
         mediaPlayer.reset()
         Log.d("NEXT","")
-        setRessourcesWithMusic()
+        setResourcesWithMusic()
     }
 
     private fun playPreviousSong(){
@@ -318,7 +330,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             MyMediaPlayer.currentIndex-=1
         }
         mediaPlayer.reset()
-        setRessourcesWithMusic()
+        setResourcesWithMusic()
     }
 
     private fun pausePlay(){
@@ -403,9 +415,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             favoritePlaylist.musicList.add(currentSong)
         }
 
-        GlobalScope.launch(Dispatchers.IO){
-            launch{writeAllAsync(allMusics,allPlaylists)}
-        }
+        CoroutineScope(Dispatchers.IO).launch{ writeAllAsync(allMusics,allPlaylists) }
     }
 
     fun convertDuration(duration: Long): String {
@@ -466,10 +476,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
         val backgroundColor: Palette.Swatch? =
-            if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
+            if (Palette.from(bitmap).generate().dominantSwatch == null) {
                 Palette.from(bitmap).generate().swatches[0]
             } else {
-                Palette.from(bitmap).generate().darkVibrantSwatch
+                Palette.from(bitmap).generate().dominantSwatch
             }
 
         background.setBackgroundColor(backgroundColor?.rgb as Int)

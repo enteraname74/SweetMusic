@@ -8,9 +8,11 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -68,35 +70,43 @@ class ModifyPlaylistInfoActivity : Tools() {
     private var resultImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.data?.data
-            val inputStream = contentResolver.openInputStream(uri as Uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
+            val bitmap = contentResolver.loadThumbnail(
+                uri as Uri,
+                Size(400, 400),
+                null
+            )
             playlistCoverField.setImageBitmap(bitmap)
         }
     }
 
     private fun onValidateButtonClick(){
         // On modifie les éléments du fichier :
-        playlist.listName = playlistNameField.text.toString()
+        // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
+        if (allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == null || allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == playlist ) {
+            playlist.listName = playlistNameField.text.toString()
 
-        val drawable = playlistCoverField.drawable
-        val bitmapDrawable = drawable as BitmapDrawable
-        val bitmap = bitmapDrawable.bitmap
+            val drawable = playlistCoverField.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            val bitmap = bitmapDrawable.bitmap
 
-        val byteArray = bitmapToByteArray(bitmap)
+            val byteArray = bitmapToByteArray(bitmap)
 
-        playlist.playlistCover = byteArray
+            playlist.playlistCover = byteArray
 
-        // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
+            // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
 
-        // Mettons à jour nos playlists :
-        allPlaylists[position] = playlist
+            // Mettons à jour nos playlists :
+            allPlaylists[position] = playlist
 
-        GlobalScope.launch(Dispatchers.IO){
-            launch{writePlaylistsToFile(savePlaylistsFile, allPlaylists)}
+            GlobalScope.launch(Dispatchers.IO) {
+                launch { writePlaylistsToFile(savePlaylistsFile, allPlaylists) }
+            }
+
+            setResult(RESULT_OK)
+            finish()
+        } else {
+            Toast.makeText(this, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
         }
-
-        setResult(RESULT_OK)
-        finish()
     }
 
     private fun onCancelButtonClick(){

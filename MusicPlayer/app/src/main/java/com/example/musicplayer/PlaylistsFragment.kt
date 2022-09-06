@@ -109,7 +109,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
                 - Le nom n'est pas celui de la playlist principale ("Main")
              */
 
-            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && (playlists.find { it.listName == inputText.text.toString() } == null) && (inputText.text.toString() != "Main")) {
+            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && (playlists.find { it.listName == inputText.text.toString().trim() } == null) && (inputText.text.toString() != "Main")) {
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList(),null)
                 playlists.add(newPlaylist)
                 adapter.allPlaylists = playlists
