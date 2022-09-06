@@ -3,16 +3,17 @@
 ## Current functionalities :
 
 Currently, with this app, you can :
-    - Fetch all the music files in your device
-    - Create playlists and add songs to it
-    - Add your favourites songs in the dedicated Favorites playlist
-    - Modify the infos of your songs (Album cover, songs's name, artist's name, album's name)
-    - Listen to your albums and artists
-    - Search a specific music, album or artist
-    - shuffle your current playlist or just listen to the current song that is played constantly
-    - Add or remove songs from the song queue
-    - Download the current state of your songs (more details below)
-    - Set data for your songs (more details below)
+
+- Fetch all the music files in your device
+- Create playlists and add songs to it
+- Add your favourites songs in the dedicated Favorites playlist
+- Modify the infos of your songs (Album cover, songs's name, artist's name, album's name)
+- Listen to your albums and artists
+- Search a specific music, album or artist
+- shuffle your current playlist or just listen to the current song that is played constantly
+- Add or remove songs from the song queue
+- Download the current state of your songs (more details below)
+- Set data for your songs (more details below)
     
 ## Downloading / Setting data :
 
@@ -20,8 +21,9 @@ Currently, with this app, you can :
 
 With this app you can download the current state of your data (in the main menu, swiping left to right from the border of the screen shows a sliding menu).
 Downloading the data of the app will save two files :
-    - allMusics.musics : a file that contains all the infos about your musics
-    - allPlaylists.playlists : a file that contains all the infos about your playlists
+
+- allMusics.musics : a file that contains all the infos about your musics
+- allPlaylists.playlists : a file that contains all the infos about your playlists
 
 It's an interesting tool when you want to be sure that you have a backup of your infos (not the songs themselves but the infos about them (album, name, artist, album)) 
 Those files will be downloaded inside your Download folder.
