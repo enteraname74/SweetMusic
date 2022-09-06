@@ -85,10 +85,12 @@
             android:background="@color/secondary_color"
             android:visibility="visible" />
     </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
         android:layout_height="70dp"
+        android:layout_gravity="bottom"
         android:orientation="horizontal"
         android:layout_below="@+id/playlists"
         android:background="@color/primary_color">

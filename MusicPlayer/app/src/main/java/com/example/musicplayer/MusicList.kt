@@ -1,4 +1,5 @@
 package com.example.musicplayer
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -69,6 +70,7 @@ data class MusicList(
         )
     }
 
+    @SuppressLint("ResourceType")
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
         val currentMusic = musics[position]
         var currentPlayedMusic: Music? = null
@@ -97,7 +99,7 @@ data class MusicList(
             Log.d("CHANGE COLOR", currentPlayedMusic.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         } else {
-            holder.songName?.setTextColor(Color.parseColor("#7da7c5"))
+            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
         }
     }
 

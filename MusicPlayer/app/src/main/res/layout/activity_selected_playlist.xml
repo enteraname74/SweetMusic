@@ -42,6 +42,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:text="PLAYLIST NAME"
+                android:singleLine="true"
                 android:textColor="@color/third_color"
                 android:textSize="20sp">
 
@@ -83,7 +84,7 @@
 
     </LinearLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/playlists"
         android:layout_width="match_parent"
         android:layout_height="537dp"
@@ -93,25 +94,12 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menu_playlist_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:background="@color/secondary_color"
             android:visibility="visible" />
+    </LinearLayout>
 
-        <TextView
-            android:id="@+id/no_playlists_found"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/third_color"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:background="@color/secondary_color"
-            android:text="NO PLAYLISTS FOUND"
-            android:gravity="center_horizontal|center_vertical"
-            android:visibility="gone">
-        </TextView>
-
-
-    </RelativeLayout>
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
