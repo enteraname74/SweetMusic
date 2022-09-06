@@ -36,17 +36,12 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Playlists
     private var playlists = ArrayList<Playlist>()
-    private val playlistsNames = ArrayList<String>()
     private val mediaPlayer = MyMediaPlayer.getInstance
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         playlists = MyMediaPlayer.allPlaylists
 
-        // On récupère une liste des noms des playlists :
-        for (element in playlists){
-            playlistsNames.add(element.listName)
-        }
         adapter = Playlists(playlists,context as Context,this,R.layout.playlist_file_linear)
         mediaPlayer.setOnCompletionListener { playNextSong() }
     }
@@ -114,8 +109,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
                 - Le nom n'est pas celui de la playlist principale ("Main")
              */
 
-            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && !(playlistsNames.contains(inputText.text.toString())) && (inputText.text.toString() != "Main")) {
-                playlistsNames.add(inputText.text.toString())
+            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && (playlists.find { it.listName == inputText.text.toString() } == null) && (inputText.text.toString() != "Main")) {
                 val newPlaylist = Playlist(inputText.text.toString(), ArrayList(),null)
                 playlists.add(newPlaylist)
                 adapter.allPlaylists = playlists
