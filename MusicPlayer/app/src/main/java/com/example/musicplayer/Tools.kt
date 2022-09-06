@@ -13,6 +13,7 @@ import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.contextaware.withContextAvailable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -129,6 +130,8 @@ open class Tools : AppCompatActivity() {
             oos.close()
         } catch (error : IOException){
             Log.d("Error retrieving musics",error.toString())
+            Toast.makeText(applicationContext, "Couldn't retrieve musics", Toast.LENGTH_LONG).show()
+
         }
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, "allPlaylists.playlists")))
@@ -136,7 +139,9 @@ open class Tools : AppCompatActivity() {
             oos.close()
         } catch (error : IOException){
             Log.d("Error retrieving musics",error.toString())
+            Toast.makeText(applicationContext, "Couldn't retrieve playlists", Toast.LENGTH_LONG).show()
         }
+        Toast.makeText(applicationContext, "Data retrieved in your Download Folder", Toast.LENGTH_LONG).show()
     }
 
     fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){

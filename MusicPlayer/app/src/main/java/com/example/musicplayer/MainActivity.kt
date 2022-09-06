@@ -309,12 +309,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             R.id.download_data -> {
-                CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO){
-                    launch{
-                        retrieveAllMusicsFromApp()
-                    }
-                }
-                Toast.makeText(this, "Data retrieved", Toast.LENGTH_SHORT).show()
+                CoroutineScope(Dispatchers.Main).launch { retrieveAllMusicsFromApp() }
                 true
             }
             R.id.set_data -> {
