@@ -58,20 +58,21 @@ open class Tools : AppCompatActivity() {
     }
 
     fun playRandom(list : ArrayList<Music>, context : Context) {
-        MyMediaPlayer.getInstance.reset()
-        val shuffledList = ArrayList(list.map { it.copy() })
-        shuffledList.shuffle()
-        MyMediaPlayer.currentPlaylist = ArrayList(shuffledList.map { it.copy() })
-        MyMediaPlayer.initialPlaylist = ArrayList(shuffledList.map { it.copy() })
-        val sameMusic = false
+        if (list.size > 0) {
+            val shuffledList = ArrayList(list.map { it.copy() })
+            shuffledList.shuffle()
+            MyMediaPlayer.currentPlaylist = ArrayList(shuffledList.map { it.copy() })
+            MyMediaPlayer.initialPlaylist = ArrayList(shuffledList.map { it.copy() })
+            val sameMusic = false
 
-        MyMediaPlayer.currentIndex = 0
+            MyMediaPlayer.currentIndex = 0
 
-        val intent = Intent(context,MusicPlayerActivity::class.java)
+            val intent = Intent(context, MusicPlayerActivity::class.java)
 
-        intent.putExtra("SAME MUSIC", sameMusic)
+            intent.putExtra("SAME MUSIC", sameMusic)
 
-        startActivity(intent)
+            startActivity(intent)
+        }
     }
 
     fun onBottomMenuClick(position : Int, context : Context){
