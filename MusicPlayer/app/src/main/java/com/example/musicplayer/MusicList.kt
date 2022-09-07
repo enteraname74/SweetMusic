@@ -83,7 +83,7 @@ data class MusicList(
             // Passons d'abord notre byteArray en bitmap :
             val bytes = currentMusic.albumCover
             var bitmap: Bitmap? = null
-            if (bytes != null && bytes.isNotEmpty()) {
+            if ((bytes != null) && bytes.isNotEmpty()) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
             holder.albumCover?.setImageBitmap(bitmap)
@@ -96,7 +96,6 @@ data class MusicList(
         holder.albumName?.text = currentMusic.album
 
         if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
-            Log.d("CHANGE COLOR", currentPlayedMusic.toString())
             holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
         } else {
             holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))

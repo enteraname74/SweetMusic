@@ -167,7 +167,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         // On ajoute nos musiques et playlists dans notre mediaplayer :
 
-        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO){
+        CoroutineScope(Dispatchers.IO).launch{
             launch{readPlaylistsAsync()}
         }
         println("end")
@@ -236,26 +236,24 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         noSongPlaying.visibility = View.VISIBLE
 
         if (MyMediaPlayer.currentIndex != -1) {
-            CoroutineScope(Dispatchers.IO).launch {
-                withContext(Dispatchers.Main) {
-                    noSongPlaying.visibility = View.GONE
-                    infoSongPlaying.visibility = View.VISIBLE
-                    songTitleInfo.text =
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                    if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                        // Passons d'abord notre byteArray en bitmap :
-                        val bytes =
-                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                        var bitmap: Bitmap? = null
-                        if (bytes != null && bytes.isNotEmpty()) {
-                            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        }
-                        withContext(Dispatchers.Main) {
-                            albumCoverInfo.setImageBitmap(bitmap)
-                        }
-                    } else {
-                        albumCoverInfo.setImageResource(R.drawable.michael)
+            CoroutineScope(Dispatchers.Main).launch {
+                noSongPlaying.visibility = View.GONE
+                infoSongPlaying.visibility = View.VISIBLE
+                songTitleInfo.text =
+                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes =
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     }
+                    withContext(Dispatchers.Main) {
+                        albumCoverInfo.setImageBitmap(bitmap)
+                    }
+                } else {
+                    albumCoverInfo.setImageResource(R.drawable.michael)
                 }
             }
 
