@@ -54,7 +54,9 @@
             android:background="@drawable/search_view_shape"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            app:queryHint="Search a specific music">
+            app:queryHint="Search a specific music"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp">
         </android.widget.SearchView>
 
         <Button
@@ -66,7 +68,7 @@
             android:textColor="@color/third_color"
             android:layout_marginRight="10dp"
             android:layout_gravity="end"
-            >
+            android:layout_marginEnd="10dp">
         </Button>
 
     </LinearLayout>
@@ -101,7 +103,8 @@
             android:id="@+id/album_cover_info"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:src="@drawable/icone_musique">
+            android:src="@drawable/icone_musique"
+            android:layout_marginStart="5dp">
 
         </ImageView>
 
@@ -149,7 +152,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="20dp"
                     android:layout_toEndOf="@+id/song_title_info"
-                    >
+                    android:layout_marginStart="20dp">
                 </ImageView>
 
                 <ImageView

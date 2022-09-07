@@ -4,9 +4,16 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.10477632021527077" />
+        <entry key="app/src/main/res/drawable-hdpi/ic_baseline_skip_previous_24.xml" value="0.257" />
+        <entry key="app/src/main/res/drawable-ldrtl/ic_baseline_skip_next_24.xml" value="0.197" />
+        <entry key="app/src/main/res/drawable-ldrtl/ic_baseline_skip_previous_24.xml" value="0.1875" />
+        <entry key="app/src/main/res/drawable-mdpi/ic_baseline_skip_previous_24.xml" value="0.257" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.3385" />
         <entry key="app/src/main/res/drawable-v24/search_view_shape.xml" value="0.329" />
         <entry key="app/src/main/res/drawable-v24/shape.xml" value="0.329" />
+        <entry key="app/src/main/res/drawable-xhdpi/ic_baseline_skip_previous_24.xml" value="0.257" />
+        <entry key="app/src/main/res/drawable-xxhdpi/ic_baseline_skip_previous_24.xml" value="0.257" />
+        <entry key="app/src/main/res/drawable-xxxhdpi/ic_baseline_skip_previous_24.xml" value="0.257" />
         <entry key="app/src/main/res/drawable/gradient_background.xml" value="0.318" />
         <entry key="app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.323" />
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_downward_24.xml" value="0.193" />
@@ -26,6 +33,7 @@
         <entry key="app/src/main/res/drawable/image.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/michael_background.xml" value="0.25" />
         <entry key="app/src/main/res/drawable/round_image.xml" value="0.329" />
+        <entry key="app/src/main/res/drawable/rtl_left_arrow.xml" value="0.256" />
         <entry key="app/src/main/res/drawable/tab_indicator.xml" value="0.35" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_modify_music_info.xml" value="0.35260416666666666" />

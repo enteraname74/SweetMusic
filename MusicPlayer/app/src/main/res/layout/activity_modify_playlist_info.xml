@@ -8,7 +8,9 @@
     android:background="@color/primary_color"
     android:paddingLeft="30dp"
     android:paddingRight="30dp"
-    android:id="@+id/modify_playlist">
+    android:id="@+id/modify_playlist"
+    android:paddingStart="30dp"
+    android:paddingEnd="30dp">
 
     <TextView
         android:id="@+id/title_activity"
@@ -87,7 +89,8 @@
                 android:backgroundTint="@color/secondary_color"
                 android:text="Cancel"
                 android:textColor="@color/third_color"
-                android:textSize="14sp">
+                android:textSize="14sp"
+                android:layout_marginEnd="50dp">
             </Button>
 
             <Button

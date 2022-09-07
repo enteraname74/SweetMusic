@@ -9,7 +9,9 @@
     tools:context=".MainActivity"
     android:layout_marginLeft="10dp"
     android:layout_marginRight="10dp"
-    android:layout_marginTop="10dp">
+    android:layout_marginTop="10dp"
+    android:layout_marginStart="10dp"
+    android:layout_marginEnd="10dp">
 
     <ImageView
         android:id="@+id/album_cover"
@@ -23,7 +25,8 @@
         android:layout_height="match_parent"
         android:gravity="center_vertical"
         android:layout_marginLeft="4dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginStart="4dp">
 
 
         <TextView
@@ -48,7 +51,8 @@
                 android:textColor="@color/third_color"
                 android:singleLine="true"
                 android:layout_marginRight="4dp"
-                android:text="Artist">
+                android:text="Artist"
+                android:layout_marginEnd="4dp">
 
             </TextView>
 
@@ -67,7 +71,8 @@
                 android:textColor="@color/third_color"
                 android:singleLine="true"
                 android:layout_marginLeft="4dp"
-                android:text="Album">
+                android:text="Album"
+                android:layout_marginStart="4dp">
 
             </TextView>
 
