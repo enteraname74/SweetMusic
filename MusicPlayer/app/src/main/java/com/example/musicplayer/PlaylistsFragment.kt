@@ -2,7 +2,6 @@ package com.example.musicplayer
 
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -22,8 +21,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -35,16 +34,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     private val savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Playlists
-    private var playlists = ArrayList<Playlist>()
     private val mediaPlayer = MyMediaPlayer.getInstance
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        playlists = MyMediaPlayer.allPlaylists
-
-        adapter = Playlists(playlists,context as Context,this,R.layout.playlist_file_linear)
-        mediaPlayer.setOnCompletionListener { playNextSong() }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,6 +42,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_playlists, container, false)
+        adapter = Playlists(MyMediaPlayer.allPlaylists,context as Context,this,R.layout.playlist_file_linear)
 
         // Mise en place du bouton de création de playlist :
         val addPlaylist = view.findViewById<ImageView>(R.id.add_playlist)
@@ -72,14 +63,10 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
 
     override fun onResume() {
         super.onResume()
-        playlists = MyMediaPlayer.allPlaylists
-        adapter.allPlaylists = playlists
-        if (MyMediaPlayer.dataWasChanged){
-            // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
-            playlists = MyMediaPlayer.allPlaylists
-            MyMediaPlayer.dataWasChanged = false
-        }
+
+        adapter.allPlaylists = MyMediaPlayer.allPlaylists
         adapter.notifyDataSetChanged()
+
         mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
@@ -98,35 +85,39 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         // L'entrée :
         val inputText = EditText(context)
         // Le type d'entrée :
-        inputText.setInputType(InputType.TYPE_CLASS_TEXT)
+        inputText.inputType = InputType.TYPE_CLASS_TEXT
         builder.setView(inputText)
         // Les boutons :
         // Si on valide la création, on crée notre playlist :
-        builder.setPositiveButton("OK", DialogInterface.OnClickListener{ _, _ ->
+        builder.setPositiveButton("OK") { _, _ ->
             /* Afin de créer une playlist, nous devons vérifier les critères suivants :
                 - Le nom n'est pas vide ou ne commence pas avec un espace (au cas où on a qu'un espace en guise de nom
                 - Le nom n'est pas déjà prit
                 - Le nom n'est pas celui de la playlist principale ("Main")
              */
 
-            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && (playlists.find { it.listName == inputText.text.toString().trim() } == null) && (inputText.text.toString() != "Main")) {
-                val newPlaylist = Playlist(inputText.text.toString(), ArrayList(),null)
-                playlists.add(newPlaylist)
-                adapter.allPlaylists = playlists
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writePlaylistsToFile(savePlaylistsFile, playlists)}
+            if (inputText.text.toString() != "" && !(inputText.text.toString().startsWith(" ")) && (MyMediaPlayer.allPlaylists.find { it.listName == inputText.text.toString().trim() } == null) && (inputText.text.toString() != "Main")) {
+                val newPlaylist = Playlist(inputText.text.toString(), ArrayList(), null)
+                MyMediaPlayer.allPlaylists.add(newPlaylist)
+                adapter.allPlaylists = MyMediaPlayer.allPlaylists
+                CoroutineScope(Dispatchers.IO).launch {
+                    writePlaylistsToFile(
+                        savePlaylistsFile,
+                        MyMediaPlayer.allPlaylists
+                    )
                 }
 
                 menuRecyclerView.layoutManager = LinearLayoutManager(context)
                 menuRecyclerView.adapter = adapter
             } else {
-                Toast.makeText(context,"A title must be set correctly !", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "A title must be set correctly !", Toast.LENGTH_SHORT)
+                    .show()
             }
-        })
+        }
         // Si on annule la création de la playlist, on quitte la fenêtre
-        builder.setNegativeButton("CANCEL", DialogInterface.OnClickListener{ dialogInterface, i ->
+        builder.setNegativeButton("CANCEL") { dialogInterface, _ ->
             dialogInterface.cancel()
-        })
+        }
 
         builder.show()
 
@@ -199,14 +190,14 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         Log.d("Inside Playlist","")
         return when(item.itemId){
             10 -> {
-                if (playlists[item.groupId].isFavoriteList){
+                if (MyMediaPlayer.allPlaylists[item.groupId].isFavoriteList){
                     Toast.makeText(context,"You can't delete the Favorites playlist",Toast.LENGTH_SHORT).show()
                 } else {
-                    playlists.removeAt(item.groupId)
-                    adapter.allPlaylists = playlists
+                    MyMediaPlayer.allPlaylists.removeAt(item.groupId)
+                    adapter.allPlaylists = MyMediaPlayer.allPlaylists
                     adapter.notifyItemRemoved(item.groupId)
 
-                    writePlaylistsToFile(savePlaylistsFile,playlists)
+                    writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)
                     Toast.makeText(context,"Suppressions de la playlist",Toast.LENGTH_SHORT).show()
                 }
                 true
@@ -225,8 +216,8 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             // On récupère les playlists avec la modification effectuée :
-            playlists = MyMediaPlayer.allPlaylists
-            adapter.allPlaylists = playlists
+            MyMediaPlayer.allPlaylists = MyMediaPlayer.allPlaylists
+            adapter.allPlaylists = MyMediaPlayer.allPlaylists
         }
     }
 }

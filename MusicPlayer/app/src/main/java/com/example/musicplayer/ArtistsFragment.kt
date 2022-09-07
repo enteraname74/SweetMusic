@@ -15,46 +15,16 @@ import android.widget.SearchView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.IOException
 
 class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQueryTextListener {
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var adapter: Artists
-    private var artists = ArrayList<Artist>()
     private val mediaPlayer = MyMediaPlayer.getInstance
     private lateinit var searchView : SearchView
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        if (MyMediaPlayer.allMusics.size > 0){
-            val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-            var currentArtist : Artist
-            // Trions d'abord notre liste artiste :
-            copiedMusics.sortWith(compareBy<Music> { it.artist })
-            currentArtist = Artist(
-                copiedMusics[0].artist,
-                ArrayList<Music>(),
-                copiedMusics[0].albumCover
-            )
-
-            for (music in copiedMusics) {
-                if (music.artist == currentArtist.artistName) {
-                    currentArtist.musicList.add(music)
-                } else {
-                    // On passe à un autre album :
-                    // On ajoute d'abord notre album à notre liste :
-                    artists.add(currentArtist)
-                    // On change ensuite l'album actuelle
-                    currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
-                    currentArtist.musicList.add(music)
-                }
-            }
-        }
-
-        MyMediaPlayer.allArtists = artists
-        adapter = Artists(artists, context as Context, this)
-        mediaPlayer.setOnCompletionListener { playNextSong() }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -62,6 +32,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_artists, container, false)
+        adapter = Artists(MyMediaPlayer.allArtists, context as Context, this)
 
         searchView = view.findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
@@ -82,35 +53,36 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        if (MyMediaPlayer.allMusics.size > 0) {
-            val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-            var currentArtist: Artist
-            // Trions d'abord notre liste artiste :
-            copiedMusics.sortWith(compareBy<Music> { it.artist })
-            currentArtist = Artist(
-                copiedMusics[0].artist,
-                ArrayList<Music>(),
-                copiedMusics[0].albumCover
-            )
+        CoroutineScope(Dispatchers.Main).launch {
+            if (MyMediaPlayer.allMusics.size > 0) {
+                val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+                var currentArtist: Artist
+                // Trions d'abord notre liste artiste :
+                copiedMusics.sortWith(compareBy<Music> { it.artist })
+                currentArtist = Artist(
+                    copiedMusics[0].artist,
+                    ArrayList<Music>(),
+                    copiedMusics[0].albumCover
+                )
 
-            artists.clear()
-            for (music in copiedMusics) {
-                if (music.artist == currentArtist.artistName) {
-                    currentArtist.musicList.add(music)
-                } else {
-                    // On passe à un autre album :
-                    // On ajoute d'abord notre album à notre liste :
-                    artists.add(currentArtist)
-                    // On change ensuite l'album actuelle
-                    currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
-                    currentArtist.musicList.add(music)
+                MyMediaPlayer.allArtists.clear()
+                for (music in copiedMusics) {
+                    if (music.artist == currentArtist.artistName) {
+                        currentArtist.musicList.add(music)
+                    } else {
+                        // On passe à un autre album :
+                        // On ajoute d'abord notre album à notre liste :
+                        MyMediaPlayer.allArtists.add(currentArtist)
+                        // On change ensuite l'album actuelle
+                        currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
+                        currentArtist.musicList.add(music)
+                    }
                 }
+                adapter.allArtists = MyMediaPlayer.allArtists
+                adapter.notifyDataSetChanged()
             }
-            MyMediaPlayer.allArtists = artists
-            adapter.allArtists = artists
-            adapter.notifyDataSetChanged()
-            mediaPlayer.setOnCompletionListener { playNextSong() }
         }
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     private fun playNextSong() {
@@ -165,7 +137,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
 
     override fun onArtistClick(position: Int) {
         val intent = Intent(context, SelectedArtistActivity::class.java)
-        val artist = artists[position]
+        val artist = MyMediaPlayer.allArtists[position]
         val globalPosition = MyMediaPlayer.allArtists.indexOf(artist)
 
         intent.putExtra("POSITION", globalPosition)
@@ -186,7 +158,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
             if (p0 != null) {
                 val list = ArrayList<Artist>()
 
-                artists = if(p0 == ""){
+                MyMediaPlayer.allArtists = if(p0 == ""){
                     MyMediaPlayer.allArtists
                 } else {
                     for (artist: Artist in MyMediaPlayer.allArtists) {
@@ -201,7 +173,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
                         ArrayList<Artist>()
                     }
                 }
-                adapter.allArtists = artists
+                adapter.allArtists = MyMediaPlayer.allArtists
                 adapter.notifyDataSetChanged()
             }
         } catch (error : Error){

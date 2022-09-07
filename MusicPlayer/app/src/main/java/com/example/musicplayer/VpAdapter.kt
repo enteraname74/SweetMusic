@@ -13,7 +13,6 @@ class VpAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragm
     }
 
     override fun createFragment(position: Int): Fragment {
-        Log.d("position",position.toString())
         return when(position){
             0 -> { MusicsFragment() }
             1 -> { PlaylistsFragment() }
