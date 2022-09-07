@@ -5,17 +5,24 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.PorterDuff
+import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.alpha
+import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,6 +34,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     private var allPlaylists = ArrayList<Playlist>()
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
+    private var searchIsOn = false
     private lateinit var searchView : SearchView
     private lateinit var menuRecyclerView : RecyclerView
 
@@ -88,7 +96,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             songTitleInfo?.isSelected = true
         }
 
-        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
+        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
@@ -113,13 +121,43 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 }
             }
         }
+
+        val playlistCover = findViewById<ImageView>(R.id.cover)
+
+        CoroutineScope(Dispatchers.Main).launch {
+
+            var bitmap: Bitmap? = null
+
+            if (playlist.playlistCover != null) {
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes = playlist.playlistCover
+                if ((bytes != null) && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                playlistCover.setImageBitmap(bitmap)
+            } else {
+                playlistCover.setImageResource(R.drawable.michael)
+            }
+
+            val backgroundColor: Palette.Swatch? =
+                if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
+                    Palette.from(bitmap as Bitmap).generate().swatches[0]
+                } else {
+                    Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
+                }
+
+            playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor?.rgb as Int,150))
+            playlistName.setTextColor(backgroundColor.titleTextColor)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
 
-        adapter.musics = MyMediaPlayer.allPlaylists[playlistPosition].musicList
+        if(!searchIsOn){
+            adapter.musics = MyMediaPlayer.allPlaylists[playlistPosition].musicList
+        }
         adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
@@ -280,63 +318,11 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
-        try {
-            if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
-                val list = ArrayList<Music>()
-
-                if(p0 == ""){
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
-                } else {
-                    for (music: Music in allMusicsBackup) {
-                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                            list.add(music)
-                        }
-                    }
-
-                    if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-            }
-        } catch (error : Error){
-            Log.d("ERROR",error.toString())
-        }
-        return true
+        return manageSearchBarEvents(p0)
     }
 
     override fun onQueryTextChange(p0: String?): Boolean {
-        try {
-            if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
-                val list = ArrayList<Music>()
-
-                if(p0 == ""){
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
-                } else {
-                    for (music: Music in allMusicsBackup) {
-                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                            list.add(music)
-                        }
-                    }
-
-                    if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-            }
-        } catch (error : Error){
-            Log.d("ERROR",error.toString())
-        }
-        return true
+        return manageSearchBarEvents(p0)
     }
 
     private fun pausePlay() {
@@ -364,5 +350,35 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
+        try {
+            if (p0 != null) {
+                val list = ArrayList<Music>()
+
+                if(p0 == ""){
+                    searchIsOn = false
+                    adapter.musics = playlist.musicList
+                } else {
+                    searchIsOn = true
+                    for (music: Music in playlist.musicList) {
+                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                            list.add(music)
+                        }
+                    }
+
+                    if (list.size > 0) {
+                        adapter.musics = list
+                    } else {
+                        adapter.musics = ArrayList<Music>()
+                    }
+                }
+                adapter.notifyDataSetChanged()
+            }
+        } catch (error : Error){
+            Log.d("ERROR",error.toString())
+        }
+        return true
     }
 }

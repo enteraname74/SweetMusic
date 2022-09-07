@@ -84,21 +84,22 @@ class ModifyPlaylistInfoActivity : Tools() {
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
         if (allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == null || allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == playlist ) {
+
+            playlist.listName = playlistNameField.text.toString()
+            val drawable = playlistCoverField.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            val bitmap = bitmapDrawable.bitmap
+
+            val byteArray = bitmapToByteArray(bitmap)
+
+            playlist.playlistCover = byteArray
+
+            // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
+
+            // Mettons à jour nos playlists :
+            allPlaylists[position] = playlist
+
             CoroutineScope(Dispatchers.IO).launch {
-                playlist.listName = playlistNameField.text.toString()
-                val drawable = playlistCoverField.drawable
-                val bitmapDrawable = drawable as BitmapDrawable
-                val bitmap = bitmapDrawable.bitmap
-
-                val byteArray = bitmapToByteArray(bitmap)
-
-                playlist.playlistCover = byteArray
-
-                // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
-
-                // Mettons à jour nos playlists :
-                allPlaylists[position] = playlist
-
                 writePlaylistsToFile(savePlaylistsFile, allPlaylists)
             }
 
