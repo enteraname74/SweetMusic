@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -83,23 +84,22 @@ class ModifyPlaylistInfoActivity : Tools() {
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
         if (allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == null || allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == playlist ) {
-            playlist.listName = playlistNameField.text.toString()
+            CoroutineScope(Dispatchers.IO).launch {
+                playlist.listName = playlistNameField.text.toString()
+                val drawable = playlistCoverField.drawable
+                val bitmapDrawable = drawable as BitmapDrawable
+                val bitmap = bitmapDrawable.bitmap
 
-            val drawable = playlistCoverField.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            val bitmap = bitmapDrawable.bitmap
+                val byteArray = bitmapToByteArray(bitmap)
 
-            val byteArray = bitmapToByteArray(bitmap)
+                playlist.playlistCover = byteArray
 
-            playlist.playlistCover = byteArray
+                // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
 
-            // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
+                // Mettons à jour nos playlists :
+                allPlaylists[position] = playlist
 
-            // Mettons à jour nos playlists :
-            allPlaylists[position] = playlist
-
-            GlobalScope.launch(Dispatchers.IO) {
-                launch { writePlaylistsToFile(savePlaylistsFile, allPlaylists) }
+                writePlaylistsToFile(savePlaylistsFile, allPlaylists)
             }
 
             setResult(RESULT_OK)
