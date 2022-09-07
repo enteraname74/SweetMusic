@@ -46,9 +46,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Log.d("DOWNLOAD", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString())
-        Log.d("DOWNLOAD", applicationContext.filesDir.toString())
-
         pausePlayButton = findViewById(R.id.pause_play)
 
         if (!checkPermission()){
@@ -98,7 +95,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                         val albumUri = ContentUris.withAppendedId(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
                         )
-                        Log.d("URI", albumUri.toString())
 
                         val albumCover : ByteArray? = try {
                             val bitmap = contentResolver.loadThumbnail(

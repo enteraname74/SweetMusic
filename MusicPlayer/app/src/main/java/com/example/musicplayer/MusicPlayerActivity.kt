@@ -150,11 +150,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             }
 
             val backgroundColor: Palette.Swatch? =
-                if (Palette.from(bitmap as Bitmap).generate().dominantSwatch == null) {
+                if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
                     Log.d("CAN'T CHOOSE COLOR","")
                     Palette.from(bitmap as Bitmap).generate().swatches[0]
                 } else {
-                    Palette.from(bitmap as Bitmap).generate().dominantSwatch
+                    Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
                 }
 
             background.setBackgroundColor(backgroundColor?.rgb as Int)
@@ -473,10 +473,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
             Palette.from(bitmap as Bitmap).generate().swatches[0].toString()
             val backgroundColor: Palette.Swatch? =
-                if (Palette.from(bitmap).generate().dominantSwatch == null) {
+                if (Palette.from(bitmap).generate().darkVibrantSwatch == null) {
                     Palette.from(bitmap).generate().swatches[0]
                 } else {
-                    Palette.from(bitmap).generate().dominantSwatch
+                    Palette.from(bitmap).generate().darkVibrantSwatch
                 }
 
             background.setBackgroundColor(backgroundColor?.rgb as Int)
