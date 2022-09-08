@@ -11,6 +11,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
@@ -84,6 +87,7 @@ data class MusicList(
         } catch (error : ArrayIndexOutOfBoundsException){
         }
 
+
         if(currentMusic.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
             val bytes = currentMusic.albumCover
@@ -126,8 +130,6 @@ data class MusicList(
                 holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
             }
         }
-
-
     }
 
     override fun getItemCount(): Int {
