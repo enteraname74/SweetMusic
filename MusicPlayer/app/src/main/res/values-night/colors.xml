@@ -10,5 +10,6 @@
 
     <color name="primary_color">#161925</color>
     <color name="secondary_color">#17325b</color>
-    <color name="third_color">#7da7c5</color>
+    <color name="third_color">#cccccc</color>
+    <color name="selected_music_color">#061426</color>
 </resources>

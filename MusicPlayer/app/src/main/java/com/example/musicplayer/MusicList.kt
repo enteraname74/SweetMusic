@@ -17,7 +17,8 @@ data class MusicList(
     var musics : ArrayList<Music>,
     var listName : String,
     private val context : Context,
-    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
+    private val mOnMusicListener : OnMusicListener,
+    var backgroundColor: Int = -1) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
     class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener{
 
@@ -25,6 +26,7 @@ data class MusicList(
         var songName : TextView? = null
         var artist : TextView? = null
         var albumName : TextView? = null
+        var separator : TextView? = null
         var background : LinearLayout? = null
 
         init{
@@ -34,6 +36,7 @@ data class MusicList(
             songName = itemView.findViewById(R.id.songs_name)
             artist = itemView.findViewById(R.id.artist)
             albumName = itemView.findViewById(R.id.album_name)
+            separator = itemView.findViewById(R.id.separator)
             background = itemView.findViewById(R.id.background)
 
             itemView.setOnClickListener(this)
@@ -94,11 +97,21 @@ data class MusicList(
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
+        if (backgroundColor != -1){
+            holder.background?.setBackgroundColor(backgroundColor)
+        }
 
         if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
-            holder.songName?.setTextColor(Color.parseColor("#FFFFFF"))
+            Log.d("THERE","THERE")
+            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
         } else {
             holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
         }
     }
 

@@ -3,9 +3,7 @@ package com.example.musicplayer
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.PorterDuff
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -146,8 +144,25 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                     Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
                 }
 
-            playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor?.rgb as Int,150))
+            findViewById<LinearLayout>(R.id.background).setBackgroundColor(backgroundColor?.rgb as Int)
+
+            val lighterColorTheme = ColorUtils.blendARGB(backgroundColor.rgb,Color.WHITE,0.1f)
+            val buttonPanel = findViewById<LinearLayout>(R.id.buttons_panel)
+
+            searchView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+            buttonPanel.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+            menuRecyclerView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+            adapter.backgroundColor = lighterColorTheme
+            adapter.notifyDataSetChanged()
+
+            playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
             playlistName.setTextColor(backgroundColor.titleTextColor)
+
+            val addSongs = findViewById<ImageView>(R.id.add_songs)
+            addSongs.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            shuffleButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            findViewById<ImageView>(R.id.modify_playlist).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            bottomInfos.setBackgroundColor(lighterColorTheme)
         }
     }
 
