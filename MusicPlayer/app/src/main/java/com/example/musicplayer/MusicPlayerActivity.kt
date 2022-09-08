@@ -125,6 +125,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
             }
         })
+
+        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
+        quitActivity.setOnClickListener{ finish() }
     }
 
     private fun setResourcesWithMusic(){

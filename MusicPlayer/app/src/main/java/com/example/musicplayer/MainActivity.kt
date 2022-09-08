@@ -174,27 +174,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         navigationView.setNavigationItemSelectedListener(this)
 
         openMenu.setOnClickListener { openNavigationMenu(drawerLayout) }
-
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..", "")
-                }
-            }
-        }
     }
 
     private fun checkPermission() : Boolean {
@@ -268,6 +247,27 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         } else {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
+
+        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
+        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
+            Log.d("focusChange", focusChange.toString())
+            when (focusChange) {
+                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
+                else -> {
+                    if (mediaPlayer.isPlaying) {
+                        println("loss focus")
+                        mediaPlayer.pause()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                    Log.d("change does..", "")
+                }
+            }
+        }
     }
 
     private fun pausePlay() {
@@ -292,7 +292,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 }
             }
             else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
             }
         }
     }
