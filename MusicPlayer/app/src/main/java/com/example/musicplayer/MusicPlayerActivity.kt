@@ -479,6 +479,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.quit_activity).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
 
         window.navigationBarColor = backgroundColor.rgb
