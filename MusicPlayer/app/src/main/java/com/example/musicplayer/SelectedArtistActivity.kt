@@ -56,8 +56,8 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedArtistActivity)
         menuRecyclerView.adapter = adapter
 
-        val albumName = findViewById<TextView>(R.id.artist_name)
-        albumName?.text = artist.artistName
+        val artistName = findViewById<TextView>(R.id.playlist_name)
+        artistName?.text = artist.artistName
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
