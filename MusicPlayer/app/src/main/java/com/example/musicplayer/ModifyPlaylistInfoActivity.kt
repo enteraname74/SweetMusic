@@ -98,6 +98,7 @@ class ModifyPlaylistInfoActivity : Tools() {
 
             // Mettons à jour nos playlists :
             allPlaylists[position] = playlist
+            MyMediaPlayer.allPlaylists = allPlaylists
 
             CoroutineScope(Dispatchers.IO).launch {
                 writePlaylistsToFile(savePlaylistsFile, allPlaylists)

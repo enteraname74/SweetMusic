@@ -94,6 +94,12 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             songTitleInfo?.isSelected = true
         }
 
+        val modifyPlaylistInfos = findViewById<ImageView>(R.id.modify_playlist)
+        modifyPlaylistInfos.setOnClickListener { modifyPlaylist() }
+
+        val addSongs = findViewById<ImageView>(R.id.add_songs)
+        addSongs.setOnClickListener{ onAddSongsClick() }
+
         val shuffleButton = findViewById<ImageView>(R.id.shuffle)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
 
@@ -168,8 +174,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         } else {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-        val addSongs = findViewById<ImageView>(R.id.add_songs)
-        addSongs.setOnClickListener{ onAddSongsClick() }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
@@ -193,7 +197,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             }
             playlist.musicList = musics
             adapter.musics = musics
-            menuRecyclerView?.adapter = adapter
+            menuRecyclerView.adapter = adapter
 
             val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
             playlists[playlistPosition].musicList = musics
@@ -412,5 +416,18 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
 
         window.navigationBarColor = lighterColorTheme
         window.statusBarColor = lighterColorTheme
+    }
+
+    private fun modifyPlaylist() {
+        val intent = Intent(this,ModifyPlaylistInfoActivity::class.java)
+        intent.putExtra("POSITION",playlistPosition)
+        modifyPlaylistLauncher.launch(intent)
+    }
+
+    private var modifyPlaylistLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val playlistName = findViewById<TextView>(R.id.playlist_name)
+            playlistName.text = playlist.listName
+        }
     }
 }

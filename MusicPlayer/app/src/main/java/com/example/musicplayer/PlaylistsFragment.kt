@@ -215,8 +215,6 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     }
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // On récupère les playlists avec la modification effectuée :
-            MyMediaPlayer.allPlaylists = MyMediaPlayer.allPlaylists
             adapter.allPlaylists = MyMediaPlayer.allPlaylists
         }
     }
