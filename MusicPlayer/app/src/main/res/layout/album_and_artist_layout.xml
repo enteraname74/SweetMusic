@@ -6,8 +6,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary_color"
-    tools:context=".SelectedPlaylistActivity">
+    android:background="@color/primary_color">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -61,17 +60,6 @@
             android:layout_marginBottom="5dp"
             android:layout_weight="1"
             android:src="@drawable/ic_baseline_edit_24"
-            app:tint="@color/third_color" />
-
-        <ImageView
-            android:contentDescription="@string/add_button"
-            android:id="@+id/add_songs"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_add_24"
             app:tint="@color/third_color" />
 
         <ImageView
@@ -166,7 +154,6 @@
                 android:textColor="@color/third_color">
 
             </TextView>
-
 
             <ImageView
                 android:contentDescription="@string/previous"

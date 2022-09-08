@@ -42,7 +42,7 @@
         android:layout_height="200dp"
         android:layout_below="@+id/album_art"
         android:layout_marginTop="10dp"
-        android:src="@drawable/michael"></ImageView>
+        android:src="@drawable/michael"/>
 
     <TextView
         android:id="@+id/music_name"
@@ -52,17 +52,18 @@
         android:layout_marginTop="10dp"
         android:text="Name of the song :"
         android:textColor="@color/third_color"
-        android:textSize="17sp"></TextView>
+        android:textSize="17sp"/>
 
     <EditText
         android:id="@+id/edit_music_name"
+        android:maxLines="1"
+        android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/music_name"
         android:backgroundTint="@color/third_color"
         android:textColor="@color/third_color"
-        android:textSize="15sp">
-    </EditText>
+        android:textSize="15sp"/>
 
     <TextView
         android:id="@+id/album_name"
@@ -78,6 +79,8 @@
 
     <EditText
         android:id="@+id/edit_album_name"
+        android:maxLines="1"
+        android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/album_name"
@@ -99,13 +102,14 @@
 
     <EditText
         android:id="@+id/edit_artist_name"
+        android:maxLines="1"
+        android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/artist_name"
         android:backgroundTint="@color/third_color"
         android:textColor="@color/third_color"
-        android:textSize="15sp">
-    </EditText>
+        android:textSize="15sp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

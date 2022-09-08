@@ -51,6 +51,7 @@
         <entry key="app/src/main/res/layout/activity_selected_artist.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_playlist.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_set_data.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/album_and_artist_layout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/album_file.xml" value="0.3515625" />
         <entry key="app/src/main/res/layout/artist_file.xml" value="0.5" />
         <entry key="app/src/main/res/layout/fragment_album.xml" value="0.20833333333333334" />

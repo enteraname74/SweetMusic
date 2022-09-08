@@ -61,13 +61,14 @@
 
     <EditText
         android:id="@+id/edit_playlist_name"
+        android:maxLines="1"
+        android:inputType="text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/playlist_name"
         android:backgroundTint="@color/third_color"
         android:textColor="@color/third_color"
-        android:textSize="15sp">
-    </EditText>
+        android:textSize="15sp"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

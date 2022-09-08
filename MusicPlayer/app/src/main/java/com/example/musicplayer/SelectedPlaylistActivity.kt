@@ -119,59 +119,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 }
             }
         }
-
-        val playlistCover = findViewById<ImageView>(R.id.cover)
-
-        CoroutineScope(Dispatchers.Main).launch {
-
-            var bitmap: Bitmap? = null
-
-            if (playlist.playlistCover != null) {
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = playlist.playlistCover
-                if ((bytes != null) && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                playlistCover.setImageBitmap(bitmap)
-            } else {
-                playlistCover.setImageResource(R.drawable.michael)
-            }
-
-            val backgroundColor: Palette.Swatch? =
-                if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
-                    Palette.from(bitmap as Bitmap).generate().swatches[0]
-                } else {
-                    Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
-                }
-
-            findViewById<LinearLayout>(R.id.background).setBackgroundColor(backgroundColor?.rgb as Int)
-
-            val lighterColorTheme = ColorUtils.blendARGB(backgroundColor.rgb,Color.WHITE,0.1f)
-            val buttonPanel = findViewById<LinearLayout>(R.id.buttons_panel)
-
-            searchView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
-            buttonPanel.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
-            menuRecyclerView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
-            adapter.backgroundColor = lighterColorTheme
-            adapter.colorsForText = backgroundColor
-            adapter.notifyDataSetChanged()
-
-            playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
-            playlistName.setTextColor(backgroundColor.titleTextColor)
-
-            val addSongs = findViewById<ImageView>(R.id.add_songs)
-            addSongs.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            shuffleButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            findViewById<ImageView>(R.id.previous).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            findViewById<ImageView>(R.id.next).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            findViewById<ImageView>(R.id.pause_play).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            findViewById<TextView>(R.id.song_title_info).setTextColor(backgroundColor.titleTextColor)
-            findViewById<ImageView>(R.id.modify_playlist).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-            bottomInfos.setBackgroundColor(lighterColorTheme)
-
-            window.navigationBarColor = lighterColorTheme
-            window.statusBarColor = lighterColorTheme
-        }
     }
 
     override fun onResume() {
@@ -226,6 +173,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
+
+        CoroutineScope(Dispatchers.Main).launch { setColorTheme() }
     }
 
     private fun onAddSongsClick(){
@@ -403,5 +352,65 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             Log.d("ERROR",error.toString())
         }
         return true
+    }
+
+    private fun setColorTheme(){
+        var bitmap: Bitmap? = null
+        val playlistCover = findViewById<ImageView>(R.id.cover)
+
+        if (playlist.playlistCover != null) {
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = playlist.playlistCover
+            if ((bytes != null) && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            playlistCover.setImageBitmap(bitmap)
+        } else {
+            playlistCover.setImageResource(R.drawable.michael)
+            val drawable = playlistCover.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            bitmap = bitmapDrawable.bitmap
+        }
+
+        val backgroundColor: Palette.Swatch? =
+            if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
+                Palette.from(bitmap as Bitmap).generate().swatches[0]
+            } else {
+                Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
+            }
+
+        findViewById<LinearLayout>(R.id.background).setBackgroundColor(backgroundColor?.rgb as Int)
+
+        val lighterColorTheme = ColorUtils.blendARGB(backgroundColor.rgb,Color.WHITE,0.1f)
+        val buttonPanel = findViewById<LinearLayout>(R.id.buttons_panel)
+
+        searchView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+        buttonPanel.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+        menuRecyclerView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+        adapter.backgroundColor = lighterColorTheme
+        adapter.colorsForText = backgroundColor
+        adapter.notifyDataSetChanged()
+
+        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
+        val playlistName = findViewById<TextView>(R.id.playlist_name)
+        playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
+        playlistName.setTextColor(backgroundColor.titleTextColor)
+
+        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+        val addSongs = findViewById<ImageView>(R.id.add_songs)
+        addSongs.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        shuffleButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.previous).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.next).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.pause_play).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<TextView>(R.id.song_title_info).setTextColor(backgroundColor.titleTextColor)
+        findViewById<ImageView>(R.id.modify_playlist).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        noSongPlaying.setTextColor(backgroundColor.titleTextColor)
+
+        bottomInfos.setBackgroundColor(lighterColorTheme)
+
+        window.navigationBarColor = lighterColorTheme
+        window.statusBarColor = lighterColorTheme
     }
 }

@@ -26,7 +26,7 @@
         android:ellipsize="marquee"
         android:gravity="center_horizontal|center_vertical"
         android:marqueeRepeatLimit="marquee_forever"
-        android:singleLine="true"
+        android:maxLines="1"
         android:text="Title of the song"
         android:textColor="@color/third_color"
         android:textSize="20sp">

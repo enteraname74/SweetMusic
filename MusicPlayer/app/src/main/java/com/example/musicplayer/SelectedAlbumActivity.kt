@@ -3,8 +3,8 @@ package com.example.musicplayer
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -14,8 +14,11 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.ColorUtils
+import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -38,10 +41,10 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_selected_album)
+        setContentView(R.layout.album_and_artist_layout)
 
         pausePlayButton = findViewById(R.id.pause_play)
-        menuRecyclerView = findViewById(R.id.menu_album_recycler_view)
+        menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         albumPosition = intent.getSerializableExtra("POSITION") as Int
 
         album = MyMediaPlayer.allAlbums[albumPosition]
@@ -55,7 +58,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedAlbumActivity)
         menuRecyclerView.adapter = adapter
 
-        val albumName = findViewById<TextView>(R.id.album_name)
+        val albumName = findViewById<TextView>(R.id.playlist_name)
         albumName?.text = album.albumName
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
@@ -87,7 +90,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             songTitleInfo?.isSelected = true
         }
 
-        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
+        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedAlbumActivity) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
@@ -166,6 +169,8 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+
+        CoroutineScope(Dispatchers.Main).launch { setColorTheme() }
     }
 
     override fun onMusicClick(position: Int) {
@@ -302,5 +307,62 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun setColorTheme(){
+        var bitmap: Bitmap? = null
+        val playlistCover = findViewById<ImageView>(R.id.cover)
+
+        if (album.albumCover != null) {
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = album.albumCover
+            if ((bytes != null) && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            playlistCover.setImageBitmap(bitmap)
+        } else {
+            playlistCover.setImageResource(R.drawable.michael)
+            val drawable = playlistCover.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            bitmap = bitmapDrawable.bitmap
+        }
+
+        val backgroundColor: Palette.Swatch? =
+            if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
+                Palette.from(bitmap as Bitmap).generate().swatches[0]
+            } else {
+                Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
+            }
+
+        findViewById<LinearLayout>(R.id.background).setBackgroundColor(backgroundColor?.rgb as Int)
+
+        val lighterColorTheme = ColorUtils.blendARGB(backgroundColor.rgb, Color.WHITE,0.1f)
+        val buttonPanel = findViewById<LinearLayout>(R.id.buttons_panel)
+
+        searchView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+        buttonPanel.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+        menuRecyclerView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
+        adapter.backgroundColor = lighterColorTheme
+        adapter.colorsForText = backgroundColor
+        adapter.notifyDataSetChanged()
+
+        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
+        val playlistName = findViewById<TextView>(R.id.playlist_name)
+        playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
+        playlistName.setTextColor(backgroundColor.titleTextColor)
+
+        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+        findViewById<ImageView>(R.id.modify_playlist).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        shuffleButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.previous).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.next).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.pause_play).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<TextView>(R.id.song_title_info).setTextColor(backgroundColor.titleTextColor)
+        bottomInfos.setBackgroundColor(lighterColorTheme)
+        noSongPlaying.setTextColor(backgroundColor.titleTextColor)
+
+        window.navigationBarColor = lighterColorTheme
+        window.statusBarColor = lighterColorTheme
     }
 }
