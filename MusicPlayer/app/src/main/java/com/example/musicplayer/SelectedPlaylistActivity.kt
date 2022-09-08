@@ -153,6 +153,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             buttonPanel.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
             menuRecyclerView.background.colorFilter = BlendModeColorFilter(lighterColorTheme, BlendMode.SRC_ATOP)
             adapter.backgroundColor = lighterColorTheme
+            adapter.colorsForText = backgroundColor
             adapter.notifyDataSetChanged()
 
             playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
@@ -161,8 +162,15 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             val addSongs = findViewById<ImageView>(R.id.add_songs)
             addSongs.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
             shuffleButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            findViewById<ImageView>(R.id.previous).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            findViewById<ImageView>(R.id.next).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            findViewById<ImageView>(R.id.pause_play).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+            findViewById<TextView>(R.id.song_title_info).setTextColor(backgroundColor.titleTextColor)
             findViewById<ImageView>(R.id.modify_playlist).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
             bottomInfos.setBackgroundColor(lighterColorTheme)
+
+            window.navigationBarColor = lighterColorTheme
+            window.statusBarColor = lighterColorTheme
         }
     }
 

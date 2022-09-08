@@ -9,6 +9,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import java.io.Serializable
 
@@ -18,7 +19,8 @@ data class MusicList(
     var listName : String,
     private val context : Context,
     private val mOnMusicListener : OnMusicListener,
-    var backgroundColor: Int = -1) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
+    var backgroundColor: Int = -1,
+    var colorsForText : Palette.Swatch? = null) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
     class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener{
 
@@ -99,20 +101,33 @@ data class MusicList(
         holder.albumName?.text = currentMusic.album
         if (backgroundColor != -1){
             holder.background?.setBackgroundColor(backgroundColor)
+
+            if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
+                holder.songName?.setTextColor(colorsForText?.bodyTextColor as Int)
+                holder.albumName?.setTextColor(colorsForText?.bodyTextColor as Int)
+                holder.separator?.setTextColor(colorsForText?.bodyTextColor as Int)
+                holder.artist?.setTextColor(colorsForText?.bodyTextColor as Int)
+            } else {
+                holder.songName?.setTextColor(colorsForText?.titleTextColor as Int)
+                holder.albumName?.setTextColor(colorsForText?.titleTextColor as Int)
+                holder.separator?.setTextColor(colorsForText?.titleTextColor as Int)
+                holder.artist?.setTextColor(colorsForText?.titleTextColor as Int)
+            }
+        } else {
+            if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
+                holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+                holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+                holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+                holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            } else {
+                holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+                holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+                holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+                holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+            }
         }
 
-        if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
-            Log.d("THERE","THERE")
-            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-        } else {
-            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-        }
+
     }
 
     override fun getItemCount(): Int {
