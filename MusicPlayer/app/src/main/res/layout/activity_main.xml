@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/secondary_color"
-                android:text="Shuffle"
+                android:text="@string/shuffle"
                 android:textColor="@color/third_color"
                 android:layout_marginRight="10dp"
                 android:layout_gravity="end"
@@ -75,22 +75,22 @@
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Musics" />
+                    android:text="@string/musics" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Playlists" />
+                    android:text="@string/playlists" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Albums" />
+                    android:text="@string/albums" />
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Artists" />
+                    android:text="@string/artists" />
 
             </com.google.android.material.tabs.TabLayout>
 
@@ -113,7 +113,6 @@
             android:background="@color/primary_color">
 
             <ImageView
-                android:layout_marginLeft="5dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:id="@+id/album_cover_info"
@@ -131,7 +130,7 @@
                 android:textColor="@color/third_color"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:text="NO SONG IS PLAYING"
+                android:text="@string/no_song_is_playing"
                 android:gravity="center_horizontal|center_vertical"
                 android:visibility="gone">
             </TextView>
@@ -156,10 +155,8 @@
                         android:scrollHorizontally="true"
                         android:marqueeRepeatLimit="marquee_forever"
                         android:singleLine="true"
-                        android:text="Name of the Song"
-                        android:textColor="@color/third_color">
-
-                    </TextView>
+                        android:text="@string/name_of_the_song"
+                        android:textColor="@color/third_color"/>
 
 
                     <ImageView
@@ -168,7 +165,6 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="20dp"
-                        android:layout_marginLeft="20dp"
                         android:layout_toEndOf="@+id/song_title_info"
                         android:src="@drawable/ic_baseline_skip_previous_24">
 

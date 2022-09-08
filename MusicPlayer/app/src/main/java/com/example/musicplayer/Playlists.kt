@@ -53,8 +53,8 @@ class Playlists (
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 10, 0, "REMOVE")
-            menu?.add(this.bindingAdapterPosition, 11, 0, "MODIFY")
+            menu?.add(this.bindingAdapterPosition, 10, 0, itemView.resources.getString(R.string.remove))
+            menu?.add(this.bindingAdapterPosition, 11, 0, itemView.resources.getString(R.string.modify))
         }
     }
 

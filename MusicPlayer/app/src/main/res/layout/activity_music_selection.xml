@@ -24,7 +24,7 @@
         android:id="@+id/playlist_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="ADD SONGS"
+        android:text="@string/add_songs"
         android:gravity="center_horizontal"
         android:textColor="@color/third_color">
 
@@ -59,7 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="7dp"
             android:backgroundTint="@color/secondary_color"
-            android:text="CANCEL"
+            android:text="@string/cancel"
             android:textColor="@color/third_color"
             android:textSize="11sp">
 
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="7dp"
             android:backgroundTint="@color/secondary_color"
-            android:text="OK"
+            android:text="@string/ok"
             android:textColor="@color/third_color"
             android:textSize="11sp">
 

@@ -12,7 +12,6 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
@@ -87,7 +86,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
             when (cursor?.count) {
                 null -> {
-                    Toast.makeText(this, "Couldn't retrieve music files", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
                 }
                 else -> {
                     while (cursor.moveToNext()) {
@@ -132,10 +131,10 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         TabLayoutMediator(tabLayout, viewPager){tab, index ->
             tab.text = when(index){
-                0 -> {"Musics"}
-                1 -> {"Playlists"}
-                2 -> {"Albums"}
-                3 -> {"Artists"}
+                0 -> {resources.getString(R.string.musics)}
+                1 -> {resources.getString(R.string.playlists)}
+                2 -> {resources.getString(R.string.albums)}
+                3 -> {resources.getString(R.string.artists)}
                 else -> { throw Resources.NotFoundException("Position not found")}
             }
         }.attach()
@@ -184,7 +183,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     private fun requestPermission(){
 
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
-            Toast.makeText(this,"PERMISSION IS REQUIRED FOR THIS APP TO FUNCTION. PLEASE ALLOW PERMISSIONS FROM SETTINGS",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,resources.getString(R.string.permission),Toast.LENGTH_SHORT).show()
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
@@ -279,7 +278,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         when (audioManager.requestAudioFocus(audioFocusRequest)) {
             AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
             }
 
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
@@ -292,7 +291,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 }
             }
             else -> {
-                Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -45,10 +45,10 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
         listType = intent.getSerializableExtra("LIST-TYPE") as String
 
         if (listType == "initialList"){
-            listName.text = "Initial List"
+            listName.text = resources.getString(R.string.initial_list)
             list = MyMediaPlayer.initialPlaylist
         } else {
-            listName.text = "Current List"
+            listName.text = resources.getString(R.string.current_list)
             list = MyMediaPlayer.currentPlaylist
         }
 
@@ -194,7 +194,7 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             0 -> {
-                Toast.makeText(this, "Ajout dans une playlist", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
@@ -210,7 +210,7 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
 
                 Toast.makeText(
                     this,
-                    "Suppressions de la musique dans la playlist",
+                    resources.getString(R.string.deleted_from_playlist),
                     Toast.LENGTH_SHORT
                 ).show()
                 true
@@ -249,6 +249,7 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
                 }
                 adapter.notifyItemRemoved(item.groupId)
                 adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
+                Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
                 true
             }
             else -> {
@@ -277,7 +278,7 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
 
         when (audioManager.requestAudioFocus(audioFocusRequest)) {
             AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
             }
 
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
@@ -290,7 +291,7 @@ class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
                 }
             }
             else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
             }
         }
     }

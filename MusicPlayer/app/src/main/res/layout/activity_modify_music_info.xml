@@ -15,19 +15,17 @@
         android:id="@+id/title_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Modify Music Informations"
-        android:textColor="@color/third_color"
-        android:gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:textSize="20sp"
-        >
-    </TextView>
+        android:gravity="center_horizontal"
+        android:text="@string/modify_music_informations"
+        android:textColor="@color/third_color"
+        android:textSize="20sp"/>
 
     <TextView
         android:id="@+id/album_art"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Album art :"
+        android:text="@string/album_art"
         android:textColor="@color/third_color"
         android:layout_below="@+id/title_activity"
         android:textSize="17sp"
@@ -50,7 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/album_image"
         android:layout_marginTop="10dp"
-        android:text="Name of the song :"
+        android:text="@string/name_of_the_song_modify"
         android:textColor="@color/third_color"
         android:textSize="17sp"/>
 
@@ -69,7 +67,7 @@
         android:id="@+id/album_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Album :"
+        android:text="@string/album"
         android:textColor="@color/third_color"
         android:layout_below="@+id/edit_music_name"
         android:textSize="17sp"
@@ -95,7 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/edit_album_name"
         android:layout_marginTop="10dp"
-        android:text="Artist :"
+        android:text="@string/artist"
         android:textColor="@color/third_color"
         android:textSize="17sp">
     </TextView>
@@ -129,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/secondary_color"
-                android:text="Cancel"
+                android:text="@string/cancel"
                 android:textColor="@color/third_color"
                 android:textSize="14sp"
                 android:layout_marginEnd="50dp">
@@ -140,7 +138,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/secondary_color"
-                android:text="Ok"
+                android:text="@string/ok"
                 android:textColor="@color/third_color"
                 android:textSize="14sp">
             </Button>

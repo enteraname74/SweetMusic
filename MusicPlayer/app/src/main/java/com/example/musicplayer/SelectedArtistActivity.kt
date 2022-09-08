@@ -193,7 +193,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {
-                Toast.makeText(this,"Ajout dans une playlist",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.added_in_the_playlist),Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
@@ -206,7 +206,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                     launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
                 }
 
-                Toast.makeText(this,"Suppressions de la musique dans la playlist",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
                 true
             }
             2 -> {
@@ -222,6 +222,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
 
                 MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
+                Toast.makeText(this,resources.getString(R.string.music_will_be_played_next),Toast.LENGTH_SHORT).show()
                 true
             }
             else -> {
@@ -309,7 +310,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
         when (audioManager.requestAudioFocus(audioFocusRequest)) {
             AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
             }
 
             AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
@@ -322,7 +323,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 }
             }
             else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
             }
         }
     }

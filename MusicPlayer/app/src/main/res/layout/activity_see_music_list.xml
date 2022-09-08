@@ -39,7 +39,7 @@
                 android:id="@+id/list_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LIST TYPE"
+                android:text="@string/list_type"
                 android:textColor="@color/third_color">
 
             </TextView>
@@ -126,7 +126,7 @@
                     android:layout_centerVertical="true"
                     android:ellipsize="marquee"
                     android:singleLine="true"
-                    android:text="Name of the Song"
+                    android:text="@string/name_of_the_song"
                     android:textColor="@color/third_color">
 
                 </TextView>

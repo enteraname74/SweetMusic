@@ -16,7 +16,7 @@
         android:id="@+id/title_activity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Modify Playlist Informations"
+        android:text="@string/modify_playlist_informations"
         android:textColor="@color/third_color"
         android:gravity="center_horizontal"
         android:layout_marginTop="10dp"
@@ -28,7 +28,7 @@
         android:id="@+id/playlist_art"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Playlist image :"
+        android:text="@string/playlist_image"
         android:textColor="@color/third_color"
         android:layout_below="@+id/title_activity"
         android:textSize="17sp"
@@ -53,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/playlist_cover"
         android:layout_marginTop="10dp"
-        android:text="Name of the playlist :"
+        android:text="@string/name_of_the_playlist"
         android:textColor="@color/third_color"
         android:textSize="17sp">
 
@@ -88,7 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/secondary_color"
-                android:text="Cancel"
+                android:text="@string/cancel"
                 android:textColor="@color/third_color"
                 android:textSize="14sp"
                 android:layout_marginEnd="50dp">
@@ -99,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/secondary_color"
-                android:text="Ok"
+                android:text="@string/ok"
                 android:textColor="@color/third_color"
                 android:textSize="14sp">
             </Button>

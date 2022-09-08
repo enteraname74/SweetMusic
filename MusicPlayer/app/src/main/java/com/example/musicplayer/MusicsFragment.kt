@@ -116,7 +116,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         return when (item.itemId) {
             0 -> {
-                Toast.makeText(context, "Ajout dans une playlist", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
@@ -129,7 +129,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
                 Toast.makeText(
                     context,
-                    "Suppressions de la musique dans la playlist",
+                    resources.getString(R.string.deleted_from_app),
                     Toast.LENGTH_SHORT
                 ).show()
                 true
@@ -154,11 +154,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                     MyMediaPlayer.currentIndex + 1,
                     adapter.musics[item.groupId]
                 )
-                Toast.makeText(
-                    context,
-                    "Musique ajoutée à la file d'attente",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
                 true
             }
             else -> {

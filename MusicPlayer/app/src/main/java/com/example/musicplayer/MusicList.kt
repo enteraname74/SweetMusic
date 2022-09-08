@@ -60,10 +60,10 @@ data class MusicList(
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 0, 0, "ADD TO")
-            menu?.add(this.bindingAdapterPosition, 1, 0, "REMOVE")
-            menu?.add(this.bindingAdapterPosition, 2, 0, "MODIFY")
-            menu?.add(this.bindingAdapterPosition, 3, 0, "PLAY NEXT")
+            menu?.add(this.bindingAdapterPosition, 0, 0, itemView.resources.getString(R.string.add_to))
+            menu?.add(this.bindingAdapterPosition, 1, 0, itemView.resources.getString(R.string.remove))
+            menu?.add(this.bindingAdapterPosition, 2, 0, itemView.resources.getString(R.string.modify))
+            menu?.add(this.bindingAdapterPosition, 3, 0, itemView.resources.getString(R.string.play_next))
         }
 
     }

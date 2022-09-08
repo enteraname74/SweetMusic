@@ -160,14 +160,14 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        menu?.add(0, 0, 0, "ADD TO")
-        menu?.add(0, 1, 0, "MODIFY")
+        menu?.add(0, 0, 0, resources.getString(R.string.add_to))
+        menu?.add(0, 1, 0, resources.getString(R.string.modify))
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {
-                Toast.makeText(this, "Ajout dans une playlist", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
