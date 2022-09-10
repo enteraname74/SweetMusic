@@ -22,14 +22,12 @@ import com.example.musicplayer.*
 import com.example.musicplayer.Music
 import com.example.musicplayer.MusicList
 import kotlinx.coroutines.*
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.ObjectOutputStream
+import java.io.*
 
 class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
 
     private val saveAllMusicsFile = "allMusics.musics"
+    private val saveAllDeletedFiles = "allDeleted.musics"
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var searchView : SearchView
@@ -127,7 +125,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
-                CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile(MyMediaPlayer.allMusics) }
+                CoroutineScope(Dispatchers.IO).launch {
+                    addDeletedSong(musicToRemove)
+                    writeAllMusicsToFile(MyMediaPlayer.allMusics)
+                }
 
                 Toast.makeText(
                     context,
@@ -282,5 +283,30 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             Log.d("ERROR",error.toString())
         }
         return true
+    }
+
+    private fun readAllDeletedMusicsFromFile() {
+        val path = context?.applicationContext?.filesDir
+        var content = ArrayList<Music>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, saveAllDeletedFiles)))
+            content = ois.readObject() as ArrayList<Music>
+            ois.close()
+        } catch (error : IOException){
+            Log.d("Error read deleted",error.toString())
+        }
+        MyMediaPlayer.allDeletedMusics = content
+    }
+
+    private fun addDeletedSong(song : Music){
+        MyMediaPlayer.allMusics.add(song)
+        val path = context?.applicationContext?.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllDeletedFiles)))
+            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error write deleted",error.toString())
+        }
     }
 }

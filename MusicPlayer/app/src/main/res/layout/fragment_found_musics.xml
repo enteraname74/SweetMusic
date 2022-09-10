@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.FoundMusicsFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/primary_color">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/menu_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/secondary_color"
+            android:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color">
+
+            <Button
+                android:id="@+id/add_songs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/add_songs"
+                android:textColor="@color/third_color"
+                android:layout_margin="10dp"
+                android:background="@drawable/shape" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

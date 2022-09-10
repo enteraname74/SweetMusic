@@ -67,4 +67,7 @@
     <string name="playlist_deleted">Playlist deleted</string>
     <string name="cannot_delete_favorite_playlist">You can\'t delete the Favorites playlist</string>
     <string name="loading_data">Loading data</string>
+    <string name="new_songs">New Songs</string>
+    <string name="deleted_songs">Deleted Songs</string>
+    <string name="searching_new_songs">Searching new songs</string>
 </resources>

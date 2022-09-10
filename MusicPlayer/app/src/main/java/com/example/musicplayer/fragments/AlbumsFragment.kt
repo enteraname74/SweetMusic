@@ -73,8 +73,6 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                         copiedMusics[0].albumCover,
                         copiedMusics[0].artist
                     )
-                    Log.d("album pos", copiedMusics.indexOf(MyMediaPlayer.allMusics[1]).toString())
-                    Log.d("max", copiedMusics.size.toString())
                     // On vide nos albums pour mettre à jour ensuite ces derniers :
                     MyMediaPlayer.allAlbums.clear()
                     for (music in copiedMusics) {
@@ -144,7 +142,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
         } catch (e: IOException) {
-            Log.d("ERROR","")
+            Log.d("ERROR",e.toString())
             e.printStackTrace()
         }
     }

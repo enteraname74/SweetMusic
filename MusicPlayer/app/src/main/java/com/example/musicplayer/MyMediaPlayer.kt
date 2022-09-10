@@ -33,6 +33,7 @@ class MyMediaPlayer {
 
         var allMusics = ArrayList<Music>()
         var allPlaylists = ArrayList<Playlist>()
+        var allDeletedMusics = ArrayList<Music>()
 
         val iconsList = listOf(R.drawable.ic_baseline_sync_24, R.drawable.ic_baseline_shuffle_24, R.drawable.ic_baseline_replay_24)
         var iconIndex = 0

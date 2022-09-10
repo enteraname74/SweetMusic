@@ -11,9 +11,7 @@ import com.example.musicplayer.fragments.MusicsFragment
 
 class VpAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
 
-    override fun getItemCount(): Int {
-        return 4
-    }
+    override fun getItemCount() = 4
 
     override fun createFragment(position: Int): Fragment {
         return when(position){

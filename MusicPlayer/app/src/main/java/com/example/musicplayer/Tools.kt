@@ -17,6 +17,7 @@ import java.io.*
 open class Tools : AppCompatActivity() {
     val saveAllMusicsFile = "allMusics.musics"
     val savePlaylistsFile = "allPlaylists.playlists"
+    val saveAllDeletedFiles = "allDeleted.musics"
 
     var mediaPlayer = MyMediaPlayer.getInstance
 
@@ -206,6 +207,31 @@ open class Tools : AppCompatActivity() {
         if (MyMediaPlayer.allPlaylists.size == 0){
             MyMediaPlayer.allPlaylists.add(Playlist("Favorites",ArrayList(),null,true))
             writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
+        }
+    }
+
+    open fun readAllDeletedMusicsFromFile() {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Music>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, saveAllDeletedFiles)))
+            content = ois.readObject() as ArrayList<Music>
+            ois.close()
+        } catch (error : IOException){
+            Log.d("Error read deleted",error.toString())
+        }
+        MyMediaPlayer.allDeletedMusics = content
+    }
+
+    open fun addDeletedSong(song : Music){
+        MyMediaPlayer.allMusics.add(song)
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllDeletedFiles)))
+            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error write deleted",error.toString())
         }
     }
 
