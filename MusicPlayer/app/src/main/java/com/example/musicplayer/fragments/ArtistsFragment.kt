@@ -147,7 +147,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
 
     override fun onArtistClick(position: Int) {
         val intent = Intent(context, SelectedArtistActivity::class.java)
-        val artist = MyMediaPlayer.allArtists[position]
+        val artist = adapter.allArtists[position]
         val globalPosition = MyMediaPlayer.allArtists.indexOf(artist)
 
         intent.putExtra("POSITION", globalPosition)

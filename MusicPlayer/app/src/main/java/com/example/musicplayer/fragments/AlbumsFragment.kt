@@ -151,7 +151,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
 
     override fun onAlbumClick(position: Int) {
         val intent = Intent(context, SelectedAlbumActivity::class.java)
-        val album = MyMediaPlayer.allAlbums[position]
+        val album = adapter.allAlbums[position]
         val globalPosition = MyMediaPlayer.allAlbums.indexOf(album)
 
         intent.putExtra("POSITION", globalPosition)
