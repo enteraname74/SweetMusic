@@ -92,8 +92,8 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                     // Il faut prendre le dernier cas en compte :
                     MyMediaPlayer.allAlbums.add(currentAlbum)
                     adapter.allAlbums = MyMediaPlayer.allAlbums
+                    adapter.notifyDataSetChanged()
                 }
-                adapter.notifyDataSetChanged()
             }
         }
         mediaPlayer.setOnCompletionListener { playNextSong() }
