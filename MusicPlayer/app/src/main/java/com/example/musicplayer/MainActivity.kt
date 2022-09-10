@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.Manifest
+import android.Manifest.permission.MANAGE_EXTERNAL_STORAGE
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -11,8 +12,12 @@ import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.net.Uri
+import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
 import android.util.Size
 import android.view.MenuItem
@@ -50,10 +55,14 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         if (!checkPermission()){
             requestPermission()
         }
-        Log.d("after perm","")
+
+        if (SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
+                requestPermissionToWrite()
+            }
+        }
 
         if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
-            Log.d("after perm","no files")
             musics = readAllMusicsFromFile(saveAllMusicsFile)
             allMusicsBackup = ArrayList(musics.map { it.copy() })
         }
@@ -183,8 +192,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         return result == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestPermission(){
 
+    private fun requestPermission(){
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
             Toast.makeText(this,resources.getString(R.string.permission),Toast.LENGTH_SHORT).show()
             ActivityCompat.requestPermissions(
@@ -197,6 +206,20 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 this,
                  arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                 69
+            )
+        }
+    }
+
+    private fun requestPermissionToWrite(){
+        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+        Log.d("uri", uri.toString())
+
+        if (SDK_INT >= 30) {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                    uri
+                )
             )
         }
     }

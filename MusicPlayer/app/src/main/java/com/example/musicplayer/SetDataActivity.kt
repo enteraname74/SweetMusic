@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.FileUtils
 import android.text.Editable
 import android.util.Log
 import android.widget.Button
@@ -46,7 +47,8 @@ class SetDataActivity : Tools() {
     }
 
     private fun selectMusicsFile() {
-        val intent = Intent(Intent.ACTION_PICK)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
         resultMusicsLauncher.launch(intent)
     }
 
@@ -55,7 +57,10 @@ class SetDataActivity : Tools() {
     private var resultMusicsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.data?.data
-            val pathName = uri?.lastPathSegment
+            val path = uri?.path as String
+            val pathName = path.substring(path.lastIndexOf("/")+1)
+            Log.d("path", uri.toString())
+            Log.d("pathName", pathName.toString())
 
             if (pathName == "allMusics.musics"){
                 validMusicsFile = true
@@ -69,14 +74,16 @@ class SetDataActivity : Tools() {
     }
 
     private fun selectPlaylistsFile() {
-        val intent = Intent(Intent.ACTION_PICK)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
         resultPlaylistsLauncher.launch(intent)
     }
 
     private var resultPlaylistsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.data?.data
-            val pathName = uri?.lastPathSegment
+            val path = uri?.path as String
+            val pathName = path.substring(path.lastIndexOf("/")+1)
 
             if (pathName == "allPlaylists.playlists"){
                 validPlaylistsFile = true
