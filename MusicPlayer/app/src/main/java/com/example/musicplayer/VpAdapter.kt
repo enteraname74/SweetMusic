@@ -1,10 +1,13 @@
 package com.example.musicplayer
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.example.musicplayer.fragments.PlaylistsFragment
+import com.example.musicplayer.fragments.AlbumsFragment
+import com.example.musicplayer.fragments.ArtistsFragment
+import com.example.musicplayer.fragments.MusicsFragment
 
 class VpAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
 

@@ -64,4 +64,6 @@
     <string name="deleted_from_playlist">Deleted from the playlist</string>
     <string name="music_will_be_played_next">This music will be played next</string>
     <string name="deleted_from_app">Deleted from the app</string>
+    <string name="playlist_deleted">Playlist deleted</string>
+    <string name="cannot_delete_favorite_playlist">You can\'t delete the Favorites playlist</string>
 </resources>

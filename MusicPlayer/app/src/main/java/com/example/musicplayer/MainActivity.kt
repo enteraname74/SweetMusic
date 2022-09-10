@@ -50,15 +50,18 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         if (!checkPermission()){
             requestPermission()
         }
+        Log.d("after perm","")
 
         if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
+            Log.d("after perm","no files")
             musics = readAllMusicsFromFile(saveAllMusicsFile)
             allMusicsBackup = ArrayList(musics.map { it.copy() })
         }
         if (musics.size <= 0){
+            Log.d("after perm","no songs")
             // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
             // Créons d'abord la playlist des favoris :
-            val favoritePlaylist = Playlist("Favorites",ArrayList(),null)
+            val favoritePlaylist = Playlist("Favorites",ArrayList(),null, true)
             val playlists = ArrayList<Playlist>()
             playlists.add(favoritePlaylist)
             writePlaylistsToFile(savePlaylistsFile,playlists)

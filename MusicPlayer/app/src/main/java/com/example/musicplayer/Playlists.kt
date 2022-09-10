@@ -17,7 +17,7 @@ import java.lang.Error
 class Playlists (
     var allPlaylists : ArrayList<Playlist>,
     private val context : Context,
-    private val mOnPlaylistListener : OnPlaylistsListener ,
+    private val mOnPlaylistListener : OnPlaylistsListener,
     private val resourceName : Int) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
 
     class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener {

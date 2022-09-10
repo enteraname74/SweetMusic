@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -16,7 +17,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ModifyPlaylistInfoActivity : Tools() {
@@ -39,6 +39,14 @@ class ModifyPlaylistInfoActivity : Tools() {
         // On récupère les différents champs modifiable :
         playlistCoverField = findViewById(R.id.playlist_cover)
         playlistNameField = findViewById(R.id.edit_playlist_name)
+
+        if (playlist.isFavoriteList){
+            playlistNameField.isFocusable = false
+            playlistNameField.isFocusableInTouchMode = false
+            playlistNameField.isEnabled = false
+            playlistNameField.isCursorVisible = false
+            playlistNameField.setBackgroundColor(Color.TRANSPARENT)
+        }
 
         // On indique les infos actuelles de la musique dans nos champs :
         if (playlist.playlistCover != null){
@@ -83,7 +91,8 @@ class ModifyPlaylistInfoActivity : Tools() {
     private fun onValidateButtonClick(){
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
-        if (allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == null || allPlaylists.find { it.listName == playlistNameField.text.toString().trim() } == playlist ) {
+        val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
+        if (verification == null || verification == playlist ) {
 
             playlist.listName = playlistNameField.text.toString()
             val drawable = playlistCoverField.drawable

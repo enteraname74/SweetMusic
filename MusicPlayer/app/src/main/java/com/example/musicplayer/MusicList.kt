@@ -11,9 +11,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :

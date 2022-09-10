@@ -22,9 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.*
-import kotlin.system.measureTimeMillis
-import kotlin.time.measureTime
 
 class PlaylistsMenuActivity : Tools(), Playlists.OnPlaylistsListener {
     private var menuRecyclerView : RecyclerView? = null

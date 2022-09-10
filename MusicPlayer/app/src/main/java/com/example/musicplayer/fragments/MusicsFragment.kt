@@ -1,10 +1,9 @@
-package com.example.musicplayer
+package com.example.musicplayer.fragments
 
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -19,6 +18,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.*
+import com.example.musicplayer.Music
+import com.example.musicplayer.MusicList
 import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileOutputStream
@@ -104,7 +106,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         MyMediaPlayer.currentIndex = position
 
-        val intent = Intent(context,MusicPlayerActivity::class.java)
+        val intent = Intent(context, MusicPlayerActivity::class.java)
         Log.d("SAME MUSIC", sameMusic.toString())
         intent.putExtra("SAME MUSIC", sameMusic)
 
@@ -178,20 +180,20 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     }
 
     private fun playNextSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
+        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
-            MyMediaPlayer.currentIndex+=1
+            MyMediaPlayer.currentIndex +=1
         }
         adapter.notifyDataSetChanged()
         playMusic()
     }
 
     private fun playPreviousSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex==0){
+        if(MyMediaPlayer.currentIndex ==0){
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
-            MyMediaPlayer.currentIndex-=1
+            MyMediaPlayer.currentIndex -=1
         }
         adapter.notifyDataSetChanged()
         playMusic()

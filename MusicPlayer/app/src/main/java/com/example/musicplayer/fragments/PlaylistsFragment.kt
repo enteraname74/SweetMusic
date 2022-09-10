@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.fragments
 
 import android.app.Activity
 import android.content.Context
@@ -21,6 +21,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -42,7 +43,10 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_playlists, container, false)
-        adapter = Playlists(MyMediaPlayer.allPlaylists,context as Context,this,R.layout.playlist_file_linear)
+        adapter = Playlists(
+            MyMediaPlayer.allPlaylists,context as Context,this,
+            R.layout.playlist_file_linear
+        )
 
         // Mise en place du bouton de création de playlist :
         val addPlaylist = view.findViewById<ImageView>(R.id.add_playlist)
@@ -73,7 +77,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     override fun onPlaylistClick(position: Int) {
         Log.d("PLAYLIST POSITION", position.toString())
 
-        val intent = Intent(context,SelectedPlaylistActivity::class.java)
+        val intent = Intent(context, SelectedPlaylistActivity::class.java)
         intent.putExtra("POSITION", position)
 
         startActivity(intent)
@@ -137,19 +141,19 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     }
 
     private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
+        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
-            MyMediaPlayer.currentIndex+=1
+            MyMediaPlayer.currentIndex +=1
         }
         playMusic()
     }
 
     private fun playPreviousSong(){
-        if(MyMediaPlayer.currentIndex==0){
+        if(MyMediaPlayer.currentIndex ==0){
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
-            MyMediaPlayer.currentIndex-=1
+            MyMediaPlayer.currentIndex -=1
         }
         playMusic()
     }
@@ -187,23 +191,22 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        Log.d("Inside Playlist","")
         return when(item.itemId){
             10 -> {
                 if (MyMediaPlayer.allPlaylists[item.groupId].isFavoriteList){
-                    Toast.makeText(context,"You can't delete the Favorites playlist",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,resources.getString(R.string.cannot_delete_favorite_playlist),Toast.LENGTH_SHORT).show()
                 } else {
                     MyMediaPlayer.allPlaylists.removeAt(item.groupId)
                     adapter.allPlaylists = MyMediaPlayer.allPlaylists
                     adapter.notifyItemRemoved(item.groupId)
 
-                    writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)
-                    Toast.makeText(context,"Suppressions de la playlist",Toast.LENGTH_SHORT).show()
+                    writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
+                    Toast.makeText(context,resources.getString(R.string.playlist_deleted),Toast.LENGTH_SHORT).show()
                 }
                 true
             }
             11 -> {
-                val intent = Intent(context,ModifyPlaylistInfoActivity::class.java)
+                val intent = Intent(context, ModifyPlaylistInfoActivity::class.java)
                 intent.putExtra("POSITION",item.groupId)
                 resultLauncher.launch(intent)
                 true

@@ -14,7 +14,8 @@ import java.io.Serializable
 class Artists (
     var allArtists : ArrayList<Artist>,
     private val context : Context,
-    private val mOnArtistListener : OnArtistsListener) : RecyclerView.Adapter<Artists.ArtistsViewHolder>(), Serializable {
+    private val mOnArtistListener : OnArtistsListener
+) : RecyclerView.Adapter<Artists.ArtistsViewHolder>(), Serializable {
 
     class ArtistsViewHolder(itemView: View, private var onArtistsListener: OnArtistsListener) :
         RecyclerView.ViewHolder(itemView), View.OnClickListener, Serializable {

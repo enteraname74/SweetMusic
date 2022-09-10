@@ -20,9 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.system.measureTimeMillis
 
-class SeeMusicListActivity : Tools(),MusicList.OnMusicListener {
+class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
     private var list = ArrayList<Music>()
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView

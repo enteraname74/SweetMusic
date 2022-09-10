@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -16,7 +15,6 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.alpha
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView

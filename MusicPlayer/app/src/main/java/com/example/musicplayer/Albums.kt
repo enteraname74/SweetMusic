@@ -14,7 +14,8 @@ import java.io.Serializable
 class Albums (
     var allAlbums : ArrayList<Album>,
     private val context : Context,
-    private val mOnAlbumListener : OnAlbumsListener) : RecyclerView.Adapter<Albums.AlbumsViewHolder>(), Serializable {
+    private val mOnAlbumListener : OnAlbumsListener
+) : RecyclerView.Adapter<Albums.AlbumsViewHolder>(), Serializable {
 
     class AlbumsViewHolder(itemView : View, private var onAlbumsListener : OnAlbumsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable {
 

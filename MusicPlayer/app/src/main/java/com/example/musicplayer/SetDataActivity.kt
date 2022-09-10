@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.text.Editable
 import android.util.Log
 import android.widget.Button
@@ -14,11 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import java.io.ObjectInputStream
-import java.time.Duration
 
 class SetDataActivity : Tools() {
     private lateinit var editTextMusics: EditText

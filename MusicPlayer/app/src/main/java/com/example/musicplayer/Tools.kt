@@ -4,16 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
-import android.media.Image
 import android.os.Environment
 import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.contextaware.withContextAvailable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -86,7 +81,7 @@ open class Tools : AppCompatActivity() {
         }
         MyMediaPlayer.currentIndex = position
         Log.d("MEDIA POSITION", MyMediaPlayer.currentIndex.toString())
-        val intent = Intent(context,MusicPlayerActivity::class.java)
+        val intent = Intent(context, MusicPlayerActivity::class.java)
 
         /*On fait passer notre liste de musiques dans notre nouvelle activité pour
         récupérer les données des musiques
@@ -99,20 +94,20 @@ open class Tools : AppCompatActivity() {
     }
 
     open fun playNextSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
+        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
         } else {
-            MyMediaPlayer.currentIndex+=1
+            MyMediaPlayer.currentIndex +=1
         }
         adapter.notifyDataSetChanged()
         playMusic()
     }
 
     open fun playPreviousSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex==0){
+        if(MyMediaPlayer.currentIndex ==0){
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
-            MyMediaPlayer.currentIndex-=1
+            MyMediaPlayer.currentIndex -=1
         }
         adapter.notifyDataSetChanged()
         playMusic()
@@ -210,7 +205,7 @@ open class Tools : AppCompatActivity() {
         MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
         if (MyMediaPlayer.allPlaylists.size == 0){
             MyMediaPlayer.allPlaylists.add(Playlist("Favorites",ArrayList(),null,true))
-            writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)
+            writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
         }
     }
 
