@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.media.*
@@ -17,6 +18,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +35,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     lateinit var currentTimeTv : TextView
     private lateinit var totalTimeTv : TextView
     lateinit var seekBar : SeekBar
-    private lateinit var initialList : ImageView
     private lateinit var currentList : ImageView
     private lateinit var pausePlay : ImageView
     private lateinit var nextBtn : ImageView
@@ -59,7 +61,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         currentTimeTv = findViewById(R.id.current_time)
         totalTimeTv = findViewById(R.id.total_time)
         seekBar = findViewById(R.id.seek_bar)
-        initialList = findViewById(R.id.initial_playlist)
         currentList = findViewById(R.id.current_playlist)
         pausePlay = findViewById(R.id.pause_play)
         nextBtn = findViewById(R.id.next)
@@ -94,7 +95,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
-        initialList.setOnClickListener{ seeList() }
         currentList.setOnClickListener{ seeList() }
         pausePlay.setOnClickListener{ pausePlay() }
         nextBtn.setOnClickListener{ playNextSong() }
@@ -143,6 +143,17 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
+
+        currentList.setOnClickListener{ seeList() }
+        pausePlay.setOnClickListener{ pausePlay() }
+        nextBtn.setOnClickListener{ playNextSong() }
+        previousBtn.setOnClickListener{ playPreviousSong() }
+        favoriteBtn.setOnClickListener{ setFavorite() }
+        sort.setOnClickListener{ changeSorting() }
+
+        registerForContextMenu(musicIcon)
+
+        playMusic()
     }
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
@@ -455,11 +466,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         currentTimeTv.setTextColor(backgroundColor.titleTextColor)
         totalTimeTv.setTextColor(backgroundColor.titleTextColor)
 
-        val lighterColorTheme = ColorUtils.blendARGB(backgroundColor.rgb, backgroundColor.rgb,0.1f)
-        seekBar.progressDrawable.setTint(lighterColorTheme)
-        seekBar.thumb.setTint(lighterColorTheme)
+        seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
-        initialList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
