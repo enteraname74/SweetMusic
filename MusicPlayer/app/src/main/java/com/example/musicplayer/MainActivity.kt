@@ -1,7 +1,6 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.Manifest.permission.MANAGE_EXTERNAL_STORAGE
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -38,6 +37,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
+    private lateinit var fetchingSongs : LinearLayout
     private lateinit var viewPager : ViewPager2
 
     private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
@@ -51,10 +51,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         setContentView(R.layout.activity_main)
 
         pausePlayButton = findViewById(R.id.pause_play)
-
-        if (!checkPermission()){
-            requestPermission()
-        }
+        fetchingSongs = findViewById(R.id.fetching_songs)
+        tabLayout = findViewById(R.id.tab_layout)
+        viewPager = findViewById(R.id.view_pager)
 
         if (SDK_INT >= 30) {
             if (!Environment.isExternalStorageManager()) {
@@ -62,83 +61,19 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             }
         }
 
-        if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
-            musics = readAllMusicsFromFile(saveAllMusicsFile)
-            allMusicsBackup = ArrayList(musics.map { it.copy() })
+        if (!checkPermission()){
+            requestPermission()
         }
-        if (musics.size <= 0){
-            Log.d("after perm","no songs")
-            // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
-            // Créons d'abord la playlist des favoris :
-            val favoritePlaylist = Playlist("Favorites",ArrayList(),null, true)
-            val playlists = ArrayList<Playlist>()
-            playlists.add(favoritePlaylist)
-            writePlaylistsToFile(savePlaylistsFile,playlists)
 
-            // A "projection" defines the columns that will be returned for each row
-            val projection: Array<String> = arrayOf(
-                MediaStore.Audio.Media.TITLE,
-                MediaStore.Audio.Media.ARTIST,
-                MediaStore.Audio.Media.ALBUM,
-                MediaStore.Audio.Media.DURATION,
-                MediaStore.Audio.Media.DATA,
-                MediaStore.Audio.Albums.ALBUM_ID
-            )
-
-            val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
-
-            // Does a query against the table and returns a Cursor object
-            val cursor = contentResolver.query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,    // The content URI of the words table
-                projection,                                     // The columns to return for each row
-                selection,                                      // Either null, or the boolean that specifies the rows to retrieve
-                null,
-                null // The sort order for the returned rows
-            )
-
-            when (cursor?.count) {
-                null -> {
-                    Toast.makeText(this, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
-                }
-                else -> {
-                    while (cursor.moveToNext()) {
-                        val albumId = cursor.getLong(5)
-                        val albumUri = ContentUris.withAppendedId(
-                            MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
-                        )
-
-                        val albumCover : ByteArray? = try {
-                            val bitmap = contentResolver.loadThumbnail(
-                                albumUri,
-                                Size(400, 400),
-                                null
-                            )
-                            bitmapToByteArray(bitmap)
-                        } catch (error : FileNotFoundException){
-                            null
-                        }
-                        val music = Music(
-                            cursor.getString(0),
-                            cursor.getString(1),
-                            cursor.getString(2),
-                            albumCover,
-                            cursor.getLong(3),
-                            cursor.getString(4)
-                        )
-                        if (File(music.path).exists()) {
-                            musics.add(music)
-                        }
-                    }
-
-                    cursor.close()
-                    musics.reverse()
-
-                    writeAllMusicsToFile(saveAllMusicsFile, musics)
-                }
+        if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
+            CoroutineScope(Dispatchers.Main).launch {
+                musics = readAllMusicsFromFile(saveAllMusicsFile)
+                allMusicsBackup = ArrayList(musics.map { it.copy() })
+                fetchingSongs.visibility = View.GONE
+                viewPager.visibility = View.VISIBLE
             }
         }
-        tabLayout = findViewById(R.id.tab_layout)
-        viewPager = findViewById(R.id.view_pager)
+
         viewPager.adapter = VpAdapter(this)
 
         TabLayoutMediator(tabLayout, viewPager){tab, index ->
@@ -151,81 +86,38 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             }
         }.attach()
 
-        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-
-        if (MyMediaPlayer.currentIndex == -1){
-            noSongPlaying.visibility = View.VISIBLE
-            infoSongPlaying.visibility = View.GONE
-        } else {
-            noSongPlaying.visibility = View.GONE
-            infoSongPlaying.visibility = View.VISIBLE
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            bottomInfos.setOnClickListener{onBottomMenuClick(MyMediaPlayer.currentIndex, this@MainActivity)}
-            songTitleInfo?.isSelected = true
-        }
-
-        MyMediaPlayer.allMusics = musics
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-        shuffleButton.setOnClickListener { playRandom(musics, this@MainActivity) }
+        shuffleButton.setOnClickListener { playRandom(musics, this) }
 
-        // On ajoute nos musiques et playlists dans notre mediaplayer :
-
-        CoroutineScope(Dispatchers.IO).launch{
-            launch{readPlaylistsAsync()}
-        }
-        println("end")
+        CoroutineScope(Dispatchers.IO).launch{ readPlaylistsAsync() }
 
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val openMenu = findViewById<ImageView>(R.id.open_menu)
         val navigationView = findViewById<NavigationView>(R.id.navigation_view)
         navigationView.setNavigationItemSelectedListener(this)
 
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+
         openMenu.setOnClickListener { openNavigationMenu(drawerLayout) }
-    }
-
-    private fun checkPermission() : Boolean {
-        val result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-        return result == PackageManager.PERMISSION_GRANTED
-    }
-
-
-    private fun requestPermission(){
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
-            Toast.makeText(this,resources.getString(R.string.permission),Toast.LENGTH_SHORT).show()
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                69
-            )
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                 arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                69
-            )
-        }
-    }
-
-    private fun requestPermissionToWrite(){
-        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-        Log.d("uri", uri.toString())
-
-        if (SDK_INT >= 30) {
-            startActivity(
-                Intent(
-                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                    uri
-                )
-            )
-        }
     }
 
     override fun onResume() {
         super.onResume()
+
+        // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
+        // Si on a la permission et qu'on a pas encore de fichiers avec des musiques, alors on va chercher nos musiques :
+        if (checkPermission() && !File(applicationContext.filesDir, saveAllMusicsFile).exists()){
+            // Créons d'abord la playlist des favoris :
+            CoroutineScope(Dispatchers.IO).launch {
+                val favoritePlaylist = Playlist("Favorites",ArrayList(),null, true)
+                val playlists = ArrayList<Playlist>()
+                playlists.add(favoritePlaylist)
+                writePlaylistsToFile(savePlaylistsFile,playlists)
+            }
+
+            CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
+        }
 
         val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
         val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
@@ -340,4 +232,115 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     }
 
     private var setDataResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
+
+    private suspend fun fetchMusics() {
+        // Pour éviter de potentiels crash de l'app :
+        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
+        val openMenu = findViewById<ImageView>(R.id.open_menu)
+
+        withContext(Dispatchers.Main) {
+            shuffleButton.visibility = View.GONE
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            openMenu.visibility = View.GONE
+        }
+
+        // A "projection" defines the columns that will be returned for each row
+        val projection: Array<String> = arrayOf(
+            MediaStore.Audio.Media.TITLE,
+            MediaStore.Audio.Media.ARTIST,
+            MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.DURATION,
+            MediaStore.Audio.Media.DATA,
+            MediaStore.Audio.Albums.ALBUM_ID
+        )
+
+        val selection = MediaStore.Audio.Media.IS_MUSIC + " != 0"
+
+        // Does a query against the table and returns a Cursor object
+        val cursor = contentResolver.query(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,    // The content URI of the words table
+            projection,                                     // The columns to return for each row
+            selection,                                      // Either null, or the boolean that specifies the rows to retrieve
+            null,
+            null // The sort order for the returned rows
+        )
+
+        when (cursor?.count) {
+            null -> {
+                Toast.makeText(this, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                while (cursor.moveToNext()) {
+                    val albumId = cursor.getLong(5)
+                    val albumUri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
+                    )
+
+                    val albumCover : ByteArray? = try {
+                        val bitmap = contentResolver.loadThumbnail(
+                            albumUri,
+                            Size(400, 400),
+                            null
+                        )
+                        bitmapToByteArray(bitmap)
+                    } catch (error : FileNotFoundException){
+                        null
+                    }
+                    val music = Music(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        albumCover,
+                        cursor.getLong(3),
+                        cursor.getString(4)
+                    )
+                    if (File(music.path).exists()) {
+                        musics.add(music)
+                    }
+                }
+                cursor.close()
+                musics.reverse()
+
+                writeAllMusicsToFile(saveAllMusicsFile, musics)
+
+                val openMenu = findViewById<ImageView>(R.id.open_menu)
+                withContext(Dispatchers.Main){
+                    fetchingSongs.visibility = View.GONE
+                    viewPager.visibility = View.VISIBLE
+                    shuffleButton.visibility = View.VISIBLE
+                    drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                    openMenu.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    private fun checkPermission() : Boolean {
+        val result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        return result == PackageManager.PERMISSION_GRANTED
+    }
+
+
+    private fun requestPermission(){
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+            69
+        )
+    }
+
+    private fun requestPermissionToWrite(){
+        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+        Log.d("uri", uri.toString())
+
+        if (SDK_INT >= 30) {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                    uri
+                )
+            )
+        }
+    }
 }

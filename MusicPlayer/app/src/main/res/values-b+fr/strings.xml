@@ -66,4 +66,5 @@
     <string name="deleted_from_app">Supprimer de l\'application</string>
     <string name="playlist_deleted">Playlist supprimée</string>
     <string name="cannot_delete_favorite_playlist">Vous ne pouvez pas supprimer la playlist des favoris</string>
+    <string name="loading_data">Chargement des données</string>
 </resources>
