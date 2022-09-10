@@ -93,11 +93,12 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
+            println("not the same song. Selected : $position, Normal : ${MyMediaPlayer.currentIndex}")
             sameMusic = false
         }
         // Vérifions si on change de playlist :
         if (adapter.musics != MyMediaPlayer.initialPlaylist) {
-            println("there")
+            println("changement playlist")
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.playlistName = "Main"
@@ -107,7 +108,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         MyMediaPlayer.currentIndex = position
 
         val intent = Intent(context, MusicPlayerActivity::class.java)
-        Log.d("SAME MUSIC", sameMusic.toString())
         intent.putExtra("SAME MUSIC", sameMusic)
 
         startActivity(intent)

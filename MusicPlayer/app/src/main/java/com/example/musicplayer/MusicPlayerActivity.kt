@@ -334,12 +334,14 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     // Permet de changer le statut favoris de la chanson :
     private fun setFavorite(){
         if(currentSong.favorite){
-            currentSong.favorite = false
+            MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
             MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
+            currentSong.favorite = false
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
         } else {
-            currentSong.favorite = true
+            MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
             MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
+            currentSong.favorite = true
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         }
 
@@ -439,7 +441,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
     }
 
-    fun setColor(){
+    private fun setColor(){
         val background = findViewById<RelativeLayout>(R.id.music_player)
         var bitmap : Bitmap? = null
         if (currentSong.albumCover != null) {
