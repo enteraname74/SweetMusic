@@ -25,8 +25,6 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
     private var list = ArrayList<Music>()
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
-    private lateinit var listName : TextView
-    private lateinit var listType : String
 
     private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
     private lateinit var audioAttributes : AudioAttributes
@@ -39,20 +37,10 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
         setContentView(R.layout.activity_see_music_list)
 
         menuRecyclerView = findViewById(R.id.songs_list)
-        listName = findViewById(R.id.list_name)
-
-        listType = intent.getSerializableExtra("LIST-TYPE") as String
-
-        if (listType == "initialList"){
-            listName.text = resources.getString(R.string.initial_list)
-            list = MyMediaPlayer.initialPlaylist
-        } else {
-            listName.text = resources.getString(R.string.current_list)
-            list = MyMediaPlayer.currentPlaylist
-        }
 
         CoroutineScope(Dispatchers.IO).launch{
-            adapter = MusicList(list, listName.text as String,applicationContext,this@SeeMusicListActivity)
+            list = MyMediaPlayer.currentPlaylist
+            adapter = MusicList(list, "currentList",applicationContext,this@SeeMusicListActivity)
             menuRecyclerView.layoutManager = LinearLayoutManager(this@SeeMusicListActivity)
             menuRecyclerView.adapter = adapter
         }
@@ -108,13 +96,11 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
     override fun onResume() {
         super.onResume()
         if (MyMediaPlayer.modifiedSong) {
-            GlobalScope.launch(Dispatchers.IO) {
-                launch {
-                    writeAllAsync(
-                        MyMediaPlayer.allMusics,
-                        MyMediaPlayer.allPlaylists
-                    )
-                }
+            CoroutineScope(Dispatchers.IO).launch{
+                writeAllAsync(
+                    MyMediaPlayer.allMusics,
+                    MyMediaPlayer.allPlaylists
+                )
             }
             adapter.musics = list
             adapter.notifyItemRangeChanged(0, adapter.itemCount)
@@ -133,24 +119,22 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
         noSongPlaying.visibility = View.VISIBLE
 
         if (MyMediaPlayer.currentIndex != -1) {
-            GlobalScope.launch(Dispatchers.IO) {
-                launch {
-                    noSongPlaying.visibility = View.GONE
-                    infoSongPlaying.visibility = View.VISIBLE
-                    songTitleInfo.text =
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                    if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                        // Passons d'abord notre byteArray en bitmap :
-                        val bytes =
-                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                        var bitmap: Bitmap? = null
-                        if (bytes != null && bytes.isNotEmpty()) {
-                            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                        }
-                        albumCoverInfo.setImageBitmap(bitmap)
-                    } else {
-                        albumCoverInfo.setImageResource(R.drawable.michael)
+            CoroutineScope(Dispatchers.Main).launch {
+                noSongPlaying.visibility = View.GONE
+                infoSongPlaying.visibility = View.VISIBLE
+                songTitleInfo.text =
+                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes =
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                     }
+                    albumCoverInfo.setImageBitmap(bitmap)
+                } else {
+                    albumCoverInfo.setImageResource(R.drawable.michael)
                 }
             }
 
@@ -197,14 +181,8 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
                 true
             }
             1 -> {
-                if (listType == "initialList"){
-                    if (MyMediaPlayer.initialPlaylist.equals(MyMediaPlayer.currentPlaylist)){
-                        MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
-                    }
-                    MyMediaPlayer.initialPlaylist.remove(list[item.groupId])
-                } else {
-                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
-                }
+
+                MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
                 adapter.notifyItemRemoved(item.groupId)
 
                 Toast.makeText(
@@ -224,31 +202,25 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                val song = list[item.groupId]
+                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                val songToPlayNext = adapter.musics[item.groupId]
 
-                if (listType == "initialList"){
-                    if (MyMediaPlayer.initialPlaylist.equals(MyMediaPlayer.currentPlaylist)){
-                        MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
-                        MyMediaPlayer.currentPlaylist.add(
-                            MyMediaPlayer.currentIndex + 1,
-                            song
-                        )
-                    }
-                    MyMediaPlayer.initialPlaylist.remove(list[item.groupId])
-                    MyMediaPlayer.initialPlaylist.add(
-                        MyMediaPlayer.currentIndex + 1,
-                        song
-                    )
-                } else {
-                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
+                if (currentMusic != songToPlayNext) {
+                    MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
+
+                    // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+
                     MyMediaPlayer.currentPlaylist.add(
                         MyMediaPlayer.currentIndex + 1,
-                        song
+                        songToPlayNext
                     )
+
+                    adapter.notifyItemRemoved(item.groupId)
+                    adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
+                    Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
                 }
-                adapter.notifyItemRemoved(item.groupId)
-                adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
-                Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
                 true
             }
             else -> {
@@ -259,11 +231,7 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
 
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if(result.resultCode == Activity.RESULT_OK){
-            list = if (listType == "initialList"){
-                MyMediaPlayer.initialPlaylist
-            } else {
-                MyMediaPlayer.currentPlaylist
-            }
+            list = MyMediaPlayer.currentPlaylist
             adapter.musics = list
         }
     }

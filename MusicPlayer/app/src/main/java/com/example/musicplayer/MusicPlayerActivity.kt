@@ -94,8 +94,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
-        initialList.setOnClickListener{ seeList("initialList") }
-        currentList.setOnClickListener{ seeList("currentList") }
+        initialList.setOnClickListener{ seeList() }
+        currentList.setOnClickListener{ seeList() }
         pausePlay.setOnClickListener{ pausePlay() }
         nextBtn.setOnClickListener{ playNextSong() }
         previousBtn.setOnClickListener{ playPreviousSong() }
@@ -143,18 +143,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
-
-        initialList.setOnClickListener{ seeList("initialList") }
-        currentList.setOnClickListener{ seeList("currentList") }
-        pausePlay.setOnClickListener{ pausePlay() }
-        nextBtn.setOnClickListener{ playNextSong() }
-        previousBtn.setOnClickListener{ playPreviousSong() }
-        favoriteBtn.setOnClickListener{ setFavorite() }
-        sort.setOnClickListener{ changeSorting() }
-
-        registerForContextMenu(musicIcon)
-
-        playMusic()
     }
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
@@ -185,9 +173,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
     }
 
-    private fun seeList(listType: String) {
+    private fun seeList() {
         val intent = Intent(this@MusicPlayerActivity, SeeMusicListActivity::class.java)
-        intent.putExtra("LIST-TYPE", listType)
         resultLauncher.launch(intent)
     }
 
@@ -410,10 +397,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     override fun onResume() {
         super.onResume()
-        Log.d("RESUME", "RESUME MUSIC")
-
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
 

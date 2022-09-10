@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
     android:orientation="vertical"
@@ -46,42 +46,21 @@
         </RelativeLayout>
     </LinearLayout>
 
-    <RelativeLayout
-        android:id="@+id/playlists"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/songs_list"
         android:layout_width="match_parent"
-        android:layout_height="596dp"
-        android:layout_below="@+id/titleMenu"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/secondary_color"
+        android:visibility="visible" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/songs_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/secondary_color"
-            android:visibility="visible" />
-
-        <TextView
-            android:id="@+id/no_playlists_found"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/third_color"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:background="@color/secondary_color"
-            android:text="NO PLAYLISTS FOUND"
-            android:gravity="center_horizontal|center_vertical"
-            android:visibility="gone">
-        </TextView>
-
-
-    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:orientation="horizontal"
-        android:layout_below="@+id/playlists"
+        android:layout_gravity="bottom"
         android:background="@color/primary_color">
 
         <ImageView
@@ -164,4 +143,4 @@
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>
-</RelativeLayout>
+</LinearLayout>

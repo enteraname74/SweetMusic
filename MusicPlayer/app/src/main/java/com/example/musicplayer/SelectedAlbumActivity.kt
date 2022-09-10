@@ -221,13 +221,35 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 true
             }
             3 -> {
-                // Lorsque l'on veut jouer une musique après celle qui se joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove((adapter.musics[item.groupId]))
-                MyMediaPlayer.currentPlaylist.remove((adapter.musics[item.groupId]))
+                if (MyMediaPlayer.currentPlaylist.size > 0) {
+                    // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
+                    val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                    val songToPlayNext = adapter.musics[item.groupId]
 
-                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
-                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
-                Toast.makeText(this,resources.getString(R.string.music_will_be_played_next),Toast.LENGTH_SHORT).show()
+                    // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
+                    if (currentMusic != songToPlayNext) {
+                        MyMediaPlayer.initialPlaylist.remove(songToPlayNext)
+                        MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
+
+                        // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
+                        MyMediaPlayer.currentIndex =
+                            MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+
+                        MyMediaPlayer.initialPlaylist.add(
+                            MyMediaPlayer.currentIndex + 1,
+                            songToPlayNext
+                        )
+                        MyMediaPlayer.currentPlaylist.add(
+                            MyMediaPlayer.currentIndex + 1,
+                            songToPlayNext
+                        )
+                        Toast.makeText(
+                            this,
+                            resources.getString(R.string.music_will_be_played_next),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
                 true
             }
             else -> {

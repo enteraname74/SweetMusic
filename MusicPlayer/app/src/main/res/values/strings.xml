@@ -45,7 +45,7 @@
     <string name="pause_play">pause play</string>
     <string name="favorite">favorite</string>
     <string name="add_songs">Add songs</string>
-    <string name="list_type">LIST TYPE</string>
+    <string name="list_type">Current List</string>
     <string name="select_the_saved_files">Select the saved files</string>
     <string name="music_file_musics">Music file (.musics) :</string>
     <string name="select">Select</string>

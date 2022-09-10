@@ -45,7 +45,7 @@
     <string name="pause_play">pause et jeu</string>
     <string name="favorite">favoris</string>
     <string name="add_songs">Ajouter des chansons</string>
-    <string name="list_type">Type de la liste</string>
+    <string name="list_type">Playlist jouée</string>
     <string name="select_the_saved_files">Selectionnez les fichiers de sauvegardes</string>
     <string name="music_file_musics">Fichier de musiques (.musics) :</string>
     <string name="select">Choisir</string>
