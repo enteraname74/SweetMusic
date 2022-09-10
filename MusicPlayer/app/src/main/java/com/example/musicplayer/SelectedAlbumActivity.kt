@@ -208,9 +208,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
-                }
+                CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics) }
 
                 Toast.makeText(this,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
                 true
@@ -218,16 +216,17 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             2 -> {
                 // MODIFY INFOS :
                 val intent = Intent(this@SelectedAlbumActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH", musics[item.groupId].path)
+                intent.putExtra("PATH", adapter.musics[item.groupId].path)
                 resultModifyMusic.launch(intent)
                 true
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui se joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
-                MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
+                MyMediaPlayer.initialPlaylist.remove((adapter.musics[item.groupId]))
+                MyMediaPlayer.currentPlaylist.remove((adapter.musics[item.groupId]))
 
-                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
+                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
+                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
                 Toast.makeText(this,resources.getString(R.string.music_will_be_played_next),Toast.LENGTH_SHORT).show()
                 true
             }
@@ -254,9 +253,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
                 if(p0 == ""){
                     searchIsOn = false
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
+                    adapter.musics = allMusicsBackup
                 } else {
                     searchIsOn = true
                     for (music: Music in allMusicsBackup) {
@@ -266,15 +263,12 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                     }
 
                     if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
+                        adapter.musics = list
                     } else {
-                        musics = ArrayList<Music>()
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
+                        adapter.musics = ArrayList<Music>()
                     }
                 }
+                adapter.notifyDataSetChanged()
             }
         } catch (error : Error){
             Log.d("ERROR",error.toString())

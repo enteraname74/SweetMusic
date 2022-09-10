@@ -30,6 +30,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var searchView : SearchView
     private lateinit var menuRecyclerView : RecyclerView
+    private var searchIsOn = false
 
     private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
     private lateinit var audioAttributes : AudioAttributes
@@ -212,16 +213,17 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             2 -> {
                 // MODIFY INFOS :
                 val intent = Intent(this@SelectedArtistActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH", musics[item.groupId].path)
+                intent.putExtra("PATH", adapter.musics[item.groupId].path)
                 resultModifyMusic.launch(intent)
                 true
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
-                MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
+                MyMediaPlayer.initialPlaylist.remove((adapter.musics[item.groupId]))
+                MyMediaPlayer.currentPlaylist.remove((adapter.musics[item.groupId]))
 
-                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
+                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
+                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
                 Toast.makeText(this,resources.getString(R.string.music_will_be_played_next),Toast.LENGTH_SHORT).show()
                 true
             }
@@ -234,50 +236,23 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
-        try {
-            if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
-                val list = ArrayList<Music>()
-
-                if(p0 == ""){
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
-                } else {
-                    for (music: Music in allMusicsBackup) {
-                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
-                            list.add(music)
-                        }
-                    }
-
-                    if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    } else {
-                        musics = ArrayList<Music>()
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
-                    }
-                }
-            }
-        } catch (error : Error){
-            Log.d("ERROR",error.toString())
-        }
-        return true
+        return manageSearchBarEvents(p0)
     }
 
     override fun onQueryTextChange(p0: String?): Boolean {
+        return manageSearchBarEvents(p0)
+    }
+
+    private fun manageSearchBarEvents(p0 : String?) : Boolean {
         try {
             if (p0 != null) {
-                Log.d("TEXTE", p0.toString())
                 val list = ArrayList<Music>()
 
                 if(p0 == ""){
-                    musics = allMusicsBackup
-                    adapter.musics = musics
-                    adapter.notifyDataSetChanged()
+                    searchIsOn = false
+                    adapter.musics = allMusicsBackup
                 } else {
+                    searchIsOn = true
                     for (music: Music in allMusicsBackup) {
                         if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
                             list.add(music)
@@ -285,15 +260,13 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                     }
 
                     if (list.size > 0) {
-                        musics = list
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
+                        adapter.musics = list
+
                     } else {
-                        musics = ArrayList<Music>()
-                        adapter.musics = musics
-                        adapter.notifyDataSetChanged()
+                        adapter.musics = ArrayList<Music>()
                     }
                 }
+                adapter.notifyDataSetChanged()
             }
         } catch (error : Error){
             Log.d("ERROR",error.toString())

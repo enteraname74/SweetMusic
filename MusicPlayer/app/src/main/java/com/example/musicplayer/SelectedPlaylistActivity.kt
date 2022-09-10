@@ -279,16 +279,17 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             2 -> {
                 // MODIFY INFOS :
                 val intent = Intent(this@SelectedPlaylistActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH",musics[item.groupId].path)
+                intent.putExtra("PATH", adapter.musics[item.groupId].path)
                 resultModifyMusic.launch(intent)
                 true
             }
             3 -> {
                 // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                MyMediaPlayer.initialPlaylist.remove((musics[item.groupId]))
-                MyMediaPlayer.currentPlaylist.remove((musics[item.groupId]))
+                MyMediaPlayer.initialPlaylist.remove((adapter.musics[item.groupId]))
+                MyMediaPlayer.currentPlaylist.remove((adapter.musics[item.groupId]))
 
-                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, musics[item.groupId])
+                MyMediaPlayer.initialPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
+                MyMediaPlayer.currentPlaylist.add(MyMediaPlayer.currentIndex+1, adapter.musics[item.groupId])
                 Toast.makeText(this,resources.getString(R.string.music_will_be_played_next),Toast.LENGTH_SHORT).show()
                 true
             }
