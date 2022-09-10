@@ -324,6 +324,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     // Permet de savoir si une chanson est en favoris :
     private fun getFavoriteState(){
+        Log.d("favorite ?", currentSong.favorite.toString())
         if(currentSong.favorite){
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {

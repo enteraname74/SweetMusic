@@ -234,14 +234,27 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             }
             1 -> {
                 val musicToRemove = adapter.musics[item.groupId]
-                musics.removeAt(item.groupId)
+                adapter.musics.remove(musicToRemove)
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allPlaylists[playlistPosition].musicList.remove(musicToRemove)
 
-                // Si la musique est retirée de la playlist favorites, on enlève son statut de favoris :
-                if (musicToRemove.favorite){
+                // Si on enlève une musique de la playlist des favoris, on enlève son statut de favoris :
+                if (playlist.isFavoriteList){
                     val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
-                    MyMediaPlayer.allMusics[globalPosition].favorite = false
+                    val positionInInitialList = MyMediaPlayer.initialPlaylist.indexOf(musicToRemove)
+                    val positionInCurrentList = MyMediaPlayer.currentPlaylist.indexOf(musicToRemove)
+
+                    if(globalPosition != -1)  {
+                        MyMediaPlayer.allMusics[globalPosition].favorite = false
+                    }
+
+                    if(positionInInitialList != -1)  {
+                        MyMediaPlayer.initialPlaylist[positionInInitialList].favorite = false
+                    }
+
+                    if(positionInCurrentList != -1)  {
+                        MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
+                    }
 
                     GlobalScope.launch(Dispatchers.IO){
                         launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
@@ -260,6 +273,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 }
 
                 Toast.makeText(this,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
+
                 true
             }
             2 -> {
