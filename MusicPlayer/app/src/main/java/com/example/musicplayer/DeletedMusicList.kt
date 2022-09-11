@@ -2,7 +2,6 @@ package com.example.musicplayer
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -13,10 +12,9 @@ import java.io.Serializable
 data class DeletedMusicList(
     var musics : ArrayList<Music>,
     var listName : String,
-    private val context : Context,
-    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<DeletedMusicList.DeletedMusicListViewHolder>(), Serializable {
+    private val context : Context) : RecyclerView.Adapter<DeletedMusicList.DeletedMusicListViewHolder>(), Serializable {
 
-    class DeletedMusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener{
+    class DeletedMusicListViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable, View.OnCreateContextMenuListener{
 
         var albumCover : ImageView? = null
         var songName : TextView? = null
@@ -32,17 +30,11 @@ data class DeletedMusicList(
             albumName = itemView.findViewById(R.id.album_name)
 
             itemView.setOnClickListener(this)
-            itemView.setOnLongClickListener(this)
             itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onClick(v: View?) {
-            this.onMusicListener.onMusicClick(bindingAdapterPosition)
-        }
-
-        override fun onLongClick(v: View?): Boolean {
             itemView.showContextMenu()
-            return true
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
@@ -57,7 +49,7 @@ data class DeletedMusicList(
                 R.layout.music_file,
                 parent,
                 false
-            ), mOnMusicListener
+            )
         )
     }
 
@@ -84,9 +76,5 @@ data class DeletedMusicList(
 
     override fun getItemCount(): Int {
         return musics.size
-    }
-
-    interface OnMusicListener {
-        fun onMusicClick(position : Int)
     }
 }

@@ -9,6 +9,7 @@ import android.util.Log
 import android.util.Size
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -23,15 +24,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
 
-class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
+class FoundMusicsFragment : Fragment() {
     private lateinit var adapter : NewMusicsList
     private lateinit  var menuRecyclerView : RecyclerView
     private lateinit var fetchingSongs : LinearLayout
     private val saveAllMusicsFile = "allMusics.musics"
+    private val saveAllDeletedFiles = "allDeleted.musics"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = NewMusicsList(ArrayList<Music>(), "Main",activity?.applicationContext as Context, this)
+        adapter = NewMusicsList(ArrayList<Music>(), "Main",activity?.applicationContext as Context)
     }
 
     override fun onCreateView(
@@ -107,7 +109,7 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
             else -> {
                 while (cursor.moveToNext()) {
                     // Si la musique n'est pas présente dans notre liste, alors on ajoute la musique dans la liste des musiques trouvées :
-                    if (MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) {
+                    if ((MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) && (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null)) {
                         val albumId = cursor.getLong(5)
                         val albumUri = ContentUris.withAppendedId(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
@@ -151,13 +153,51 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         }
     }
 
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        Log.d("new songs fragment",item.itemId.toString())
+
+        return when (item.itemId) {
+            30 -> {
+                val musicToRemove = adapter.musics[item.groupId]
+                adapter.musics.removeAt(item.groupId)
+                adapter.notifyItemRemoved(item.groupId)
+
+                MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
+                CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
+
+                Toast.makeText(
+                    context,
+                    resources.getString(R.string.retrieved_music),
+                    Toast.LENGTH_SHORT
+                ).show()
+                true
+            }
+            else -> super.onContextItemSelected(item)
+        }
+    }
+
     private fun addSongsToAllMusics(){
         for (music in adapter.musics){
             MyMediaPlayer.allMusics.add(0,music)
         }
         CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile() }
+        Toast.makeText(
+            context,
+            resources.getString(R.string.retrieved_all_new_musics),
+            Toast.LENGTH_SHORT
+        ).show()
         activity?.finish()
     }
 
-    override fun onMusicClick(position: Int) {}
+    private fun writeAllDeletedSong(){
+        val path = context?.applicationContext?.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllDeletedFiles)))
+            oos.writeObject(MyMediaPlayer.allDeletedMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error write deleted",error.toString())
+        }
+    }
+
 }

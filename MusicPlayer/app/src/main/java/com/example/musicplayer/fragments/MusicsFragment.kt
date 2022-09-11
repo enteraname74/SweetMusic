@@ -286,19 +286,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         return true
     }
 
-    private fun readAllDeletedMusicsFromFile() {
-        val path = context?.applicationContext?.filesDir
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(FileInputStream(File(path, saveAllDeletedFiles)))
-            content = ois.readObject() as ArrayList<Music>
-            ois.close()
-        } catch (error : IOException){
-            Log.d("Error read deleted",error.toString())
-        }
-        MyMediaPlayer.allDeletedMusics = content
-    }
-
     private fun writeAllDeletedSong(){
         val path = context?.applicationContext?.filesDir
         try {

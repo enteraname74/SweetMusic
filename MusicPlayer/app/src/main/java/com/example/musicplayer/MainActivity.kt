@@ -91,6 +91,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         shuffleButton.setOnClickListener { playRandom(musics, this) }
 
         CoroutineScope(Dispatchers.IO).launch{ readPlaylistsAsync() }
+        CoroutineScope(Dispatchers.IO).launch { readAllDeletedMusicsFromFile() }
 
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val openMenu = findViewById<ImageView>(R.id.open_menu)

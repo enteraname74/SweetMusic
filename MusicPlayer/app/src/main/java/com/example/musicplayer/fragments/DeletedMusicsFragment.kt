@@ -1,7 +1,6 @@
 package com.example.musicplayer.fragments
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -12,22 +11,21 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.musicplayer.DeletedMusicList
-import com.example.musicplayer.ModifyMusicInfoActivity
-import com.example.musicplayer.MyMediaPlayer
-import com.example.musicplayer.R
+import com.example.musicplayer.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.IOException
+import java.io.*
 
-class DeletedMusicsFragment : Fragment(), DeletedMusicList.OnMusicListener {
+class DeletedMusicsFragment : Fragment() {
     private lateinit var adapter : DeletedMusicList
     private lateinit  var menuRecyclerView : RecyclerView
+    private val saveAllDeletedFiles = "allDeleted.musics"
+    private val saveAllMusicsFile = "allMusics.musics"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = DeletedMusicList(MyMediaPlayer.allDeletedMusics,"deletedSongs", activity?.applicationContext as Context, this)
+        adapter = DeletedMusicList(MyMediaPlayer.allDeletedMusics,"deletedSongs", activity?.applicationContext as Context)
     }
 
     override fun onCreateView(
@@ -44,20 +42,24 @@ class DeletedMusicsFragment : Fragment(), DeletedMusicList.OnMusicListener {
         return view
     }
 
-    override fun onMusicClick(position: Int) {
-        TODO("Not yet implemented")
+    override fun onResume() {
+        super.onResume()
+        adapter.musics = MyMediaPlayer.allDeletedMusics
+        adapter.notifyDataSetChanged()
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        Log.d("music fragment",item.itemId.toString())
+        Log.d("deleted fragment",item.itemId.toString())
 
         return when (item.itemId) {
-            0 -> {
+            20 -> {
                 val musicToRetrieve = adapter.musics[item.groupId]
                 adapter.musics.removeAt(item.groupId)
                 adapter.notifyItemRemoved(item.groupId)
 
                 MyMediaPlayer.allMusics.add(0, musicToRetrieve)
+                CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
+                CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile() }
 
                 Toast.makeText(
                     context,
@@ -67,6 +69,28 @@ class DeletedMusicsFragment : Fragment(), DeletedMusicList.OnMusicListener {
                 true
             }
             else -> super.onContextItemSelected(item)
+        }
+    }
+
+    private fun writeAllDeletedSong(){
+        val path = context?.applicationContext?.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllDeletedFiles)))
+            oos.writeObject(MyMediaPlayer.allDeletedMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error write deleted",error.toString())
+        }
+    }
+
+    private fun writeAllMusicsToFile(){
+        val path = context?.applicationContext?.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllMusicsFile)))
+            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error write musics",error.toString())
         }
     }
 }

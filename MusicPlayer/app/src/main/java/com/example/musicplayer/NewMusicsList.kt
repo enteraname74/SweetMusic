@@ -12,10 +12,9 @@ import java.io.Serializable
 data class NewMusicsList(
     var musics : ArrayList<Music>,
     var listName : String,
-    private val context : Context,
-    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<NewMusicsList.NewMusicListViewHolder>(), Serializable {
+    private val context : Context) : RecyclerView.Adapter<NewMusicsList.NewMusicListViewHolder>(), Serializable {
 
-    class NewMusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener{
+    class NewMusicListViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable, View.OnCreateContextMenuListener{
 
         var albumCover : ImageView? = null
         var songName : TextView? = null
@@ -31,22 +30,17 @@ data class NewMusicsList(
             albumName = itemView.findViewById(R.id.album_name)
 
             itemView.setOnClickListener(this)
-            itemView.setOnLongClickListener(this)
             itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onClick(v: View?) {
-            this.onMusicListener.onMusicClick(bindingAdapterPosition)
-        }
-
-        override fun onLongClick(v: View?): Boolean {
             itemView.showContextMenu()
-            return true
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
             menu?.add(this.bindingAdapterPosition, 30, 0, itemView.resources.getString(R.string.remove))
         }
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewMusicListViewHolder {
@@ -55,7 +49,7 @@ data class NewMusicsList(
                 R.layout.music_file,
                 parent,
                 false
-            ), mOnMusicListener
+            )
         )
     }
 
@@ -82,9 +76,5 @@ data class NewMusicsList(
 
     override fun getItemCount(): Int {
         return musics.size
-    }
-
-    interface OnMusicListener {
-        fun onMusicClick(position : Int)
     }
 }

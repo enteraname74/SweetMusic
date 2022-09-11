@@ -73,4 +73,5 @@
     <string name="retrieve_music">Retrieve</string>
     <string name="retrieved_music">Retrieved music</string>
     <string name="add_new_songs">Add these new songs</string>
+    <string name="retrieved_all_new_musics">New songs retrieved</string>
 </resources>
