@@ -97,7 +97,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         val navigationView = findViewById<NavigationView>(R.id.navigation_view)
         navigationView.setNavigationItemSelectedListener(this)
 
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
 
         openMenu.setOnClickListener { openNavigationMenu(drawerLayout) }
     }
@@ -216,6 +216,11 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
+            R.id.find_new_songs -> {
+                val intent = Intent(this@MainActivity,FindNewSongsActivity::class.java)
+                startActivity(intent)
+                true
+            }
             R.id.download_data -> {
                 CoroutineScope(Dispatchers.Main).launch { retrieveAllMusicsFromApp() }
                 true

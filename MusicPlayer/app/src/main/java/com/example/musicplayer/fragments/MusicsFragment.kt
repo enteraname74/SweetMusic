@@ -126,7 +126,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    addDeletedSong(musicToRemove)
+                    MyMediaPlayer.allDeletedMusics.add(musicToRemove)
+                    writeAllDeletedSong()
                     writeAllMusicsToFile(MyMediaPlayer.allMusics)
                 }
 
@@ -298,12 +299,11 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         MyMediaPlayer.allDeletedMusics = content
     }
 
-    private fun addDeletedSong(song : Music){
-        MyMediaPlayer.allMusics.add(song)
+    private fun writeAllDeletedSong(){
         val path = context?.applicationContext?.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllDeletedFiles)))
-            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.writeObject(MyMediaPlayer.allDeletedMusics)
             oos.close()
         } catch (error : IOException){
             Log.d("Error write deleted",error.toString())

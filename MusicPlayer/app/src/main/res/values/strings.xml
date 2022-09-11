@@ -70,4 +70,7 @@
     <string name="new_songs">New Songs</string>
     <string name="deleted_songs">Deleted Songs</string>
     <string name="searching_new_songs">Searching new songs</string>
+    <string name="retrieve_music">Retrieve</string>
+    <string name="retrieved_music">Retrieved music</string>
+    <string name="add_new_songs">Add these new songs</string>
 </resources>
