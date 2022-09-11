@@ -205,10 +205,21 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
+                // Enlevons la musique de nos playlists :
+                for(playlist in MyMediaPlayer.allPlaylists) {
+                    if (playlist.musicList.contains(musicToRemove)){
+                        playlist.musicList.remove(musicToRemove)
+                    }
+                }
+
+                // Si la musique était en favoris, on lui enlève ce statut :
+                musicToRemove.favorite = false
+
                 CoroutineScope(Dispatchers.IO).launch {
                     MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
                     writeAllDeletedSong()
                     writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)
+                    writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
                 }
 
                 Toast.makeText(

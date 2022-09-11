@@ -28,6 +28,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     private val saveAllMusicsFile = "allMusics.musics"
     private val saveAllDeletedFiles = "allDeleted.musics"
+    private val savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var searchView : SearchView
@@ -127,10 +128,21 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
+                // Enlevons la musique de nos playlists :
+                for(playlist in MyMediaPlayer.allPlaylists) {
+                    if (playlist.musicList.contains(musicToRemove)){
+                        playlist.musicList.remove(musicToRemove)
+                    }
+                }
+
+                // Si la musique était en favoris, on lui enlève ce statut :
+                musicToRemove.favorite = false
+
                 CoroutineScope(Dispatchers.IO).launch {
                     MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
                     writeAllDeletedSong()
                     writeAllMusicsToFile(MyMediaPlayer.allMusics)
+                    writePlaylistsToFile()
                 }
 
                 Toast.makeText(
@@ -296,6 +308,17 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             oos.close()
         } catch (error : IOException){
             Log.d("Error write deleted",error.toString())
+        }
+    }
+
+    fun writePlaylistsToFile(){
+        val path = context?.applicationContext?.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, savePlaylistsFile)))
+            oos.writeObject(MyMediaPlayer.allPlaylists)
+            oos.close()
+        } catch (error : IOException){
+            Log.d("Error write playlists",error.toString())
         }
     }
 }
