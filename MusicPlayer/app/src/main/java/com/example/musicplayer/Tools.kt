@@ -223,12 +223,11 @@ open class Tools : AppCompatActivity() {
         MyMediaPlayer.allDeletedMusics = content
     }
 
-    open fun addDeletedSong(song : Music){
-        MyMediaPlayer.allMusics.add(song)
+    open fun writeAllDeletedSong(){
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllDeletedFiles)))
-            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.writeObject(MyMediaPlayer.allDeletedMusics)
             oos.close()
         } catch (error : IOException){
             Log.d("Error write deleted",error.toString())

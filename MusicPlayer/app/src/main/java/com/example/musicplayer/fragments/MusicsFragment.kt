@@ -116,17 +116,19 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         return when (item.itemId) {
             0 -> {
+                // ADD TO PLAYLIST
                 Toast.makeText(context, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
+                // DELETE FROM APP
                 val musicToRemove = adapter.musics[item.groupId]
                 adapter.musics.removeAt(item.groupId)
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    MyMediaPlayer.allDeletedMusics.add(musicToRemove)
+                    MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
                     writeAllDeletedSong()
                     writeAllMusicsToFile(MyMediaPlayer.allMusics)
                 }

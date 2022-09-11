@@ -194,20 +194,28 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {
+                // ADD TO PLAYLIST
                 Toast.makeText(this,resources.getString(R.string.added_in_the_playlist),Toast.LENGTH_SHORT).show()
                 true
             }
             1 -> {
+                // DELETE FROM APP
                 val musicToRemove = adapter.musics[item.groupId]
-                musics.removeAt(item.groupId)
+                adapter.musics.removeAt(item.groupId)
                 adapter.notifyItemRemoved(item.groupId)
                 MyMediaPlayer.allMusics.remove(musicToRemove)
 
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
+                CoroutineScope(Dispatchers.IO).launch {
+                    MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
+                    writeAllDeletedSong()
+                    writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)
                 }
 
-                Toast.makeText(this,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    resources.getString(R.string.deleted_from_app),
+                    Toast.LENGTH_SHORT
+                ).show()
                 true
             }
             2 -> {
