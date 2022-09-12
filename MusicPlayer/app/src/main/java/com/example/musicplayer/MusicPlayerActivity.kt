@@ -454,7 +454,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             val drawable = musicIcon.drawable
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap
-        }   
+        }
 
         val backgroundColor: Palette.Swatch? =
             if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
