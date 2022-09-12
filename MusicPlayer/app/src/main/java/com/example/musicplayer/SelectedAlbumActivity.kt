@@ -89,6 +89,9 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             songTitleInfo?.isSelected = true
         }
 
+        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
+        quitActivity.setOnClickListener{ finish() }
+
         val shuffleButton = findViewById<ImageView>(R.id.shuffle)
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedAlbumActivity) }
 
@@ -419,6 +422,11 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         adapter.backgroundColor = lighterColorTheme
         adapter.colorsForText = backgroundColor
         adapter.notifyDataSetChanged()
+
+        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
+        val quitActivityPanel = findViewById<LinearLayout>(R.id.quit_activity_panel)
+        quitActivityPanel.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
+        quitActivity.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
 
         val shuffleButton = findViewById<ImageView>(R.id.shuffle)
         val playlistName = findViewById<TextView>(R.id.playlist_name)

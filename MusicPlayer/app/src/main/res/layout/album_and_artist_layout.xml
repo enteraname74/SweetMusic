@@ -22,6 +22,23 @@
             android:scaleType="centerCrop"
             android:src="@drawable/michael" />
 
+        <LinearLayout
+            android:id="@+id/quit_activity_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:paddingStart="5dp"
+            android:layout_alignParentStart="true">
+
+            <ImageView
+                android:id="@+id/quit_activity"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_baseline_arrow_back_ios_new_24" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/playlist_name"
             android:layout_width="match_parent"
