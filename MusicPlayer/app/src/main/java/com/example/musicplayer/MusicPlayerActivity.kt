@@ -408,26 +408,31 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     override fun onResume() {
         super.onResume()
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-
-
-        if (!mediaPlayer.isPlaying){
-            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+        // Si on a plus de musiques dans la playlist à jouer, il faut quitter cette activité
+        if(MyMediaPlayer.currentIndex == -1) {
+            finish()
         } else {
-            pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+
+            if (!mediaPlayer.isPlaying){
+                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+
+            CoroutineScope(Dispatchers.Main).launch { setColor() }
+
+            // Vérifions si la musique est en favoris :
+            getFavoriteState()
+
+            titleTv.text = currentSong.name
+            songTitleInfo?.text = currentSong.name
+            totalTimeTv.text = convertDuration(currentSong.duration)
+
+            mediaPlayer.setOnCompletionListener { playNextSong() }
         }
-
-        CoroutineScope(Dispatchers.Main).launch { setColor() }
-
-        // Vérifions si la musique est en favoris :
-        getFavoriteState()
-
-        titleTv.text = currentSong.name
-        songTitleInfo?.text = currentSong.name
-        totalTimeTv.text = convertDuration(currentSong.duration)
-
-        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onPrepared(p0: MediaPlayer?) {

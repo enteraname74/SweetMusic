@@ -148,26 +148,40 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         noSongPlaying.visibility = View.VISIBLE
 
         if (MyMediaPlayer.currentIndex != -1){
-            noSongPlaying.visibility = View.GONE
-            infoSongPlaying.visibility = View.VISIBLE
-            songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            CoroutineScope(Dispatchers.Main).launch {
+                noSongPlaying.visibility = View.GONE
+                infoSongPlaying.visibility = View.VISIBLE
+                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    albumCoverInfo.setImageBitmap(bitmap)
+                } else {
+                    albumCoverInfo.setImageResource(R.drawable.michael)
                 }
-                albumCoverInfo.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo.setImageResource(R.drawable.michael)
-            }
 
-            pausePlayButton.setOnClickListener{ pausePlay() }
-            nextBtn?.setOnClickListener{ playNextSong(adapter) }
-            previousBtn?.setOnClickListener{ playPreviousSong(adapter) }
-            bottomInfos.setOnClickListener{ onBottomMenuClick(MyMediaPlayer.currentIndex, this@SelectedPlaylistActivity) }
-            songTitleInfo?.isSelected = true
+                pausePlayButton.setOnClickListener { pausePlay() }
+                nextBtn?.setOnClickListener { playNextSong(adapter) }
+                previousBtn?.setOnClickListener { playPreviousSong(adapter) }
+                bottomInfos.setOnClickListener {
+                    onBottomMenuClick(
+                        MyMediaPlayer.currentIndex,
+                        this@SelectedPlaylistActivity
+                    )
+                }
+                songTitleInfo?.isSelected = true
+            }
+        } else {
+            CoroutineScope(Dispatchers.Main).launch {
+                noSongPlaying?.visibility = View.VISIBLE
+                infoSongPlaying?.visibility = View.GONE
+                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
+                bottomInfos?.setOnClickListener(null)
+            }
         }
 
         if (!mediaPlayer.isPlaying){

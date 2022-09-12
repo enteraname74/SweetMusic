@@ -61,7 +61,7 @@
     <string name="unknown_error">"Une erreur inconnue est apparue"</string>
     <string name="initial_list">Liste initiale</string>
     <string name="current_list">Liste jouée</string>
-    <string name="deleted_from_playlist">Supprimer de la playlist</string>
+    <string name="deleted_from_playlist">Supprimée de la playlist</string>
     <string name="music_will_be_played_next">Cette musique sera jouée ensuite</string>
     <string name="deleted_from_app">Supprimée de l\'application</string>
     <string name="playlist_deleted">Playlist supprimée</string>
@@ -74,4 +74,6 @@
     <string name="retrieved_music">Musique récupérée</string>
     <string name="add_new_songs">Ajouter ces nouvelles chansons</string>
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
+    <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
+
 </resources>

@@ -148,16 +148,23 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 } else {
                     albumCoverInfo.setImageResource(R.drawable.michael)
                 }
-            }
 
-            pausePlayButton.setOnClickListener { pausePlay() }
-            bottomInfos.setOnClickListener {
-                onBottomMenuClick(
-                    MyMediaPlayer.currentIndex,
-                    this@MainActivity
-                )
+                pausePlayButton.setOnClickListener { pausePlay() }
+                bottomInfos.setOnClickListener {
+                    onBottomMenuClick(
+                        MyMediaPlayer.currentIndex,
+                        this@MainActivity
+                    )
+                }
+                songTitleInfo?.isSelected = true
             }
-            songTitleInfo?.isSelected = true
+        } else {
+            CoroutineScope(Dispatchers.Main).launch {
+                noSongPlaying?.visibility = View.VISIBLE
+                infoSongPlaying?.visibility = View.GONE
+                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
+                bottomInfos?.setOnClickListener(null)
+            }
         }
 
         if (!mediaPlayer.isPlaying) {

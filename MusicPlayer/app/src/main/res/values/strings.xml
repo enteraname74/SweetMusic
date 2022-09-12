@@ -74,4 +74,5 @@
     <string name="retrieved_music">Retrieved music</string>
     <string name="add_new_songs">Add these new songs</string>
     <string name="retrieved_all_new_musics">New songs retrieved</string>
+    <string name="no_songs_left_in_the_current_playlist">No songs left in the queue</string>
 </resources>

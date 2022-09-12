@@ -182,8 +182,27 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
             }
             1 -> {
                 val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
-                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
+                if (MyMediaPlayer.currentIndex == item.groupId) {
+                    if (MyMediaPlayer.currentPlaylist.size > 1) {
+                        playNextSong(adapter)
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                    } else {
+                        Log.d("SHOULD FINISH","")
+                        MyMediaPlayer.currentIndex = -1
+                        mediaPlayer.pause()
+                        Toast.makeText(
+                            this,
+                            resources.getString(R.string.no_songs_left_in_the_current_playlist),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        finish()
+                    }
+                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                } else {
+                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                }
                 adapter.notifyItemRemoved(item.groupId)
 
                 Toast.makeText(
@@ -191,6 +210,8 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
                     resources.getString(R.string.deleted_from_playlist),
                     Toast.LENGTH_SHORT
                 ).show()
+
+                // Si il n'y a plus de musiques, on
                 true
             }
             2 -> {
