@@ -181,8 +181,9 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
                 true
             }
             1 -> {
-
+                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
                 MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
+                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
                 adapter.notifyItemRemoved(item.groupId)
 
                 Toast.makeText(

@@ -209,8 +209,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         if (position != MyMediaPlayer.currentIndex) {
             sameMusic = false
         }
-        // Vérifions si on change de playlist :
-        if (musics != MyMediaPlayer.initialPlaylist) {
+        // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
+        if (musics != MyMediaPlayer.initialPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
             MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.playlistName = playlist.listName
