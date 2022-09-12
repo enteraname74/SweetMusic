@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.ColorFilter
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.media.*
@@ -18,10 +17,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
-import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
+import androidx.palette.graphics.Target
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -457,7 +454,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             val drawable = musicIcon.drawable
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap
-        }
+        }   
 
         val backgroundColor: Palette.Swatch? =
             if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {

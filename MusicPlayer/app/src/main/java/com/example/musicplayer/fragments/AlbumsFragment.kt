@@ -29,7 +29,6 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
     private lateinit var adapter : Albums
     private lateinit var searchView : SearchView
     private val mediaPlayer = MyMediaPlayer.getInstance
-    private var searchIsOn = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,40 +57,38 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
-        Log.d("FRAG ALBUM RES","")
+        searchView.setQuery("",false)
 
-        if (!searchIsOn){
-            CoroutineScope(Dispatchers.Main).launch {
-                if (MyMediaPlayer.allMusics.size > 0) {
-                    val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-                    var currentAlbum: Album
-                    // Trions d'abord notre liste par album et artiste :
-                    copiedMusics.sortWith(compareBy<Music> { it.album }.thenBy { it.artist })
-                    currentAlbum = Album(
-                        copiedMusics[0].album,
-                        ArrayList<Music>(),
-                        copiedMusics[0].albumCover,
-                        copiedMusics[0].artist
-                    )
-                    // On vide nos albums pour mettre à jour ensuite ces derniers :
-                    MyMediaPlayer.allAlbums.clear()
-                    for (music in copiedMusics) {
-                        if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist) {
-                            currentAlbum.albumList.add(music)
-                        } else {
-                            // On passe à un autre album :
-                            // On ajoute d'abord notre album à notre liste :
-                            MyMediaPlayer.allAlbums.add(currentAlbum)
-                            // On change ensuite l'album actuelle
-                            currentAlbum = Album(music.album, ArrayList<Music>(), music.albumCover, music.artist)
-                            currentAlbum.albumList.add(music)
-                        }
+        CoroutineScope(Dispatchers.Main).launch {
+            if (MyMediaPlayer.allMusics.size > 0) {
+                val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+                var currentAlbum: Album
+                // Trions d'abord notre liste par album et artiste :
+                copiedMusics.sortWith(compareBy<Music> { it.album }.thenBy { it.artist })
+                currentAlbum = Album(
+                    copiedMusics[0].album,
+                    ArrayList<Music>(),
+                    copiedMusics[0].albumCover,
+                    copiedMusics[0].artist
+                )
+                // On vide nos albums pour mettre à jour ensuite ces derniers :
+                MyMediaPlayer.allAlbums.clear()
+                for (music in copiedMusics) {
+                    if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist) {
+                        currentAlbum.albumList.add(music)
+                    } else {
+                        // On passe à un autre album :
+                        // On ajoute d'abord notre album à notre liste :
+                        MyMediaPlayer.allAlbums.add(currentAlbum)
+                        // On change ensuite l'album actuelle
+                        currentAlbum = Album(music.album, ArrayList<Music>(), music.albumCover, music.artist)
+                        currentAlbum.albumList.add(music)
                     }
-                    // Il faut prendre le dernier cas en compte :
-                    MyMediaPlayer.allAlbums.add(currentAlbum)
-                    adapter.allAlbums = MyMediaPlayer.allAlbums
-                    adapter.notifyDataSetChanged()
                 }
+                // Il faut prendre le dernier cas en compte :
+                MyMediaPlayer.allAlbums.add(currentAlbum)
+                adapter.allAlbums = MyMediaPlayer.allAlbums
+                adapter.notifyDataSetChanged()
             }
         }
         mediaPlayer.setOnCompletionListener { playNextSong() }
@@ -171,10 +168,8 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                 val list = ArrayList<Album>()
 
                 if(p0 == ""){
-                    searchIsOn = false
                     adapter.allAlbums = MyMediaPlayer.allAlbums
                 } else {
-                    searchIsOn = true
                     for (album: Album in MyMediaPlayer.allAlbums) {
                         if ((album.albumName.lowercase().contains(p0.lowercase())) || (album.artist.lowercase().contains(p0.lowercase()))) {
                             list.add(album)

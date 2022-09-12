@@ -29,7 +29,6 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
     private lateinit var adapter: Artists
     private val mediaPlayer = MyMediaPlayer.getInstance
     private lateinit var searchView : SearchView
-    private var searchIsOn = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -58,38 +57,37 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
     override fun onResume() {
         super.onResume()
         searchView.clearFocus()
+        searchView.setQuery("",false)
 
-        if (!searchIsOn){
-            CoroutineScope(Dispatchers.Main).launch {
-                if (MyMediaPlayer.allMusics.size > 0) {
-                    val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-                    var currentArtist: Artist
-                    // Trions d'abord notre liste artiste :
-                    copiedMusics.sortWith(compareBy<Music> { it.artist })
-                    currentArtist = Artist(
-                        copiedMusics[0].artist,
-                        ArrayList<Music>(),
-                        copiedMusics[0].albumCover
-                    )
+        CoroutineScope(Dispatchers.Main).launch {
+            if (MyMediaPlayer.allMusics.size > 0) {
+                val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+                var currentArtist: Artist
+                // Trions d'abord notre liste artiste :
+                copiedMusics.sortWith(compareBy<Music> { it.artist })
+                currentArtist = Artist(
+                    copiedMusics[0].artist,
+                    ArrayList<Music>(),
+                    copiedMusics[0].albumCover
+                )
 
-                    MyMediaPlayer.allArtists.clear()
-                    for (music in copiedMusics) {
-                        if (music.artist == currentArtist.artistName) {
-                            currentArtist.musicList.add(music)
-                        } else {
-                            // On passe à un autre album :
-                            // On ajoute d'abord notre album à notre liste :
-                            MyMediaPlayer.allArtists.add(currentArtist)
-                            // On change ensuite l'album actuelle
-                            currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
-                            currentArtist.musicList.add(music)
-                        }
+                MyMediaPlayer.allArtists.clear()
+                for (music in copiedMusics) {
+                    if (music.artist == currentArtist.artistName) {
+                        currentArtist.musicList.add(music)
+                    } else {
+                        // On passe à un autre album :
+                        // On ajoute d'abord notre album à notre liste :
+                        MyMediaPlayer.allArtists.add(currentArtist)
+                        // On change ensuite l'album actuelle
+                        currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
+                        currentArtist.musicList.add(music)
                     }
-                    // Il faut prendre le dernier cas en compte :
-                    MyMediaPlayer.allArtists.add(currentArtist)
-                    adapter.allArtists = MyMediaPlayer.allArtists
-                    adapter.notifyDataSetChanged()
                 }
+                // Il faut prendre le dernier cas en compte :
+                MyMediaPlayer.allArtists.add(currentArtist)
+                adapter.allArtists = MyMediaPlayer.allArtists
+                adapter.notifyDataSetChanged()
             }
         }
         mediaPlayer.setOnCompletionListener { playNextSong() }
@@ -169,10 +167,8 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
                 val list = ArrayList<Artist>()
 
                 if(p0 == ""){
-                    searchIsOn = false
                     adapter.allArtists = MyMediaPlayer.allArtists
                 } else {
-                    searchIsOn = true
                     for (artist: Artist in MyMediaPlayer.allArtists) {
                         if (artist.artistName.lowercase().contains(p0.lowercase())){
                             list.add(artist)
