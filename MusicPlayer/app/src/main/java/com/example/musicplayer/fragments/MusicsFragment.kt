@@ -11,10 +11,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.SearchView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -96,7 +93,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             sameMusic = false
         }
         // Vérifions si on change de playlist :
-        if (adapter.musics != MyMediaPlayer.initialPlaylist) {
+        if (adapter.musics != MyMediaPlayer.initialPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
             println("changement playlist")
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
@@ -132,6 +129,41 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 for(playlist in MyMediaPlayer.allPlaylists) {
                     if (playlist.musicList.contains(musicToRemove)){
                         playlist.musicList.remove(musicToRemove)
+                    }
+                }
+
+                // Enlevons la musique des playlists utilisées par le mediaplayer :
+                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
+                    MyMediaPlayer.initialPlaylist.remove(musicToRemove)
+                }
+                if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
+                    // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
+                    if (musicToRemove.path == currentSong.path) {
+                        // Si on peut passer à la musique suivante, on le fait :
+                        if (MyMediaPlayer.currentPlaylist.size > 1) {
+                            playNextSong(adapter)
+                            MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                        } else {
+                            // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
+                            val noSongPlaying = activity?.findViewById<TextView>(R.id.no_song_playing)
+                            val infoSongPlaying = activity?.findViewById<RelativeLayout>(R.id.info_song_playing)
+                            val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
+                            val bottomInfos = activity?.findViewById<LinearLayout>(R.id.bottom_infos)
+
+                            noSongPlaying?.visibility = View.VISIBLE
+                            infoSongPlaying?.visibility = View.GONE
+                            albumCoverInfo?.setImageResource(R.drawable.icone_musique)
+                            bottomInfos?.setOnClickListener(null)
+                            MyMediaPlayer.currentIndex = -1
+
+                            mediaPlayer.pause()
+                        }
+                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    } else {
+                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                        // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
                     }
                 }
 
