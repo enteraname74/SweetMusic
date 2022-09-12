@@ -217,6 +217,41 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                     }
                 }
 
+                // Enlevons la musique des playlists utilisées par le mediaplayer :
+                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
+                    MyMediaPlayer.initialPlaylist.remove(musicToRemove)
+                }
+                if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
+                    // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
+                    if (musicToRemove.path == currentSong.path) {
+                        // Si on peut passer à la musique suivante, on le fait :
+                        if (MyMediaPlayer.currentPlaylist.size > 1) {
+                            playNextSong(adapter)
+                            MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                        } else {
+                            // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
+                            val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
+                            val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
+                            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+                            val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
+
+                            noSongPlaying?.visibility = View.VISIBLE
+                            infoSongPlaying?.visibility = View.GONE
+                            albumCoverInfo?.setImageResource(R.drawable.icone_musique)
+                            bottomInfos?.setOnClickListener(null)
+                            MyMediaPlayer.currentIndex = -1
+
+                            mediaPlayer.pause()
+                        }
+                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    } else {
+                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                        // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                    }
+                }
+
                 // Si la musique était en favoris, on lui enlève ce statut :
                 musicToRemove.favorite = false
 
