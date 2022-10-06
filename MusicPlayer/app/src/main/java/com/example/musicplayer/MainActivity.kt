@@ -26,6 +26,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.viewbinding.BuildConfig
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
@@ -344,7 +345,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     }
 
     private fun requestPermissionToWrite(){
-        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+        val uri = Uri.parse("package:${BuildConfig.LIBRARY_PACKAGE_NAME}")
         Log.d("uri", uri.toString())
 
         if (SDK_INT >= 30) {

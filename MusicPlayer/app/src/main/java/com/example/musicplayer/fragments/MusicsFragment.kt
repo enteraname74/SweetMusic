@@ -87,6 +87,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     override fun onMusicClick(position: Int) {
         var sameMusic = true
+        val service = MusicNotificationService(context?.applicationContext as Context)
 
         if (position != MyMediaPlayer.currentIndex) {
             println("not the same song. Selected : $position, Normal : ${MyMediaPlayer.currentIndex}")
@@ -102,6 +103,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
 
         MyMediaPlayer.currentIndex = position
+        service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
 
         val intent = Intent(context, MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
