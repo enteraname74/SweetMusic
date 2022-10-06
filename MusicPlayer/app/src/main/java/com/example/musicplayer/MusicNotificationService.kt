@@ -34,10 +34,24 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val pausePlayIntent = PendingIntent.getBroadcast(
+        val previousMusicIntent = PendingIntent.getBroadcast(
             context,
             2,
+            Intent(context, PreviousMusicNotificationReceiver::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val pausePlayIntent = PendingIntent.getBroadcast(
+            context,
+            3,
             Intent(context, PausePlayNotificationReceiver::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val nextMusicIntent = PendingIntent.getBroadcast(
+            context,
+            4,
+            Intent(context, NextMusicNotificationReceiver::class.java),
             PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -47,7 +61,12 @@ class MusicNotificationService(private val context : Context) {
             .setContentTitle(currentSong.name)
             .setContentText(currentSong.artist)
             .setContentIntent(activityPendingIntent)
+            .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
             .addAction(pausePlayIcon,"pausePlay",pausePlayIntent)
+            .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+                .setShowActionsInCompactView(0, 1, 2)
+            )
             .build()
 
         notificationManager.notify(

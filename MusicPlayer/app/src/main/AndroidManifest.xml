@@ -82,6 +82,9 @@
             </intent-filter>
         </activity>
         <receiver android:name=".PausePlayNotificationReceiver"/>
+        <receiver android:name=".NextMusicNotificationReceiver"/>
+        <receiver android:name=".PreviousMusicNotificationReceiver"/>
+
     </application>
 
 </manifest>
