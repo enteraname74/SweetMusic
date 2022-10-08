@@ -55,6 +55,13 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        val deleteNotificationIntent = PendingIntent.getBroadcast(
+            context,
+            5,
+            Intent(context, DeletedNotificationIntentReceiver::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(context, MUSIC_NOTIFICATION_CHANNEL_ID)
             .setLargeIcon(bitmap)
             .setSmallIcon(R.drawable.icone_musique)
@@ -64,6 +71,7 @@ class MusicNotificationService(private val context : Context) {
             .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
             .addAction(pausePlayIcon,"pausePlay",pausePlayIntent)
             .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+            .setDeleteIntent(deleteNotificationIntent)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0, 1, 2)
             )
