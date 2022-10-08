@@ -197,6 +197,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     }
 
     private fun pausePlay() {
+        var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(audioAttributes)
             .setAcceptsDelayedFocusGain(true)
@@ -215,11 +216,17 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 } else {
                     mediaPlayer.start()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                    buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
                 }
             }
             else -> {
                 Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
             }
+
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext)
+            service.showNotification(buttonStyle)
         }
     }
 

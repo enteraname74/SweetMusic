@@ -100,6 +100,10 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
         } else {
             MyMediaPlayer.currentIndex +=1
         }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         playMusic()
     }
 
@@ -108,6 +112,10 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
             MyMediaPlayer.currentIndex -=1
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
         }
         playMusic()
     }

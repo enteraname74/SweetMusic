@@ -87,7 +87,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     override fun onMusicClick(position: Int) {
         var sameMusic = true
-        val service = MusicNotificationService(context?.applicationContext as Context)
 
         if (position != MyMediaPlayer.currentIndex) {
             println("not the same song. Selected : $position, Normal : ${MyMediaPlayer.currentIndex}")
@@ -103,7 +102,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
 
         MyMediaPlayer.currentIndex = position
-        service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
 
         val intent = Intent(context, MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
@@ -259,6 +261,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             MyMediaPlayer.currentIndex +=1
         }
         adapter.notifyDataSetChanged()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         playMusic()
     }
 
@@ -269,6 +275,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             MyMediaPlayer.currentIndex -=1
         }
         adapter.notifyDataSetChanged()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         playMusic()
     }
 

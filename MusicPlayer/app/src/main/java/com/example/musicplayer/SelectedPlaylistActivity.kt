@@ -235,6 +235,10 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         }
 
         MyMediaPlayer.currentIndex = position
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         val intent = Intent(this@SelectedPlaylistActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
@@ -273,7 +277,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                         MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
                     }
 
-                    GlobalScope.launch(Dispatchers.IO){
+                    CoroutineScope(Dispatchers.IO).launch{
                         launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
                     }
 
@@ -285,7 +289,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                     }
                 }
 
-                GlobalScope.launch(Dispatchers.IO){
+                CoroutineScope(Dispatchers.IO).launch{
                     launch{writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)}
                 }
 
@@ -355,6 +359,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     }
 
     private fun pausePlay() {
+        var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(audioAttributes)
             .setAcceptsDelayedFocusGain(true)
@@ -373,11 +378,16 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 } else {
                     mediaPlayer.start()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                    buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
                 }
             }
             else -> {
                 Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
             }
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(buttonStyle)
         }
     }
 

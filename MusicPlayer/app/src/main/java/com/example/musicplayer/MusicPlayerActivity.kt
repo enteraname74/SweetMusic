@@ -18,7 +18,6 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.palette.graphics.Palette
-import androidx.palette.graphics.Target
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -258,6 +257,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
                 Log.e("ERROR MEDIA PLAYER", e.toString())
                 e.printStackTrace()
             }
+            CoroutineScope(Dispatchers.Default).launch {
+                val service = MusicNotificationService(applicationContext as Context)
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
         } else {
             seekBar.progress = 0
             seekBar.max = mediaPlayer.duration
@@ -276,6 +279,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             MyMediaPlayer.currentIndex+=1
         }
         mediaPlayer.reset()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         setResourcesWithMusic()
     }
 
@@ -287,10 +294,15 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             MyMediaPlayer.currentIndex-=1
         }
         mediaPlayer.reset()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         setResourcesWithMusic()
     }
 
     private fun pausePlay(){
+        var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(audioAttributes)
             .setAcceptsDelayedFocusGain(true)
@@ -309,11 +321,16 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
                 } else {
                     mediaPlayer.start()
                     pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                    buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
                 }
             }
             else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
             }
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(buttonStyle)
         }
     }
 

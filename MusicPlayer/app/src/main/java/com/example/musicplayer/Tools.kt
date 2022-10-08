@@ -12,6 +12,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.*
 
 open class Tools : AppCompatActivity() {
@@ -67,7 +70,10 @@ open class Tools : AppCompatActivity() {
             val intent = Intent(context, MusicPlayerActivity::class.java)
 
             intent.putExtra("SAME MUSIC", sameMusic)
-
+            CoroutineScope(Dispatchers.Default).launch {
+                val service = MusicNotificationService(applicationContext as Context)
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
             startActivity(intent)
         }
     }
@@ -101,6 +107,10 @@ open class Tools : AppCompatActivity() {
             MyMediaPlayer.currentIndex +=1
         }
         adapter.notifyDataSetChanged()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         playMusic()
     }
 
@@ -111,6 +121,10 @@ open class Tools : AppCompatActivity() {
             MyMediaPlayer.currentIndex -=1
         }
         adapter.notifyDataSetChanged()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         playMusic()
     }
 

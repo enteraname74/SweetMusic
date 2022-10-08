@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
 import android.widget.Button
 import android.widget.EditText

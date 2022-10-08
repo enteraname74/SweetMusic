@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
@@ -200,6 +199,10 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         }
 
         MyMediaPlayer.currentIndex = position
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         val intent = Intent(this@SelectedArtistActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
@@ -370,6 +373,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
     }
 
     private fun pausePlay() {
+        var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(audioAttributes)
             .setAcceptsDelayedFocusGain(true)
@@ -388,11 +392,16 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 } else {
                     mediaPlayer.start()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                    buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
                 }
             }
             else -> {
                 Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
             }
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(buttonStyle)
         }
     }
 

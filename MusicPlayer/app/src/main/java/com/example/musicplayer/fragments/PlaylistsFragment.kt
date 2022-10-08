@@ -22,6 +22,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
+import com.example.musicplayer.Playlist
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -146,6 +147,10 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         } else {
             MyMediaPlayer.currentIndex +=1
         }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         playMusic()
     }
 
@@ -154,6 +159,10 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
         } else {
             MyMediaPlayer.currentIndex -=1
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
         }
         playMusic()
     }
