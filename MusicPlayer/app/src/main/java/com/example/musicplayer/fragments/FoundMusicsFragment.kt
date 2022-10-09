@@ -178,8 +178,9 @@ class FoundMusicsFragment : Fragment() {
     }
 
     private fun addSongsToAllMusics(){
+        adapter.musics.reverse()
         for (music in adapter.musics){
-            MyMediaPlayer.allMusics.add(music)
+            MyMediaPlayer.allMusics.add(0,music)
         }
         CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile() }
         Toast.makeText(
