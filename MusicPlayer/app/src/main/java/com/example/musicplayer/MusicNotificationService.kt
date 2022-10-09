@@ -6,11 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioManager
+import android.util.Log
 import androidx.core.app.NotificationCompat
 
 
-class MusicNotificationService(private val context : Context) {
-    private val  notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+class MusicNotificationService(private val context : Context) : AudioManager.OnAudioFocusChangeListener {
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val mediaPlayer = MyMediaPlayer.getInstance
 
     fun showNotification(pausePlayIcon : Int){
         val currentSong= MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
@@ -85,5 +88,22 @@ class MusicNotificationService(private val context : Context) {
 
     companion object {
         const val MUSIC_NOTIFICATION_CHANNEL_ID = "music_notification_channel"
+    }
+
+    override fun onAudioFocusChange(audioFocusChange: Int) {
+        Log.d("testNOTIF1", "test")
+        when (audioFocusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                println("test")
+                mediaPlayer.start()
+                showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.pause()
+                    showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                }
+            }
+        }
     }
 }

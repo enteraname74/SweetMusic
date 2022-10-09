@@ -33,19 +33,16 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import java.io.*
 
-class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
+class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, AudioManager.OnAudioFocusChangeListener {
 
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
     private lateinit var fetchingSongs : LinearLayout
     private lateinit var viewPager : ViewPager2
-
-    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
-    private lateinit var audioAttributes : AudioAttributes
-    private lateinit var audioManager : AudioManager
-
     private lateinit var pausePlayButton : ImageView
+
+    private lateinit var audioManager : AudioManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +103,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     override fun onResume() {
         super.onResume()
+        audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
         // Si on a la permission et qu'on a pas encore de fichiers avec des musiques, alors on va chercher nos musiques :
@@ -173,35 +171,20 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         } else {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..", "")
-                }
-            }
-        }
     }
 
     private fun pausePlay() {
         var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
+
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(audioAttributes)
             .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .setOnAudioFocusChangeListener(this)
             .build()
 
         when (audioManager.requestAudioFocus(audioFocusRequest)) {
@@ -362,6 +345,44 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                     uri
                 )
             )
+        }
+    }
+
+    override fun onAudioFocusChange(audioFocusChange: Int) {
+        Log.d("testMAIN", "test")
+        when (audioFocusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                println("test")
+                mediaPlayer.start()
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                CoroutineScope(Dispatchers.Default).launch {
+                    val service = MusicNotificationService(applicationContext as Context)
+                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.pause()
+                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val service = MusicNotificationService(applicationContext as Context)
+                        service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                }
+            }
+            else -> {
+                /*
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.pause()
+                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val service = MusicNotificationService(applicationContext as Context)
+                        service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                }
+
+                 */
+            }
         }
     }
 }

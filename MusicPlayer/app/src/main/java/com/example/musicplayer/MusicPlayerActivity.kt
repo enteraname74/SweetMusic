@@ -25,7 +25,7 @@ import java.io.IOException
 
 
 // Classe représentant la lecture d'une musique :
-class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
+class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManager.OnAudioFocusChangeListener {
 
     private lateinit var titleTv : TextView
     lateinit var currentTimeTv : TextView
@@ -39,8 +39,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
     private lateinit var sort : ImageView
-    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
-    private lateinit var audioAttributes : AudioAttributes
+
     private lateinit var audioManager : AudioManager
     private var myThread = Thread(FunctionalSeekBar(this))
 
@@ -71,24 +70,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
 
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying) {
-                        mediaPlayer.pause()
-                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                }
-            }
-        }
-
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
         currentList.setOnClickListener{ seeList() }
@@ -99,6 +80,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         sort.setOnClickListener{ changeSorting() }
 
         registerForContextMenu(musicIcon)
+
+        audioManager = this@MusicPlayerActivity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         playMusic()
 
@@ -153,7 +136,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     }
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-        super.onCreateContextMenu(menu, v, menuInfo);
+        super.onCreateContextMenu(menu, v, menuInfo)
         menu?.add(0, 0, 0, resources.getString(R.string.add_to))
         menu?.add(0, 1, 0, resources.getString(R.string.modify))
     }
@@ -177,7 +160,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+    private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
     }
 
     private fun seeList() {
@@ -214,7 +197,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
                 MyMediaPlayer.currentPlaylist.shuffle()
                 MyMediaPlayer.currentPlaylist.remove(currentSong)
                 MyMediaPlayer.currentPlaylist.add(0,currentSong)
-                MyMediaPlayer.currentIndex = 0;
+                MyMediaPlayer.currentIndex = 0
             }
             2 -> {
                 // On choisit la fonction de replay de la meme musique, on supprime d'abord toute la playlist actuelle :
@@ -230,13 +213,19 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         /*
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
+
         if (!sameMusic) {
             mediaPlayer.reset()
             try {
+                val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+
                 val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                     .setAudioAttributes(audioAttributes)
                     .setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                    .setOnAudioFocusChangeListener(this@MusicPlayerActivity)
                     .build()
 
                 when (audioManager.requestAudioFocus(audioFocusRequest)) {
@@ -303,10 +292,16 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     private fun pausePlay(){
         var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
+
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+            .build()
+
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(audioAttributes)
             .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .setOnAudioFocusChangeListener(this)
             .build()
 
         when (audioManager.requestAudioFocus(audioFocusRequest)) {
@@ -496,5 +491,36 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         window.navigationBarColor = backgroundColor.rgb
         window.statusBarColor = backgroundColor.rgb
+    }
+
+    override fun onAudioFocusChange(audioFocusChange: Int) {
+        Log.d("testMUSIC", "test")
+        when (audioFocusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                println("test")
+                mediaPlayer.start()
+                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                CoroutineScope(Dispatchers.Default).launch {
+                    val service = MusicNotificationService(applicationContext as Context)
+                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.pause()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val service = MusicNotificationService(applicationContext as Context)
+                        service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                } else {
+                    mediaPlayer.pause()
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val service = MusicNotificationService(applicationContext as Context)
+                        service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                    }
+                }
+            }
+        }
     }
 }
