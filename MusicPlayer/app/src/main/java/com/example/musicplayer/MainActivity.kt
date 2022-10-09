@@ -176,36 +176,55 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
     private fun pausePlay() {
         var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
 
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+        if(audioManager.isMusicActive) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
 
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(this)
-            .build()
+            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(audioAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(this)
+                .build()
 
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
-            }
-
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                } else {
-                    mediaPlayer.start()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                    buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
+            when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    Toast.makeText(
+                        this,
+                        resources.getString(R.string.cannot_launch_song),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }
-            else -> {
-                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-            }
 
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    if (mediaPlayer.isPlaying) {
+                        mediaPlayer.pause()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    } else {
+                        mediaPlayer.start()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                        buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
+                    }
+                }
+                else -> {
+                    Toast.makeText(
+                        this,
+                        resources.getString(R.string.unknown_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            }
+        } else {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                mediaPlayer.start()
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
+            }
         }
         CoroutineScope(Dispatchers.Default).launch {
             val service = MusicNotificationService(applicationContext)
@@ -371,7 +390,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                 }
             }
             else -> {
-                /*
                 if (mediaPlayer.isPlaying) {
                     mediaPlayer.pause()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
@@ -380,8 +398,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                         service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
                     }
                 }
-
-                 */
             }
         }
     }

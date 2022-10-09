@@ -217,30 +217,38 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
         if (!sameMusic) {
             mediaPlayer.reset()
             try {
-                val audioAttributes = AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
+                if(audioManager.isMusicActive) {
+                    val audioAttributes = AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
 
-                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                    .setAudioAttributes(audioAttributes)
-                    .setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(this@MusicPlayerActivity)
-                    .build()
+                    val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(audioAttributes)
+                        .setAcceptsDelayedFocusGain(true)
+                        .setOnAudioFocusChangeListener(this@MusicPlayerActivity)
+                        .build()
 
-                when (audioManager.requestAudioFocus(audioFocusRequest)) {
-                    AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                        Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-                    }
+                    when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                        AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                            Toast.makeText(this, "Cannot launch the music", Toast.LENGTH_SHORT)
+                                .show()
+                        }
 
-                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                        mediaPlayer.setDataSource(currentSong.path)
-                        mediaPlayer.setOnPreparedListener(this)
-                        mediaPlayer.prepareAsync()
+                        AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                            mediaPlayer.setDataSource(currentSong.path)
+                            mediaPlayer.setOnPreparedListener(this)
+                            mediaPlayer.prepareAsync()
+                        }
+                        else -> {
+                            Toast.makeText(this, "AN unknown error has come up", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
-                    else -> {
-                        Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
-                    }
+                } else {
+                    mediaPlayer.setDataSource(currentSong.path)
+                    mediaPlayer.setOnPreparedListener(this)
+                    mediaPlayer.prepareAsync()
                 }
             } catch (e: IOException) {
                 Log.e("ERROR MEDIA PLAYER", e.toString())
@@ -293,34 +301,45 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
     private fun pausePlay(){
         var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
 
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+        if(audioManager.isMusicActive) {
+            val audioAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
 
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(this)
-            .build()
+            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(audioAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(this)
+                .build()
 
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-            }
+            when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    Toast.makeText(this, "Cannot launch the music", Toast.LENGTH_SHORT).show()
+                }
 
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                } else {
-                    mediaPlayer.start()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                    buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    if (mediaPlayer.isPlaying) {
+                        mediaPlayer.pause()
+                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    } else {
+                        mediaPlayer.start()
+                        pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                        buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
+                    }
+                }
+                else -> {
+                    Toast.makeText(this, "An unknown error has come up", Toast.LENGTH_SHORT).show()
                 }
             }
-            else -> {
-                Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
+        } else {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                mediaPlayer.start()
+                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
             }
         }
         CoroutineScope(Dispatchers.Default).launch {

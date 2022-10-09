@@ -258,29 +258,54 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
     }
 
     private fun pausePlay() {
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
-            .build()
+        var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
 
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
-            }
+        if(audioManager.isMusicActive) {
+            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(audioAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(onAudioFocusChange)
+                .build()
 
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                } else {
-                    mediaPlayer.start()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    Toast.makeText(
+                        this,
+                        resources.getString(R.string.cannot_launch_song),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    if (mediaPlayer.isPlaying) {
+                        mediaPlayer.pause()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    } else {
+                        mediaPlayer.start()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                        buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
+                    }
+                }
+                else -> {
+                    Toast.makeText(
+                        this,
+                        resources.getString(R.string.unknown_error),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
-            else -> {
-                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
+        } else {
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                mediaPlayer.start()
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
+        }
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(buttonStyle)
         }
     }
 }
