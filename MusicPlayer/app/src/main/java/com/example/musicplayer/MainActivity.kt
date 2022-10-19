@@ -369,6 +369,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
 
     override fun onAudioFocusChange(audioFocusChange: Int) {
         Log.d("testMAIN", "test")
+        if(audioFocusChange == -1){
+            CoroutineScope(Dispatchers.Default).launch {
+                val service = MusicNotificationService(applicationContext as Context)
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            return
+        }
         when (audioFocusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 println("test")

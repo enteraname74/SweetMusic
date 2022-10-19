@@ -8,11 +8,14 @@ import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
 import android.media.*
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.ContextMenu
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
@@ -22,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
+
 
 
 // Classe représentant la lecture d'une musique :
@@ -42,6 +46,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
 
     private lateinit var audioManager : AudioManager
     private var myThread = Thread(FunctionalSeekBar(this))
+
+    private lateinit var mediaSession : MediaSession
+    private lateinit var mediaSessionToken : MediaSession.Token
 
     private var sameMusic = false
 
@@ -84,6 +91,46 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
         audioManager = this@MusicPlayerActivity.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
         playMusic()
+        mediaSession = MediaSession(applicationContext, packageName+"mediaSessionPlayer")
+
+        mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS or MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS)
+
+        mediaSessionToken = mediaSession.sessionToken
+
+        mediaSession.setCallback(object : MediaSession.Callback() {
+
+            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+
+            Log.d("MediaButtonEvent", mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT).toString())
+            val keyEvent = mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT) as KeyEvent
+            if (keyEvent.action == KeyEvent.ACTION_DOWN){
+                when(keyEvent.keyCode){
+                    KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                        pausePlay()
+                    }
+                    KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                        pausePlay()
+                    }
+                    KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                        playNextSong()
+                    }
+                    KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                        playPreviousSong()
+                    }
+                }
+            }
+            return super.onMediaButtonEvent(mediaButtonIntent)
+        }
+        })
+
+        val state = PlaybackState.Builder()
+            .setActions(PlaybackState.ACTION_PLAY)
+            .setState(PlaybackState.STATE_STOPPED, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0F)
+            .build()
+
+        mediaSession.setPlaybackState(state)
+
+        mediaSession.isActive = true
 
         this@MusicPlayerActivity.runOnUiThread(myThread)
 
@@ -119,6 +166,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
         // Vérifions si la musique est en favoris :
         getFavoriteState()
 
+        Log.d("MAJ",currentSong.toString())
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
@@ -215,9 +263,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
          */
 
         if (!sameMusic) {
+            Log.d("here","")
             mediaPlayer.reset()
             try {
                 if(audioManager.isMusicActive) {
+                    Log.d("here2","")
                     val audioAttributes = AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_MEDIA)
                         .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -514,6 +564,13 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
 
     override fun onAudioFocusChange(audioFocusChange: Int) {
         Log.d("testMUSIC", "test")
+        if(audioFocusChange == -1){
+            CoroutineScope(Dispatchers.Default).launch {
+                val service = MusicNotificationService(applicationContext as Context)
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            return
+        }
         when (audioFocusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 println("test")
@@ -525,6 +582,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
                 }
             }
             AudioManager.AUDIOFOCUS_LOSS -> {
+                Log.d("testMUSIC", "LOSS")
                 if (mediaPlayer.isPlaying) {
                     mediaPlayer.pause()
                     pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
@@ -533,13 +591,21 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, AudioManage
                         service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
                     }
                 } else {
-                    mediaPlayer.pause()
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val service = MusicNotificationService(applicationContext as Context)
-                        service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                    Log.d("testMUSIC", "ELSE")
+                    if(mediaPlayer.isPlaying){
+                        mediaPlayer.pause()
+                        CoroutineScope(Dispatchers.Default).launch {
+                            val service = MusicNotificationService(applicationContext as Context)
+                            service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                        }
                     }
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaSession.release()
     }
 }

@@ -7,6 +7,7 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.util.Log
+import kotlin.contracts.Returns
 
 class NextMusicNotificationReceiver: BroadcastReceiver(), AudioManager.OnAudioFocusChangeListener {
     private var mediaPlayer = MyMediaPlayer.getInstance
@@ -37,15 +38,20 @@ class NextMusicNotificationReceiver: BroadcastReceiver(), AudioManager.OnAudioFo
                 .setOnAudioFocusChangeListener(this)
                 .build()
 
-            when (audioManager.requestAudioFocus(audioFocusRequest)) {
-                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                    mediaPlayer.reset()
-                    mediaPlayer.setDataSource(currentSong.path)
-                    mediaPlayer.prepare()
-                    mediaPlayer.start()
-                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            try {
+                when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                        mediaPlayer.reset()
+                        mediaPlayer.setDataSource(currentSong.path)
+                        mediaPlayer.prepare()
+                        mediaPlayer.start()
+                        service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                    }
                 }
+            } catch (error : Error){
+                Log.d("error","")
             }
+
         } else {
             mediaPlayer.reset()
             mediaPlayer.setDataSource(currentSong.path)
@@ -56,6 +62,15 @@ class NextMusicNotificationReceiver: BroadcastReceiver(), AudioManager.OnAudioFo
     }
 
     override fun onAudioFocusChange(audioFocusChange: Int) {
+        Log.d("audioFocusNEXT", audioFocusChange.toString())
+        if(audioFocusChange == -1){
+            if(mediaPlayer.isPlaying){
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            } else{
+                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+            return
+        }
         when (audioFocusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 mediaPlayer.start()
@@ -66,6 +81,9 @@ class NextMusicNotificationReceiver: BroadcastReceiver(), AudioManager.OnAudioFo
                     mediaPlayer.pause()
                     service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
                 }
+            }
+            -1 -> {
+                Log.d("testHere","")
             }
         }
     }

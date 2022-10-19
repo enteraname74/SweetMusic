@@ -4,13 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.os.Bundle
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,6 +30,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     private lateinit var searchView : SearchView
     private var searchIsOn = false
     private val mediaPlayer = MyMediaPlayer.getInstance
+
+    private lateinit var mediaSession : MediaSession
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +66,43 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         super.onResume()
         searchView.clearFocus()
         Log.d("RESUME FRAG","")
+
+        mediaSession = MediaSession(context as Context, requireContext().packageName+"mediaSessionPlayer")
+
+        mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS or MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS)
+
+        mediaSession.setCallback(object : MediaSession.Callback() {
+
+            override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
+
+                Log.d("MediaButtonEventMUSICFRAGMENT", mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT).toString())
+                val keyEvent = mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT) as KeyEvent
+                if (keyEvent.action == KeyEvent.ACTION_DOWN){
+                    when(keyEvent.keyCode){
+                        KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                        }
+                        KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                        }
+                        KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                            playNextSong(adapter)
+                        }
+                        KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                            playPreviousSong(adapter)
+                        }
+                    }
+                }
+                return super.onMediaButtonEvent(mediaButtonIntent)
+            }
+        })
+
+        val state = PlaybackState.Builder()
+            .setActions(PlaybackState.ACTION_PLAY)
+            .setState(PlaybackState.STATE_STOPPED, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0F)
+            .build()
+
+        mediaSession.setPlaybackState(state)
+
+        mediaSession.isActive = true
 
         // Si on est dans la barre e recherche, on ne met pas tout de suite à jour les musiques pour rester dans la barre :
         if(!searchIsOn){
@@ -107,8 +145,11 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
         }
 
+        mediaSession.release()
+
         val intent = Intent(context, MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
+
 
         startActivity(intent)
     }

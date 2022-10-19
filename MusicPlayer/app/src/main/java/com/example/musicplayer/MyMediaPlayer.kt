@@ -1,6 +1,8 @@
 package com.example.musicplayer
 
+import android.content.Context
 import android.media.MediaPlayer
+import android.media.session.MediaSession
 
 class MyMediaPlayer {
     /*Permet de créer un équivalent de "static" en Java
@@ -17,6 +19,8 @@ class MyMediaPlayer {
             }
             return instance as MediaPlayer
         }
+
+        var mediaSession : MediaSession? = null
 
         var currentIndex : Int = -1
         var initialPlaylist = ArrayList<Music>()

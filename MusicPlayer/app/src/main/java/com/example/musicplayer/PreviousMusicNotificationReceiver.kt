@@ -55,6 +55,15 @@ class PreviousMusicNotificationReceiver : BroadcastReceiver(), AudioManager.OnAu
     }
 
     override fun onAudioFocusChange(audioFocusChange: Int) {
+        Log.d("audioFocusPREVIOUS", audioFocusChange.toString())
+        if(audioFocusChange == -1){
+            if(mediaPlayer.isPlaying){
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            } else{
+                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+            return
+        }
         when (audioFocusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 mediaPlayer.start()
