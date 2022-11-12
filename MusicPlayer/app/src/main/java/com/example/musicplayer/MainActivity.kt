@@ -1,9 +1,7 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.content.ContentUris
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
@@ -40,11 +38,17 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     private lateinit var fetchingSongs : LinearLayout
     private lateinit var viewPager : ViewPager2
 
-    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
-    private lateinit var audioAttributes : AudioAttributes
-    private lateinit var audioManager : AudioManager
-
     private lateinit var pausePlayButton : ImageView
+
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            Log.d("RECEIVE IN ACTIVITY","")
+
+            if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -173,36 +177,22 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
 
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
+        Log.d("LANCEMENT DU SERVICE", "")
 
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..", "")
-                }
-            }
-        }
+        registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
+
+        val serviceIntent = Intent(this, PlaybackService::class.java)
+        startService(serviceIntent)
     }
 
     private fun pausePlay() {
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
+            .setAudioAttributes(PlaybackService.audioAttributes)
             .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
             .build()
 
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+        when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
             AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
                 Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
             }
@@ -355,5 +345,11 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 )
             )
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("MAIN PAUSE", "")
+        unregisterReceiver(broadcastReceiver)
     }
 }

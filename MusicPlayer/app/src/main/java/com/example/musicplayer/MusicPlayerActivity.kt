@@ -1,8 +1,10 @@
 package com.example.musicplayer
 
 import android.app.Activity
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
@@ -40,12 +42,20 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     private lateinit var favoriteBtn : ImageView
     private lateinit var currentSong : Music
     private lateinit var sort : ImageView
-    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
-    private lateinit var audioAttributes : AudioAttributes
-    private lateinit var audioManager : AudioManager
+
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
+
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            Log.d("RECEIVE IN MUSIC PLAYER ACTIVITY",intent.extras?.getBoolean("STOP").toString())
+
+            if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
+                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
@@ -71,24 +81,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
         mediaPlayer.setOnCompletionListener { playNextSong() }
-
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying) {
-                        mediaPlayer.pause()
-                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                }
-            }
-        }
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
@@ -126,6 +118,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         val quitActivity = findViewById<ImageView>(R.id.quit_activity)
         quitActivity.setOnClickListener{ finish() }
+
+        registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
     }
 
     private fun setResourcesWithMusic(){
@@ -235,12 +229,12 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             mediaPlayer.reset()
             try {
                 val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                    .setAudioAttributes(audioAttributes)
+                    .setAudioAttributes(PlaybackService.audioAttributes)
                     .setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                    .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
                     .build()
 
-                when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
                     AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
                         Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
                     }
@@ -292,12 +286,12 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
     private fun pausePlay(){
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
+            .setAudioAttributes(PlaybackService.audioAttributes)
             .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
+            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
             .build()
 
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
+        when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
             AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
                 Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
             }
@@ -480,5 +474,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
         window.navigationBarColor = backgroundColor.rgb
         window.statusBarColor = backgroundColor.rgb
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MUSIC PLAYER KILL", "")
+        unregisterReceiver(broadcastReceiver)
     }
 }
