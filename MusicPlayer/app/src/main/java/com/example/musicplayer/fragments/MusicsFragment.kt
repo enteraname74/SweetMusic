@@ -103,6 +103,11 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         MyMediaPlayer.currentIndex = position
 
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(context?.applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
+
         val intent = Intent(context, MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
 

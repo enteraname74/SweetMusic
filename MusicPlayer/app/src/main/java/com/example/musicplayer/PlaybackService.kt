@@ -27,13 +27,26 @@ class PlaybackService : Service() {
         onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
             Log.d("focusChange", focusChange.toString())
             when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> Log.d("SERVICE", "GAIN FOCUS WHEN OTHER APP WAS PLAYING")
+                AudioManager.AUDIOFOCUS_GAIN -> {
+                    Log.d("SERVICE", "GAIN FOCUS WHEN OTHER APP WAS PLAYING")
+                    val intentForBroadcast = Intent("BROADCAST")
+                    intentForBroadcast.putExtra("STOP",false)
+                    applicationContext.sendBroadcast(intentForBroadcast)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", false)
+                    applicationContext.sendBroadcast(intentForNotification)
+                }
                 else -> {
                     if (mediaPlayer.isPlaying) {
                         Log.d("SERVICE", "LOSS FOCUS WHILE PLAYING")
                         val intentForBroadcast = Intent("BROADCAST")
                         intentForBroadcast.putExtra("STOP",true)
                         applicationContext.sendBroadcast(intentForBroadcast)
+
+                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                        intentForNotification.putExtra("STOP", true)
+                        applicationContext.sendBroadcast(intentForNotification)
                         mediaPlayer.pause()
                     }
                 }

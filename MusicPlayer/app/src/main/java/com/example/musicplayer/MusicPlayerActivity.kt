@@ -53,7 +53,12 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
 
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
+                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
+
+            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            titleTv.text = currentSong.name
         }
     }
 
@@ -300,9 +305,17 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
                 if(mediaPlayer.isPlaying){
                     mediaPlayer.pause()
                     pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", true)
+                    applicationContext.sendBroadcast(intentForNotification)
                 } else {
                     mediaPlayer.start()
                     pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", false)
+                    applicationContext.sendBroadcast(intentForNotification)
                 }
             }
             else -> {
@@ -431,6 +444,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         seekBar.progress = 0
         seekBar.max = mediaPlayer.duration
         pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
     }
 
     private fun setColor(){

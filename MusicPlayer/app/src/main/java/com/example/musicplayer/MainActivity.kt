@@ -46,7 +46,12 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
+
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
         }
     }
 
@@ -136,8 +141,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             CoroutineScope(Dispatchers.Main).launch {
                 noSongPlaying.visibility = View.GONE
                 infoSongPlaying.visibility = View.VISIBLE
-                songTitleInfo.text =
-                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
                 if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
                     // Passons d'abord notre byteArray en bitmap :
                     val bytes =

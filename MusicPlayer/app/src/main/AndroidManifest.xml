@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".Notification"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -19,12 +20,28 @@
         android:theme="@style/Theme.MusicPlayer"
         tools:targetApi="31">
         <receiver
+            android:name=".receivers.DeletedNotificationIntentReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".receivers.NextMusicNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".receivers.PausePlayNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".receivers.PreviousMusicNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
             android:name=".receivers.TestReceiverService"
             android:enabled="true"
             android:exported="false">
-                <intent-filter>
-                    <action android:name="com.example.musicplayer.intent.action.TEST" />
-                </intent-filter>
+            <intent-filter>
+                <action android:name="com.example.musicplayer.intent.action.TEST" />
+            </intent-filter>
         </receiver>
 
         <service
