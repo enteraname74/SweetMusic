@@ -121,10 +121,10 @@ data class MusicList(
                 holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
                 holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
             } else {
-                holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-                holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-                holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
-                holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.third_color)))
+                holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+                holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+                holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+                holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
             }
         }
     }

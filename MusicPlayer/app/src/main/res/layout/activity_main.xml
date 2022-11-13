@@ -33,17 +33,18 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:src="@drawable/ic_baseline_menu_24"
-                    android:layout_marginStart="10dp">
+                    android:layout_marginStart="10dp"
+                    app:tint="@color/text_color">
                 </ImageView>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
                     android:layout_marginTop="5dp"
                     android:gravity="center_horizontal"
-                    android:layout_centerVertical="true"
                     android:text="@string/app_name"
-                    android:textColor="@color/third_color"
+                    android:textColor="@color/text_color"
                     android:textSize="20sp"
                     android:textStyle="bold">
 
@@ -56,12 +57,11 @@
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/secondary_color"
                 android:text="@string/shuffle"
-                android:textColor="@color/third_color"
+                android:textColor="@color/text_color"
                 android:layout_marginRight="10dp"
                 android:layout_gravity="end"
                 android:layout_marginEnd="10dp">
             </Button>
-
 
 
             <com.google.android.material.tabs.TabLayout
@@ -71,7 +71,7 @@
                 android:background="@color/primary_color"
                 app:tabMode="fixed"
                 app:tabIndicatorGravity="bottom"
-                app:tabTextColor="@color/third_color"
+                app:tabTextColor="@color/text_color"
                 app:tabSelectedTextColor="@color/white"
                 app:tabIndicatorAnimationMode="elastic"
                 app:tabIndicatorHeight="4dp"
@@ -116,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/loading_data"
                 android:textSize="15sp"
-                android:textColor="@color/third_color"/>
+                android:textColor="@color/text_color"/>
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -124,7 +124,7 @@
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/third_color"
+                android:indeterminateTint="@color/text_color"
                 android:indeterminateTintMode="multiply"/>
 
         </LinearLayout>
@@ -147,7 +147,10 @@
             android:layout_gravity="bottom"
             android:background="@color/primary_color">
 
-            <ImageView
+            <com.google.android.material.imageview.ShapeableImageView
+                app:shapeAppearance="@style/softRoundCorner"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:id="@+id/album_cover_info"
@@ -156,13 +159,13 @@
                 android:src="@drawable/icone_musique"
                 android:layout_marginStart="5dp">
 
-            </ImageView>
+            </com.google.android.material.imageview.ShapeableImageView>
 
             <TextView
                 android:id="@+id/no_song_playing"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textColor="@color/third_color"
+                android:textColor="@color/text_color"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:text="@string/no_song_is_playing"
@@ -187,11 +190,11 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:ellipsize="marquee"
-                        android:scrollHorizontally="true"
                         android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
                         android:singleLine="true"
                         android:text="@string/name_of_the_song"
-                        android:textColor="@color/third_color"/>
+                        android:textColor="@color/text_color" />
 
 
                     <ImageView
@@ -201,7 +204,8 @@
                         android:layout_centerVertical="true"
                         android:layout_marginStart="20dp"
                         android:layout_toEndOf="@+id/song_title_info"
-                        android:src="@drawable/ic_baseline_skip_previous_24">
+                        android:src="@drawable/ic_baseline_skip_previous_24"
+                        app:tint="@color/text_color">
 
                     </ImageView>
 
@@ -211,7 +215,9 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/pause_play"
-                        android:src="@drawable/ic_baseline_skip_next_24">
+                        android:src="@drawable/ic_baseline_skip_next_24"
+                        app:tint="@color/text_color">
+
 
                     </ImageView>
 
@@ -221,7 +227,8 @@
                         android:layout_height="wrap_content"
                         android:layout_centerInParent="true"
                         android:layout_toEndOf="@+id/previous"
-                        android:src="@drawable/ic_baseline_pause_circle_outline_24">
+                        android:src="@drawable/ic_baseline_pause_circle_outline_24"
+                        app:tint="@color/text_color">
                     </ImageView>
                 </RelativeLayout>
             </LinearLayout>

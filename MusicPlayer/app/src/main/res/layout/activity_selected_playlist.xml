@@ -142,7 +142,10 @@
         android:gravity="bottom"
         android:background="@color/primary_color">
 
-        <ImageView
+        <com.google.android.material.imageview.ShapeableImageView
+            app:shapeAppearance="@style/softRoundCorner"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
             android:contentDescription="@string/music_icon"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
@@ -152,7 +155,7 @@
             android:src="@drawable/icone_musique"
             android:layout_marginStart="5dp">
 
-        </ImageView>
+        </com.google.android.material.imageview.ShapeableImageView>
 
         <TextView
             android:id="@+id/no_song_playing"

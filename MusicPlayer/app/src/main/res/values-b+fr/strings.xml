@@ -75,5 +75,6 @@
     <string name="add_new_songs">Ajouter ces nouvelles chansons</string>
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
     <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
+    <string name="back_button">back button</string>
 
 </resources>

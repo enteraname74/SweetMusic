@@ -1,147 +1,178 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ModifyMusicInfoActivity"
-    android:background="@color/primary_color"
-    android:paddingLeft="30dp"
-    android:paddingRight="30dp"
-    android:paddingEnd="30dp"
-    android:paddingStart="30dp">
+    android:background="@color/third_color"
+    android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/title_activity"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:gravity="center_horizontal"
-        android:text="@string/modify_music_informations"
-        android:textColor="@color/third_color"
-        android:textSize="20sp"/>
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="5dp"
+        android:background="@color/secondary_color">
+
+        <TextView
+            android:textStyle="bold"
+            android:id="@+id/title_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_horizontal"
+            android:text="@string/modify_music_informations"
+            android:textColor="@color/text_color"
+            android:textSize="20sp"/>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/album_art"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/album_art"
-        android:textColor="@color/third_color"
-        android:layout_below="@+id/title_activity"
+        android:textColor="@color/text_color"
+        android:gravity="center"
         android:textSize="17sp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="10dp"/>
 
-        >
-    </TextView>
-
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
+        app:shapeAppearance="@style/softRoundCorner"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         android:id="@+id/album_image"
-        android:layout_width="match_parent"
+        android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_below="@+id/album_art"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
         android:layout_marginTop="10dp"
-        android:src="@drawable/michael"/>
+        android:src="@drawable/michael" />
 
-    <TextView
-        android:id="@+id/music_name"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/album_image"
-        android:layout_marginTop="10dp"
-        android:text="@string/name_of_the_song_modify"
-        android:textColor="@color/third_color"
-        android:textSize="17sp"/>
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@drawable/round_top_corners">
 
-    <EditText
-        android:id="@+id/edit_music_name"
-        android:maxLines="1"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/music_name"
-        android:backgroundTint="@color/third_color"
-        android:textColor="@color/third_color"
-        android:textSize="15sp"/>
-
-    <TextView
-        android:id="@+id/album_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/album"
-        android:textColor="@color/third_color"
-        android:layout_below="@+id/edit_music_name"
-        android:textSize="17sp"
-        android:layout_marginTop="10dp"
-        >
-    </TextView>
-
-    <EditText
-        android:id="@+id/edit_album_name"
-        android:maxLines="1"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/album_name"
-        android:backgroundTint="@color/third_color"
-        android:textColor="@color/third_color"
-        android:textSize="15sp">
-    </EditText>
-
-    <TextView
-        android:id="@+id/artist_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_album_name"
-        android:layout_marginTop="10dp"
-        android:text="@string/artist"
-        android:textColor="@color/third_color"
-        android:textSize="17sp">
-    </TextView>
-
-    <EditText
-        android:id="@+id/edit_artist_name"
-        android:maxLines="1"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/artist_name"
-        android:backgroundTint="@color/third_color"
-        android:textColor="@color/third_color"
-        android:textSize="15sp"/>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="70dp">
-
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+    
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal">
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <Button
-                android:layout_marginRight="50dp"
-                android:id="@+id/cancel_button"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/music_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/secondary_color"
-                android:text="@string/cancel"
-                android:textColor="@color/third_color"
-                android:textSize="14sp"
-                android:layout_marginEnd="50dp">
-            </Button>
+                android:layout_marginTop="10dp"
+                android:text="@string/name_of_the_song_modify"
+                android:textColor="@color/text_color"
+                android:textSize="17sp"/>
 
-            <Button
-                android:id="@+id/validate_button"
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/edit_music_name"
+                android:maxLines="1"
+                android:inputType="text"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/secondary_color"
-                android:text="@string/ok"
-                android:textColor="@color/third_color"
-                android:textSize="14sp">
-            </Button>
+                android:backgroundTint="@color/text_color"
+                android:textColor="@color/text_color"
+                android:textSize="15sp"/>
+
+            <TextView
+                android:id="@+id/album_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/album"
+                android:textColor="@color/text_color"
+                android:textSize="17sp"
+                android:layout_marginTop="10dp"
+                >
+            </TextView>
+
+            <EditText
+                android:id="@+id/edit_album_name"
+                android:maxLines="1"
+                android:inputType="text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/text_color"
+                android:textColor="@color/text_color"
+                android:textSize="15sp">
+            </EditText>
+
+            <TextView
+                android:id="@+id/artist_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/artist"
+                android:textColor="@color/text_color"
+                android:textSize="17sp">
+            </TextView>
+
+            <EditText
+                android:id="@+id/edit_artist_name"
+                android:maxLines="1"
+                android:inputType="text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/text_color"
+                android:textColor="@color/text_color"
+                android:textSize="15sp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="5"
+                android:orientation="horizontal"
+                android:gravity="bottom|center_horizontal">
+
+                <Button
+                    android:id="@+id/cancel_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/third_color"
+                    android:text="@string/cancel"
+                    android:textColor="@color/text_color"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="50dp">
+                </Button>
+
+                <Button
+                    android:id="@+id/validate_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/third_color"
+                    android:text="@string/ok"
+                    android:textColor="@color/text_color"
+                    android:textSize="14sp">
+                </Button>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            
         </LinearLayout>
-    </RelativeLayout>
-</RelativeLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+    </LinearLayout>
+</LinearLayout>

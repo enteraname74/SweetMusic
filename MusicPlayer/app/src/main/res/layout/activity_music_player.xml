@@ -49,23 +49,26 @@
 
     </RelativeLayout>
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/album_cover_big"
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="300dp"
+        android:layout_centerHorizontal="true"
+        app:shapeAppearance="@style/softRoundCorner"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         android:layout_above="@id/controls"
-        android:layout_marginTop="70dp"
-        android:layout_marginBottom="-5dp"
         android:contentDescription="@string/album_art"
         android:src="@drawable/icone_musique">
 
-    </ImageView>
+    </com.google.android.material.imageview.ShapeableImageView>
 
     <RelativeLayout
         android:id="@+id/controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginTop="50dp"
         android:padding="40dp"
         >
 
@@ -125,48 +128,48 @@
                 android:gravity="center_horizontal|center_vertical">
 
                 <ImageView
-                    android:contentDescription="@string/sort"
                     android:id="@+id/sort"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginEnd="20dp"
+                    android:contentDescription="@string/sort"
                     android:src="@drawable/ic_baseline_sync_24">
 
                 </ImageView>
 
                 <ImageView
-                    android:contentDescription="@string/previous"
                     android:id="@+id/previous"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/previous"
                     android:src="@drawable/ic_baseline_skip_previous_24">
 
                 </ImageView>
 
                 <ImageView
-                    android:contentDescription="@string/pause_play"
                     android:id="@+id/pause_play"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/pause_play"
                     android:src="@drawable/ic_baseline_pause_circle_outline_24">
 
                 </ImageView>
 
                 <ImageView
-                    android:contentDescription="@string/next"
                     android:id="@+id/next"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/next"
                     android:src="@drawable/ic_baseline_skip_next_24">
 
                 </ImageView>
 
                 <ImageView
-                    android:contentDescription="@string/favorite"
                     android:id="@+id/favorite"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginStart="20dp"
+                    android:contentDescription="@string/favorite"
                     android:src="@drawable/ic_baseline_favorite_border_24">
 
                 </ImageView>
