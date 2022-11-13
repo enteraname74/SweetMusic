@@ -205,9 +205,17 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 if(mediaPlayer.isPlaying){
                     mediaPlayer.pause()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", true)
+                    applicationContext.sendBroadcast(intentForNotification)
                 } else {
                     mediaPlayer.start()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", false)
+                    applicationContext.sendBroadcast(intentForNotification)
                 }
             }
             else -> {

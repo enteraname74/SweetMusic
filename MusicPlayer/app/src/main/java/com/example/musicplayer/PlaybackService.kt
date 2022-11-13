@@ -10,13 +10,15 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.IBinder
 import android.provider.MediaStore
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.KeyEvent
 import android.widget.Toast
 
 class PlaybackService : Service() {
     var mediaPlayer = MyMediaPlayer.getInstance
-    private lateinit var mediaSession : MediaSession
+    private lateinit var mediaSession : MediaSessionCompat
     private lateinit var mediaSessionToken : MediaSession.Token
 
     override fun onBind(intent: Intent): IBinder? {
@@ -61,12 +63,12 @@ class PlaybackService : Service() {
             }
         }
 
-        mediaSession = MediaSession(applicationContext, packageName+"mediaSessionPlayer")
-        mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS or MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS)
+        //mediaSession = MediaSession(applicationContext, packageName+"mediaSessionPlayer")
+        //mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS or MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS)
 
-        mediaSessionToken = mediaSession.sessionToken
+        mediaSession = MediaSessionCompat(applicationContext, packageName+"mediaSessionPlayer")
 
-        mediaSession.setCallback(object : MediaSession.Callback() {
+        mediaSession.setCallback(object : MediaSessionCompat.Callback() {
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
                 Log.d("MediaButtonEvent", mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT).toString())
 
@@ -74,14 +76,37 @@ class PlaybackService : Service() {
                 if (keyEvent.action == KeyEvent.ACTION_DOWN){
                     when(keyEvent.keyCode){
                         KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                            mediaPlayer.pause()
-                            val intentForBroadcast = Intent("BROADCAST")
-                            intentForBroadcast.putExtra("STOP",true)
-                            applicationContext.sendBroadcast(intentForBroadcast)
+                            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                                .setAudioAttributes(audioAttributes)
+                                .setAcceptsDelayedFocusGain(true)
+                                .setOnAudioFocusChangeListener(onAudioFocusChange)
+                                .build()
 
-                            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                            intentForNotification.putExtra("STOP", true)
-                            applicationContext.sendBroadcast(intentForNotification)
+                            when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                                    if (mediaPlayer.isPlaying) {
+                                        mediaPlayer.pause()
+                                        val intentForBroadcast = Intent("BROADCAST")
+                                        intentForBroadcast.putExtra("STOP", true)
+                                        applicationContext.sendBroadcast(intentForBroadcast)
+
+                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                                        intentForNotification.putExtra("STOP", true)
+                                        applicationContext.sendBroadcast(intentForNotification)
+                                    } else {
+                                        mediaPlayer.start()
+
+                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                                        intentForNotification.putExtra("STOP", false)
+                                        applicationContext.sendBroadcast(intentForNotification)
+
+                                        val intentForBroadcast = Intent("BROADCAST")
+                                        intentForBroadcast.putExtra("STOP", false)
+                                        applicationContext.sendBroadcast(intentForBroadcast)
+                                    }
+                                }
+                                else -> {}
+                            }
                         }
                         KeyEvent.KEYCODE_MEDIA_PLAY -> {
                             val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
@@ -197,9 +222,9 @@ class PlaybackService : Service() {
             }
         })
 
-        val state = PlaybackState.Builder()
-            .setActions(PlaybackState.ACTION_PLAY)
-            .setState(PlaybackState.STATE_STOPPED, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0F)
+        val state = PlaybackStateCompat.Builder()
+            .setActions(PlaybackStateCompat.ACTION_PLAY)
+            .setState(PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0F)
             .build()
 
         mediaSession.setPlaybackState(state)
