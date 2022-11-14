@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.imageview.ShapeableImageView
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :

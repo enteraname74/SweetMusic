@@ -12,6 +12,10 @@ class DeletedNotificationIntentReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         mediaPlayer.pause()
 
+        val intentForNotification = Intent("BROADCAST")
+        intentForNotification.putExtra("STOP_RECEIVE", true)
+        context.sendBroadcast(intentForNotification)
+
         val intentForActivity = Intent("BROADCAST")
         intentForActivity.putExtra("STOP", true)
         context.sendBroadcast(intentForActivity)

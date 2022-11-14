@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -19,15 +20,22 @@ import com.example.musicplayer.receivers.PreviousMusicNotificationReceiver
 class MusicNotificationService(private val context : Context) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val mediaPlayer = MyMediaPlayer.getInstance
+    private lateinit var notificationMusicPlayer : Notification
+    private lateinit var pausePlayIntent : PendingIntent
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d("RECEIVE IN NOTIFICATION",intent.extras?.getBoolean("STOP").toString())
 
-            if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
-                showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+            if (intent.extras?.getBoolean("STOP_RECEIVE") != null && intent.extras?.getBoolean("STOP_RECEIVE") as Boolean) {
+                Log.d("STOP RECEIVE", "STOP RECEIVE")
+                context.unregisterReceiver(this)
+            } else if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
+                notificationMusicPlayer.actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
+                notificationManager.notify(1, notificationMusicPlayer)
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
-                showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                notificationMusicPlayer.actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
+                notificationManager.notify(1, notificationMusicPlayer)
             }
         }
     }
@@ -63,7 +71,7 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val pausePlayIntent = PendingIntent.getBroadcast(
+        pausePlayIntent = PendingIntent.getBroadcast(
             context,
             3,
             Intent(context, PausePlayNotificationReceiver::class.java),
@@ -84,7 +92,7 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, MUSIC_NOTIFICATION_CHANNEL_ID)
+        notificationMusicPlayer = NotificationCompat.Builder(context, MUSIC_NOTIFICATION_CHANNEL_ID)
             .setLargeIcon(bitmap)
             .setSmallIcon(R.drawable.icone_musique)
             .setContentTitle(currentSong.name)
@@ -101,30 +109,11 @@ class MusicNotificationService(private val context : Context) {
 
         notificationManager.notify(
             1,
-            notification
+            notificationMusicPlayer
         )
     }
 
     companion object {
         const val MUSIC_NOTIFICATION_CHANNEL_ID = "music_notification_channel"
     }
-
-    /*
-    override fun onAudioFocusChange(audioFocusChange: Int) {
-        Log.d("testNOTIF1", "test")
-        when (audioFocusChange) {
-            AudioManager.AUDIOFOCUS_GAIN -> {
-                println("test")
-                mediaPlayer.start()
-                showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-            }
-            AudioManager.AUDIOFOCUS_LOSS -> {
-                if (mediaPlayer.isPlaying) {
-                    mediaPlayer.pause()
-                    showNotification(R.drawable.ic_baseline_play_circle_outline_24)
-                }
-            }
-        }
-    }
-     */
 }

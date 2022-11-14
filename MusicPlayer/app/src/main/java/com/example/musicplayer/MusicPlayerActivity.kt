@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.app.Activity
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -290,37 +291,47 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     }
 
     private fun pausePlay(){
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(PlaybackService.audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
-            .build()
+        if(!(mediaPlayer.isPlaying)){
+            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(PlaybackService.audioAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
+                .build()
 
-        when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-            }
+            when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                }
 
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    if(mediaPlayer.isPlaying){
+                        mediaPlayer.pause()
+                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
 
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", true)
-                    applicationContext.sendBroadcast(intentForNotification)
-                } else {
-                    mediaPlayer.start()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                        intentForNotification.putExtra("STOP", true)
+                        applicationContext.sendBroadcast(intentForNotification)
+                    } else {
+                        mediaPlayer.start()
+                        pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
 
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", false)
-                    applicationContext.sendBroadcast(intentForNotification)
+                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                        intentForNotification.putExtra("STOP", false)
+                        applicationContext.sendBroadcast(intentForNotification)
+                    }
+                }
+                else -> {
+                    Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
                 }
             }
-            else -> {
-                Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
-            }
+        } else {
+            Log.d("SEND", "")
+            mediaPlayer.pause()
+            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+
+            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+            intentForNotification.putExtra("STOP", true)
+            applicationContext.sendBroadcast(intentForNotification)
         }
     }
 
@@ -445,14 +456,29 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         seekBar.max = mediaPlayer.duration
         pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
 
-        CoroutineScope(Dispatchers.Default).launch {
+        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Si il n'y a pas de notifications, on l'affiche
+        if(notificationManager.activeNotifications.isEmpty()) {
             val service = MusicNotificationService(applicationContext as Context)
-            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            if (mediaPlayer.isPlaying){
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            } else {
+                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+            }
         }
+
+
+        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+        if (mediaPlayer.isPlaying){
+            intentForNotification.putExtra("STOP", false)
+        } else {
+            intentForNotification.putExtra("STOP", true)
+        }
+        applicationContext.sendBroadcast(intentForNotification)
     }
 
     private fun setColor(){
-        val background = findViewById<RelativeLayout>(R.id.music_player)
+        val background = findViewById<LinearLayout>(R.id.music_player)
         var bitmap : Bitmap? = null
         if (currentSong.albumCover != null) {
             // Passons d'abord notre byteArray en bitmap :

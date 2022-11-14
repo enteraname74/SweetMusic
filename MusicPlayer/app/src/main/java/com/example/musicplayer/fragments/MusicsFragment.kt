@@ -1,5 +1,6 @@
 package com.example.musicplayer.fragments
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -103,9 +104,25 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         MyMediaPlayer.currentIndex = position
 
-        CoroutineScope(Dispatchers.Default).launch {
+        val notificationManager = context?.applicationContext?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Si il n'y a pas de notifications, on l'affiche
+        if(notificationManager.activeNotifications.isEmpty()) {
             val service = MusicNotificationService(context?.applicationContext as Context)
-            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            if (mediaPlayer.isPlaying){
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            } else {
+                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+        }
+
+        if(mediaPlayer.isPlaying){
+            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+            intentForNotification.putExtra("STOP", false)
+            context?.applicationContext?.sendBroadcast(intentForNotification)
+        } else {
+            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+            intentForNotification.putExtra("STOP", true)
+            context?.applicationContext?.sendBroadcast(intentForNotification)
         }
 
         val intent = Intent(context, MusicPlayerActivity::class.java)
