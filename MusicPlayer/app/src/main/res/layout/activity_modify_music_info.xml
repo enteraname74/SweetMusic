@@ -17,15 +17,16 @@
         android:background="@color/secondary_color">
 
         <TextView
-            android:textStyle="bold"
             android:id="@+id/title_activity"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
             android:gravity="center_horizontal"
             android:text="@string/modify_music_informations"
             android:textColor="@color/text_color"
-            android:textSize="20sp"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
     </RelativeLayout>
 
