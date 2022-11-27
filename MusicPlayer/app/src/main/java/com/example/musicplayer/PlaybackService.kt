@@ -86,6 +86,7 @@ class PlaybackService : Service() {
                                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
                                     if (mediaPlayer.isPlaying) {
                                         mediaPlayer.pause()
+                                        audioManager.abandonAudioFocusRequest(audioFocusRequest)
                                         val intentForBroadcast = Intent("BROADCAST")
                                         intentForBroadcast.putExtra("STOP", true)
                                         applicationContext.sendBroadcast(intentForBroadcast)

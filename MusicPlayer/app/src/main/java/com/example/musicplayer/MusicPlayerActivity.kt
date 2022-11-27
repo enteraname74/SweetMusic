@@ -291,42 +291,33 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     }
 
     private fun pausePlay(){
-        if(!(mediaPlayer.isPlaying)){
-            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(PlaybackService.audioAttributes)
-                .setAcceptsDelayedFocusGain(true)
-                .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
-                .build()
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(PlaybackService.audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
+            .build()
 
+        if(!(mediaPlayer.isPlaying)){
             when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
                 AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
                     Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
                 }
 
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                    if(mediaPlayer.isPlaying){
-                        mediaPlayer.pause()
-                        pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    mediaPlayer.start()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
 
-                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                        intentForNotification.putExtra("STOP", true)
-                        applicationContext.sendBroadcast(intentForNotification)
-                    } else {
-                        mediaPlayer.start()
-                        pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                        intentForNotification.putExtra("STOP", false)
-                        applicationContext.sendBroadcast(intentForNotification)
-                    }
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", false)
+                    applicationContext.sendBroadcast(intentForNotification)
                 }
                 else -> {
-                    Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
                 }
             }
         } else {
-            Log.d("SEND", "")
             mediaPlayer.pause()
+            PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
             pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
 
             val intentForNotification = Intent("BROADCAST_NOTIFICATION")
