@@ -20,8 +20,10 @@ import com.example.musicplayer.receivers.PreviousMusicNotificationReceiver
 class MusicNotificationService(private val context : Context) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     private val mediaPlayer = MyMediaPlayer.getInstance
-    private lateinit var notificationMusicPlayer : Notification
+    private lateinit var notificationMusicPlayer : NotificationCompat.Builder
     private lateinit var pausePlayIntent : PendingIntent
+    private lateinit var previousMusicIntent : PendingIntent
+    private lateinit var nextMusicIntent : PendingIntent
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -31,11 +33,29 @@ class MusicNotificationService(private val context : Context) {
                 Log.d("STOP RECEIVE", "STOP RECEIVE")
                 context.unregisterReceiver(this)
             } else if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
-                notificationMusicPlayer.actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                notificationManager.notify(1, notificationMusicPlayer)
+                //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
+                notificationMusicPlayer
+                    .clearActions()
+                    .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
+                    .addAction(R.drawable.ic_baseline_play_circle_outline_24,"pausePlay",pausePlayIntent)
+                    .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+
+                notificationMusicPlayer.setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
+                notificationMusicPlayer.setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
+
+                notificationManager.notify(1, notificationMusicPlayer.build())
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
-                notificationMusicPlayer.actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                notificationManager.notify(1, notificationMusicPlayer)
+                //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
+                notificationMusicPlayer
+                    .clearActions()
+                    .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
+                    .addAction(R.drawable.ic_baseline_pause_circle_outline_24,"pausePlay",pausePlayIntent)
+                    .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+
+                notificationMusicPlayer.setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
+                notificationMusicPlayer.setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
+
+                notificationManager.notify(1, notificationMusicPlayer.build())
             }
         }
     }
@@ -64,7 +84,7 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val previousMusicIntent = PendingIntent.getBroadcast(
+        previousMusicIntent = PendingIntent.getBroadcast(
             context,
             2,
             Intent(context, PreviousMusicNotificationReceiver::class.java),
@@ -78,7 +98,7 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val nextMusicIntent = PendingIntent.getBroadcast(
+        nextMusicIntent = PendingIntent.getBroadcast(
             context,
             4,
             Intent(context, NextMusicNotificationReceiver::class.java),
@@ -105,11 +125,10 @@ class MusicNotificationService(private val context : Context) {
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0, 1, 2)
             )
-            .build()
 
         notificationManager.notify(
             1,
-            notificationMusicPlayer
+            notificationMusicPlayer.build()
         )
     }
 

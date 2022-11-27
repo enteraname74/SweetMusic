@@ -16,6 +16,7 @@
         android:background="@color/primary_color">
 
         <ImageView
+            android:id="@+id/quit_activity"
             android:contentDescription="@string/back_button"
             android:layout_width="0dp"
             android:layout_weight="1"
