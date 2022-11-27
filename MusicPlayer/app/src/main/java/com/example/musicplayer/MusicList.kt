@@ -103,7 +103,7 @@ data class MusicList(
         holder.albumName?.text = currentMusic.album
         if (backgroundColor != -1){
             holder.background?.setBackgroundColor(backgroundColor)
-
+            /*
             if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
                 holder.songName?.setTextColor(colorsForText?.bodyTextColor as Int)
                 holder.albumName?.setTextColor(colorsForText?.bodyTextColor as Int)
@@ -115,7 +115,9 @@ data class MusicList(
                 holder.separator?.setTextColor(colorsForText?.titleTextColor as Int)
                 holder.artist?.setTextColor(colorsForText?.titleTextColor as Int)
             }
+             */
         } else {
+            /*
             if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
                 holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
                 holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
@@ -127,6 +129,8 @@ data class MusicList(
                 holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
                 holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
             }
+
+             */
         }
     }
 

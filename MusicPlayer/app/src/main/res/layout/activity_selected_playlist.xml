@@ -11,7 +11,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="250dp"
         android:orientation="horizontal"
         android:layout_marginBottom="5dp">
 
@@ -49,10 +49,10 @@
             android:layout_alignBottom="@id/cover"
             android:paddingStart="10dp"
             android:paddingEnd="10dp"
-            android:paddingBottom="20dp"
+            android:paddingBottom="40dp"
             android:singleLine="true"
             android:text="@string/playlist_name"
-            android:textColor="@color/third_color"
+            android:textColor="@color/text_color"
             android:textSize="30sp"
             android:textStyle="bold" />
 
@@ -62,57 +62,63 @@
         android:id="@+id/buttons_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/buttons_panel_shape"
+        android:orientation="vertical"
+        android:layout_marginTop="-45dp"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="-25dp"
-        android:orientation="horizontal">
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/buttons_panel_shape">
 
-        <ImageView
-            android:contentDescription="@string/modify_playlist"
-            android:id="@+id/modify_playlist"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_weight="1"
-            android:src="@drawable/ic_baseline_edit_24"
-            app:tint="@color/third_color" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-        <ImageView
-            android:contentDescription="@string/add_button"
-            android:id="@+id/add_songs"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_add_24"
-            app:tint="@color/third_color" />
+            <ImageView
+                android:contentDescription="@string/modify_playlist"
+                android:id="@+id/modify_playlist"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_baseline_edit_24"
+                app:tint="@color/text_color" />
 
-        <ImageView
-            android:contentDescription="@string/shuffle_playlist"
-            android:id="@+id/shuffle"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_baseline_shuffle_24"
-            app:tint="@color/third_color" />
+            <ImageView
+                android:contentDescription="@string/add_button"
+                android:id="@+id/add_songs"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_baseline_add_24"
+                app:tint="@color/text_color" />
+
+            <ImageView
+                android:contentDescription="@string/shuffle_playlist"
+                android:id="@+id/shuffle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_baseline_shuffle_24"
+                app:tint="@color/text_color" />
+
+        </LinearLayout>
+
+        <android.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/search_view_shape"
+            android:queryHint="Search a specific music"
+            android:layout_marginBottom="5dp"/>
 
     </LinearLayout>
 
-    <android.widget.SearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:background="@drawable/search_view_shape"
-        android:queryHint="Search a specific music"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="5dp"/>
 
     <LinearLayout
         android:id="@+id/playlists"
@@ -123,13 +129,11 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menu_playlist_recycler_view"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingTop="10dp"
-            android:paddingBottom="10dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:background="@drawable/recycler_view_shape"
             android:visibility="visible" />
     </LinearLayout>
@@ -137,7 +141,7 @@
     <LinearLayout
         android:id="@+id/bottom_infos"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         android:orientation="horizontal"
         android:gravity="bottom"
         android:background="@color/primary_color">
@@ -147,13 +151,13 @@
             android:scaleType="centerCrop"
             android:adjustViewBounds="true"
             android:contentDescription="@string/music_icon"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:id="@+id/album_cover_info"
             android:layout_width="60dp"
             android:layout_height="match_parent"
             android:src="@drawable/icone_musique"
-            android:layout_marginStart="5dp">
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp">
 
         </com.google.android.material.imageview.ShapeableImageView>
 
@@ -161,7 +165,7 @@
             android:id="@+id/no_song_playing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:textColor="@color/third_color"
+            android:textColor="@color/text_color"
             android:textSize="20sp"
             android:textStyle="bold"
             android:text="@string/no_song_is_playing"
@@ -183,7 +187,7 @@
                 android:ellipsize="marquee"
                 android:singleLine="true"
                 android:text="@string/name_of_the_song"
-                android:textColor="@color/third_color">
+                android:textColor="@color/text_color">
 
             </TextView>
 

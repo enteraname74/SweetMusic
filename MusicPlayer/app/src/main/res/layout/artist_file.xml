@@ -8,16 +8,14 @@
     android:layout_height="wrap_content"
     android:background="@color/secondary_color"
     tools:context=".MainActivity"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    android:layout_marginTop="10dp"
-    android:layout_marginStart="10dp"
-    android:layout_marginEnd="10dp">
+    android:layout_marginTop="15dp"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp">
 
     <ImageView
         android:id="@+id/artist_cover"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
         android:contentDescription="Artist Cover"
         android:src="@drawable/icone_musique" />
 
@@ -36,7 +34,7 @@
             android:layout_height="wrap_content"
             android:text="Name of the Artist"
             android:singleLine="true"
-            android:textColor="@color/third_color"
+            android:textColor="@color/text_color"
             >
         </TextView>
 
@@ -46,7 +44,7 @@
             android:layout_height="wrap_content"
             android:text="Number of Songs"
             android:singleLine="true"
-            android:textColor="@color/third_color">
+            android:textColor="@color/text_color">
 
         </TextView>
     </LinearLayout>

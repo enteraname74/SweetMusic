@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ModifyMusicInfoActivity"
-    android:background="@color/third_color"
+    android:background="@color/secondary_color"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -14,7 +14,7 @@
         android:paddingStart="10dp"
         android:paddingEnd="10dp"
         android:paddingBottom="5dp"
-        android:background="@color/secondary_color">
+        android:background="@color/primary_color">
 
         <TextView
             android:id="@+id/title_activity"
@@ -146,7 +146,7 @@
                     android:id="@+id/cancel_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/third_color"
+                    android:backgroundTint="@color/secondary_color"
                     android:text="@string/cancel"
                     android:textColor="@color/text_color"
                     android:textSize="14sp"
@@ -157,7 +157,7 @@
                     android:id="@+id/validate_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/third_color"
+                    android:backgroundTint="@color/secondary_color"
                     android:text="@string/ok"
                     android:textColor="@color/text_color"
                     android:textSize="14sp">

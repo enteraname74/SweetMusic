@@ -129,18 +129,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
         }
 
-        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
-        noSongPlaying.visibility = View.VISIBLE
-
         if (MyMediaPlayer.currentIndex != -1) {
             CoroutineScope(Dispatchers.Main).launch {
-                noSongPlaying.visibility = View.GONE
-                infoSongPlaying.visibility = View.VISIBLE
+                bottomInfos.visibility = View.VISIBLE
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
                 if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
                     // Passons d'abord notre byteArray en bitmap :
@@ -168,8 +163,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {
-                noSongPlaying?.visibility = View.VISIBLE
-                infoSongPlaying?.visibility = View.GONE
+                bottomInfos.visibility = View.GONE
                 albumCoverInfo?.setImageResource(R.drawable.icone_musique)
                 bottomInfos?.setOnClickListener(null)
             }

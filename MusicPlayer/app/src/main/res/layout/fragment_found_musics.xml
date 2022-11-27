@@ -27,7 +27,7 @@
                 android:text="@string/searching_new_songs"
                 android:textSize="15sp"
                 android:gravity="center"
-                android:textColor="@color/third_color"/>
+                android:textColor="@color/text_color"/>
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -35,7 +35,7 @@
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/third_color"
+                android:indeterminateTint="@color/text_color"
                 android:indeterminateTintMode="multiply"/>
 
         </LinearLayout>
@@ -58,7 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_new_songs"
-                android:textColor="@color/third_color"
+                android:textColor="@color/text_color"
                 android:layout_margin="10dp"
                 android:backgroundTint="@color/secondary_color" />
         </LinearLayout>

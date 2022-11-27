@@ -34,28 +34,11 @@ class MusicNotificationService(private val context : Context) {
                 context.unregisterReceiver(this)
             } else if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                notificationMusicPlayer
-                    .clearActions()
-                    .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
-                    .addAction(R.drawable.ic_baseline_play_circle_outline_24,"pausePlay",pausePlayIntent)
-                    .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+                updateNotification(R.drawable.ic_baseline_play_circle_outline_24)
 
-                notificationMusicPlayer.setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
-                notificationMusicPlayer.setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
-
-                notificationManager.notify(1, notificationMusicPlayer.build())
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                notificationMusicPlayer
-                    .clearActions()
-                    .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
-                    .addAction(R.drawable.ic_baseline_pause_circle_outline_24,"pausePlay",pausePlayIntent)
-                    .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
-
-                notificationMusicPlayer.setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
-                notificationMusicPlayer.setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
-
-                notificationManager.notify(1, notificationMusicPlayer.build())
+                updateNotification(R.drawable.ic_baseline_pause_circle_outline_24)
             }
         }
     }
@@ -130,6 +113,30 @@ class MusicNotificationService(private val context : Context) {
             1,
             notificationMusicPlayer.build()
         )
+    }
+
+    private fun updateNotification(pauseIcon : Int) {
+        var bitmap : Bitmap? = null
+
+        if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+        } else {
+            bitmap = BitmapFactory.decodeResource(context.resources,R.drawable.michael)
+        }
+        notificationMusicPlayer
+            .clearActions()
+            .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
+            .addAction(pauseIcon,"pausePlay",pausePlayIntent)
+            .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+            .setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
+            .setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
+            .setLargeIcon(bitmap)
+
+        notificationManager.notify(1, notificationMusicPlayer.build())
     }
 
     companion object {

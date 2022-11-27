@@ -44,7 +44,7 @@
         <entry key="app/src/main/res/layout/activity_find_new_songs.xml" value="0.35260416666666666" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_modify_music_info.xml" value="0.35260416666666666" />
-        <entry key="app/src/main/res/layout/activity_modify_playlist_info.xml" value="0.35260416666666666" />
+        <entry key="app/src/main/res/layout/activity_modify_playlist_info.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_music_player.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_music_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_playlists_menu.xml" value="0.33" />

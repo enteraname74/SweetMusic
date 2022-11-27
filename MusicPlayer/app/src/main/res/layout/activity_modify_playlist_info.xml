@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ModifyMusicInfoActivity"
-    android:background="@color/third_color"
+    android:background="@color/secondary_color"
     android:id="@+id/modify_playlist"
     android:orientation="vertical">
 
@@ -15,7 +15,7 @@
         android:layout_weight="1"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:background="@color/secondary_color">
+        android:background="@color/primary_color">
 
         <ImageView
             android:layout_width="0dp"
@@ -29,11 +29,16 @@
             android:id="@+id/title_activity"
             android:layout_width="0dp"
             android:layout_weight="5"
-            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:layout_height="match_parent"
             android:text="@string/modify_playlist_informations"
             android:textColor="@color/text_color"
-            android:gravity="center_horizontal"
-            android:textSize="20sp"/>
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="17sp"/>
 
         <View
             android:layout_width="0dp"
@@ -67,7 +72,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9"
         android:background="@drawable/round_top_corners"
         android:orientation="horizontal">
 
@@ -119,7 +125,7 @@
                     android:id="@+id/cancel_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/third_color"
+                    android:backgroundTint="@color/secondary_color"
                     android:text="@string/cancel"
                     android:textColor="@color/text_color"
                     android:textSize="14sp"
@@ -130,7 +136,7 @@
                     android:id="@+id/validate_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/third_color"
+                    android:backgroundTint="@color/secondary_color"
                     android:text="@string/ok"
                     android:textColor="@color/text_color"
                     android:textSize="14sp">
