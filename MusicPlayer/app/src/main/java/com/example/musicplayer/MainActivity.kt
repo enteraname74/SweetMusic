@@ -46,8 +46,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
             CoroutineScope(Dispatchers.Main).launch {
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name

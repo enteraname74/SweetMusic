@@ -3,8 +3,6 @@ package com.example.musicplayer.fragments
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -38,7 +36,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = MusicList(ArrayList<Music>(), "Main",activity?.applicationContext as Context, this)
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
     }
 
     override fun onCreateView(
@@ -57,9 +54,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
         val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
-
-        nextButton.setOnClickListener { playNextSong(adapter) }
-        previousButton.setOnClickListener { playPreviousSong(adapter) }
 
         return view
     }
@@ -83,9 +77,9 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
         val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
 
-        nextButton.setOnClickListener { playNextSong(adapter) }
-        previousButton.setOnClickListener { playPreviousSong(adapter) }
-        mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+        nextButton.setOnClickListener { (activity as MainActivity).playNextSong(adapter) }
+        previousButton.setOnClickListener { (activity as MainActivity).playPreviousSong(adapter) }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
@@ -170,7 +164,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                             // Si on peut passer à la musique suivante, on le fait :
                             if (MyMediaPlayer.currentPlaylist.size > 1) {
                                 Log.d("PLAY NEXT","")
-                                playNextSong(adapter)
+                                (activity as MainActivity).playNextSong(adapter)
                                 MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
                             } else {
                                 Log.d("REPLACE STATUS","")
@@ -271,57 +265,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             oos.close()
         } catch (error : IOException){
             Log.d("Error write musics",error.toString())
-        }
-    }
-
-    private fun playNextSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex +=1
-        }
-        adapter.notifyDataSetChanged()
-        playMusic()
-    }
-
-    private fun playPreviousSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex ==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex -=1
-        }
-        adapter.notifyDataSetChanged()
-        playMusic()
-    }
-
-    private fun playMusic(){
-        mediaPlayer.reset()
-        try {
-            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-            val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
-            val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
-
-            val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo?.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo?.setImageResource(R.drawable.michael)
-            }
-
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            Log.d("ERROR","")
-            e.printStackTrace()
         }
     }
 

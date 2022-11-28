@@ -18,7 +18,7 @@ import java.io.Serializable
 // Classe permettant de représenter une liste de musiques :
 data class MusicListSelection(
     var musics : ArrayList<Music>,
-    val selectedMusicsPositions : ArrayList<Int>,
+    val selectedMusicsInfos : HashMap<Int, String>,
     private val context : Context,
     private val mOnMusicListener : OnMusicListener
 ) : RecyclerView.Adapter<MusicListSelection.MusicListViewHolder>(), Serializable {
@@ -80,14 +80,10 @@ data class MusicListSelection(
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
 
-        if (position in selectedMusicsPositions) {
-            if (holder.checkbox?.isChecked == true){
-                holder.checkbox?.setChecked(false)
-            } else {
-                holder.checkbox?.setChecked(true)
-            }
+        if (currentMusic.path in selectedMusicsInfos.values) {
+            holder.checkbox?.isChecked = holder.checkbox?.isChecked != true
         } else {
-            holder.checkbox?.setChecked(false)
+            holder.checkbox?.isChecked = false
         }
     }
 

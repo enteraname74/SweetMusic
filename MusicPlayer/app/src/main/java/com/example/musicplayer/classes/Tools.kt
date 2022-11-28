@@ -99,23 +99,50 @@ open class Tools : AppCompatActivity() {
     }
 
     open fun playNextSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex +=1
+        if (requestFocus()) {
+            if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
+                MyMediaPlayer.currentIndex = 0
+            } else {
+                MyMediaPlayer.currentIndex +=1
+            }
+            adapter.notifyDataSetChanged()
+            playMusic()
         }
-        adapter.notifyDataSetChanged()
-        playMusic()
     }
 
     open fun playPreviousSong(adapter : MusicList){
-        if(MyMediaPlayer.currentIndex ==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex -=1
+        if (requestFocus()){
+            if(MyMediaPlayer.currentIndex ==0){
+                MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
+            } else {
+                MyMediaPlayer.currentIndex -=1
+            }
+            adapter.notifyDataSetChanged()
+            playMusic()
         }
-        adapter.notifyDataSetChanged()
-        playMusic()
+    }
+
+    open fun requestFocus() : Boolean{
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(PlaybackService.audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
+            .build()
+
+        return when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
+            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                false
+            }
+
+            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                true
+            }
+            else -> {
+                Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
+                false
+            }
+        }
     }
 
     open fun pausePlay(pausePlayButton : ImageView){

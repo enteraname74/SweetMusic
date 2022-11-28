@@ -9,13 +9,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.adapters.MusicListSelection
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, SearchView.OnQueryTextListener {
     private lateinit var adapter : MusicListSelection
     private lateinit var searchView : SearchView
     private var searchIsOn = false
-    private var selectedMusicsPositions = ArrayList<Int>()
+    private var selectedMusicsInfos= HashMap<Int, String>()
     private lateinit var menuRecyclerView : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +30,7 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
 
         menuRecyclerView = findViewById(R.id.all_songs_list)
 
-        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsPositions,applicationContext,this)
+        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsInfos,applicationContext,this)
 
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
@@ -43,20 +46,26 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
         val selectedMusic = adapter.musics[position]
         val globalPosition = MyMediaPlayer.allMusics.indexOf(selectedMusic)
 
-        if (globalPosition in selectedMusicsPositions){
-            selectedMusicsPositions.remove(globalPosition)
+        if (globalPosition in selectedMusicsInfos.keys){
+            selectedMusicsInfos.remove(globalPosition)
         } else {
-            selectedMusicsPositions.add(globalPosition)
+            selectedMusicsInfos[globalPosition] = selectedMusic.path
         }
 
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemChanged(position)
     }
 
     private fun onValidateButtonClick(){
         val returnIntent = Intent()
-        returnIntent.putExtra("addedSongs", selectedMusicsPositions)
-        setResult(RESULT_OK, returnIntent)
-        finish()
+        CoroutineScope(Dispatchers.Default).launch {
+            val keysList : ArrayList<Int> = ArrayList()
+            for (key in selectedMusicsInfos.keys) {
+                keysList.add(key)
+            }
+            returnIntent.putExtra("addedSongs", keysList)
+            setResult(RESULT_OK, returnIntent)
+            finish()
+        }
     }
 
     private fun onCancelButtonClick(){

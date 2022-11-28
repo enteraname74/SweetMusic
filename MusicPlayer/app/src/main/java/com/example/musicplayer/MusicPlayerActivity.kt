@@ -513,7 +513,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
         }
 
-
         val intentForNotification = Intent("BROADCAST_NOTIFICATION")
         if (mediaPlayer.isPlaying){
             intentForNotification.putExtra("STOP", false)
