@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.adapters
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
@@ -11,7 +11,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.imageview.ShapeableImageView
+import com.example.musicplayer.Music
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.R
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
@@ -101,36 +103,19 @@ data class MusicList(
         holder.songName?.text = currentMusic.name
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
-        if (backgroundColor != -1){
+        if (backgroundColor != -1) {
             holder.background?.setBackgroundColor(backgroundColor)
-            /*
-            if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
-                holder.songName?.setTextColor(colorsForText?.bodyTextColor as Int)
-                holder.albumName?.setTextColor(colorsForText?.bodyTextColor as Int)
-                holder.separator?.setTextColor(colorsForText?.bodyTextColor as Int)
-                holder.artist?.setTextColor(colorsForText?.bodyTextColor as Int)
-            } else {
-                holder.songName?.setTextColor(colorsForText?.titleTextColor as Int)
-                holder.albumName?.setTextColor(colorsForText?.titleTextColor as Int)
-                holder.separator?.setTextColor(colorsForText?.titleTextColor as Int)
-                holder.artist?.setTextColor(colorsForText?.titleTextColor as Int)
-            }
-             */
+        }
+        if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
+            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
+            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
         } else {
-            /*
-            if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
-                holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-                holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-                holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-                holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            } else {
-                holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-                holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-                holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-                holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-            }
-
-             */
+            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
         }
     }
 

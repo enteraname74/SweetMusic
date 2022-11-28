@@ -1,6 +1,9 @@
-package com.example.musicplayer
+package com.example.musicplayer.classes
 
 import android.media.MediaPlayer
+import com.example.musicplayer.Music
+import com.example.musicplayer.Playlist
+import com.example.musicplayer.R
 
 class MyMediaPlayer {
     /*Permet de créer un équivalent de "static" en Java
@@ -35,7 +38,11 @@ class MyMediaPlayer {
         var allPlaylists = ArrayList<Playlist>()
         var allDeletedMusics = ArrayList<Music>()
 
-        val iconsList = listOf(R.drawable.ic_baseline_sync_24, R.drawable.ic_baseline_shuffle_24, R.drawable.ic_baseline_replay_24)
+        val iconsList = listOf(
+            R.drawable.ic_baseline_sync_24,
+            R.drawable.ic_baseline_shuffle_24,
+            R.drawable.ic_baseline_replay_24
+        )
         var iconIndex = 0
 
         var allAlbums = ArrayList<Album>()

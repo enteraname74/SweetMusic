@@ -1,13 +1,9 @@
 package com.example.musicplayer
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -18,9 +14,11 @@ import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.adapters.MusicList
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
@@ -33,10 +31,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     private var searchIsOn = false
     private lateinit var searchView : SearchView
     private lateinit var menuRecyclerView : RecyclerView
-
-    private lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
-    private lateinit var audioAttributes : AudioAttributes
-    private lateinit var audioManager : AudioManager
 
     private lateinit var pausePlayButton : ImageView
 
@@ -76,27 +70,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
-
-        audioManager = applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        audioAttributes = AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_MEDIA)
-            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-            .build()
-
-        onAudioFocusChange = AudioManager.OnAudioFocusChangeListener { focusChange ->
-            Log.d("focusChange", focusChange.toString())
-            when (focusChange) {
-                AudioManager.AUDIOFOCUS_GAIN -> println("gain")
-                else -> {
-                    if (mediaPlayer.isPlaying) {
-                        println("loss focus")
-                        mediaPlayer.pause()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                    Log.d("change does..", "")
-                }
-            }
-        }
     }
 
     override fun onResume() {
@@ -130,7 +103,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                     albumCoverInfo.setImageResource(R.drawable.michael)
                 }
 
-                pausePlayButton.setOnClickListener { pausePlay() }
+                pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
                 nextBtn?.setOnClickListener { playNextSong(adapter) }
                 previousBtn?.setOnClickListener { playPreviousSong(adapter) }
                 bottomInfos.setOnClickListener {
@@ -238,8 +211,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                         MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
                     }
 
-                    CoroutineScope(Dispatchers.IO).launch{
-                        launch{writeAllMusicsToFile(saveAllMusicsFile,MyMediaPlayer.allMusics)}
+                    CoroutineScope(Dispatchers.IO).launch {
+                        launch{writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)}
                     }
 
                     for (playlist in MyMediaPlayer.allPlaylists){
@@ -250,8 +223,8 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                     }
                 }
 
-                GlobalScope.launch(Dispatchers.IO){
-                    launch{writePlaylistsToFile(savePlaylistsFile,MyMediaPlayer.allPlaylists)}
+                CoroutineScope(Dispatchers.IO).launch {
+                    launch{writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)}
                 }
 
                 Toast.makeText(this,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
@@ -319,33 +292,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         return manageSearchBarEvents(p0)
     }
 
-    private fun pausePlay() {
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(onAudioFocusChange)
-            .build()
-
-        when (audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
-            }
-
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                } else {
-                    mediaPlayer.start()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                }
-            }
-            else -> {
-                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private fun manageSearchBarEvents(p0 : String?) : Boolean {
         try {
             if (p0 != null) {
@@ -393,76 +339,34 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap
         }
-        /*
-        val backgroundColor: Palette.Swatch? =
-            if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
-                Palette.from(bitmap as Bitmap).generate().swatches[0]
-            } else {
-                Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch
-            }
 
-         */
         val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch
-        //findViewById<LinearLayout>(R.id.background).setBackgroundColor(backgroundColor?.rgb as Int)
-
-        //val lighterColorTheme = ColorUtils.blendARGB(backgroundColor.rgb,Color.WHITE,0.1f)
-        val buttonPanel = findViewById<LinearLayout>(R.id.buttons_panel)
-
         val newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
         val newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.1f)
         val newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
 
-        findViewById<LinearLayout>(R.id.background).setBackgroundColor(newPrimaryColor)
         searchView.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
-        buttonPanel.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
         menuRecyclerView.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
         adapter.backgroundColor = newSecondaryColor
-        //adapter.colorsForText = newPrimaryColor
         adapter.notifyDataSetChanged()
 
-        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
-        val quitActivityPanel = findViewById<LinearLayout>(R.id.quit_activity_panel)
-        /*
-        quitActivityPanel.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
-        quitActivity.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-         */
-        quitActivityPanel.setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
-        quitActivity.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
 
-        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
-        val playlistName = findViewById<TextView>(R.id.playlist_name)
-        /*
-        playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(backgroundColor.rgb as Int,150))
-        playlistName.setTextColor(backgroundColor.titleTextColor)
-         */
-        playlistName.setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
-        playlistName.setTextColor(newTextColor)
+        findViewById<TextView>(R.id.playlist_name).setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
+        findViewById<TextView>(R.id.playlist_name).setTextColor(newTextColor)
+        findViewById<TextView>(R.id.song_title_info).setTextColor(newTextColor)
 
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
-        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-        val addSongs = findViewById<ImageView>(R.id.add_songs)
-        /*
-        addSongs.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        shuffleButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.previous).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.next).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.pause_play).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<TextView>(R.id.song_title_info).setTextColor(backgroundColor.titleTextColor)
-        findViewById<ImageView>(R.id.modify_playlist).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        noSongPlaying.setTextColor(backgroundColor.titleTextColor)
-
-        bottomInfos.setBackgroundColor(lighterColorTheme)
-         */
-        addSongs.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        shuffleButton.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<LinearLayout>(R.id.quit_activity_panel).setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
+        findViewById<ImageView>(R.id.quit_activity).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.add_songs).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.shuffle).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.previous).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.next).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.pause_play).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<TextView>(R.id.song_title_info).setTextColor(newTextColor)
         findViewById<ImageView>(R.id.modify_playlist).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        noSongPlaying.setTextColor(newTextColor)
 
-        bottomInfos.setBackgroundColor(newPrimaryColor)
+        findViewById<LinearLayout>(R.id.bottom_infos).setBackgroundColor(newPrimaryColor)
+        findViewById<LinearLayout>(R.id.buttons_panel).background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
+        findViewById<LinearLayout>(R.id.background).setBackgroundColor(newPrimaryColor)
 
         window.navigationBarColor = newPrimaryColor
         window.statusBarColor = newPrimaryColor

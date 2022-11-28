@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.adapters
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -6,15 +6,17 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.Music
+import com.example.musicplayer.R
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
-data class DeletedMusicList(
+data class NewMusicsList(
     var musics : ArrayList<Music>,
     var listName : String,
-    private val context : Context) : RecyclerView.Adapter<DeletedMusicList.DeletedMusicListViewHolder>(), Serializable {
+    private val context : Context) : RecyclerView.Adapter<NewMusicsList.NewMusicListViewHolder>(), Serializable {
 
-    class DeletedMusicListViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable, View.OnCreateContextMenuListener{
+    class NewMusicListViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable, View.OnCreateContextMenuListener{
 
         var albumCover : ImageView? = null
         var songName : TextView? = null
@@ -38,13 +40,13 @@ data class DeletedMusicList(
         }
 
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 20, 0, itemView.resources.getString(R.string.retrieve_music))
+            menu?.add(this.bindingAdapterPosition, 30, 0, itemView.resources.getString(R.string.remove))
         }
 
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeletedMusicListViewHolder {
-        return DeletedMusicListViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewMusicListViewHolder {
+        return NewMusicListViewHolder(
             LayoutInflater.from(context).inflate(
                 R.layout.music_file,
                 parent,
@@ -53,7 +55,7 @@ data class DeletedMusicList(
         )
     }
 
-    override fun onBindViewHolder(holder: DeletedMusicListViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: NewMusicListViewHolder, position: Int) {
         val currentMusic = musics[position]
 
         if(currentMusic.albumCover != null){

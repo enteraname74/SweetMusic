@@ -1,6 +1,5 @@
-package com.example.musicplayer
+package com.example.musicplayer.notification
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -11,6 +10,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.example.musicplayer.MainActivity
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.R
 import com.example.musicplayer.receivers.DeletedNotificationIntentReceiver
 import com.example.musicplayer.receivers.NextMusicNotificationReceiver
 import com.example.musicplayer.receivers.PausePlayNotificationReceiver
@@ -56,7 +58,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources,R.drawable.michael)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.michael)
         }
 
         val activityIntent = Intent(context, MainActivity::class.java)
@@ -125,7 +127,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources,R.drawable.michael)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.michael)
         }
         notificationMusicPlayer
             .clearActions()

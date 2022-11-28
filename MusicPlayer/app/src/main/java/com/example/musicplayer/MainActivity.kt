@@ -6,16 +6,12 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.util.Size
 import android.view.MenuItem
 import android.view.View
@@ -25,6 +21,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewpager2.widget.ViewPager2
+import com.example.musicplayer.adapters.VpAdapter
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
@@ -32,7 +31,6 @@ import java.io.*
 
 class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
-    private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
     private lateinit var fetchingSongs : LinearLayout
@@ -42,7 +40,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d("RECEIVE IN ACTIVITY","")
 
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
@@ -76,8 +73,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
             CoroutineScope(Dispatchers.Main).launch {
-                musics = readAllMusicsFromFile(saveAllMusicsFile)
-                allMusicsBackup = ArrayList(musics.map { it.copy() })
+                MyMediaPlayer.allMusics = readAllMusicsFromFile(saveAllMusicsFile)
+                allMusicsBackup = MyMediaPlayer.allMusics.map{ it.copy() } as ArrayList<Music> /* = java.util.ArrayList<com.example.musicplayer.Music> */
                 fetchingSongs.visibility = View.GONE
                 viewPager.visibility = View.VISIBLE
             }
@@ -97,7 +94,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-        shuffleButton.setOnClickListener { playRandom(musics, this) }
+        shuffleButton.setOnClickListener { playRandom(MyMediaPlayer.allMusics, this) }
 
         CoroutineScope(Dispatchers.IO).launch{ readPlaylistsAsync() }
         CoroutineScope(Dispatchers.IO).launch { readAllDeletedMusicsFromFile() }
@@ -152,7 +149,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                     albumCoverInfo.setImageResource(R.drawable.michael)
                 }
 
-                pausePlayButton.setOnClickListener { pausePlay() }
+                pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
                 bottomInfos.setOnClickListener {
                     onBottomMenuClick(
                         MyMediaPlayer.currentIndex,
@@ -175,47 +172,10 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
 
-        Log.d("LANCEMENT DU SERVICE", "")
-
         registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
         val serviceIntent = Intent(this, PlaybackService::class.java)
         startService(serviceIntent)
-    }
-
-    private fun pausePlay() {
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(PlaybackService.audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
-            .build()
-
-        when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
-            AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                Toast.makeText(this,resources.getString(R.string.cannot_launch_song), Toast.LENGTH_SHORT).show()
-            }
-
-            AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                if(mediaPlayer.isPlaying){
-                    mediaPlayer.pause()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", true)
-                    applicationContext.sendBroadcast(intentForNotification)
-                } else {
-                    mediaPlayer.start()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", false)
-                    applicationContext.sendBroadcast(intentForNotification)
-                }
-            }
-            else -> {
-                Toast.makeText(this,resources.getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -305,13 +265,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                         cursor.getString(4)
                     )
                     if (File(music.path).exists()) {
-                        musics.add(music)
+                        MyMediaPlayer.allMusics.add(music)
                     }
                 }
                 cursor.close()
-                musics.reverse()
+                MyMediaPlayer.allMusics.reverse()
 
-                writeAllMusicsToFile(saveAllMusicsFile, musics)
+                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
 
                 val openMenu = findViewById<ImageView>(R.id.open_menu)
                 withContext(Dispatchers.Main){
@@ -341,7 +301,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     private fun requestPermissionToWrite(){
         val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
-        Log.d("uri", uri.toString())
 
         if (SDK_INT >= 30) {
             startActivity(
@@ -355,7 +314,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     override fun onPause() {
         super.onPause()
-        Log.d("MAIN PAUSE", "")
         unregisterReceiver(broadcastReceiver)
     }
 }

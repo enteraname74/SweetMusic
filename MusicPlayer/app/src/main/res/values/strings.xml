@@ -6,10 +6,8 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_song_is_playing">NO SONG IS PLAYING</string>
     <string name="name_of_the_song">Name of the Song</string>
@@ -76,4 +74,5 @@
     <string name="retrieved_all_new_musics">New songs retrieved</string>
     <string name="no_songs_left_in_the_current_playlist">No songs left in the queue</string>
     <string name="back_button">back button</string>
+    <string name="add_music_to_favourites">Added this music to the favourites</string>
 </resources>

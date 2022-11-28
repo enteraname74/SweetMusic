@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
 import com.example.musicplayer.Music
-import com.example.musicplayer.MusicList
+import com.example.musicplayer.adapters.MusicList
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.notification.MusicNotificationService
 import kotlinx.coroutines.*
 import java.io.*
 
@@ -94,7 +96,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             sameMusic = false
         }
         // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
-        if (adapter.musics != MyMediaPlayer.initialPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
+        if (adapter.musics != MyMediaPlayer.currentPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
             println("changement playlist")
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })

@@ -3,7 +3,7 @@ package com.example.musicplayer.receivers
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.example.musicplayer.MyMediaPlayer
+import com.example.musicplayer.classes.MyMediaPlayer
 
 class DeletedNotificationIntentReceiver : BroadcastReceiver() {
 

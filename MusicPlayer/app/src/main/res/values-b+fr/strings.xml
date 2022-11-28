@@ -76,5 +76,5 @@
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
     <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
     <string name="back_button">back button</string>
-
+    <string name="add_music_to_favourites">Musique ajoutée aux favoris</string>
 </resources>

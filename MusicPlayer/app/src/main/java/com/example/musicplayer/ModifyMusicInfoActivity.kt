@@ -13,6 +13,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,12 +33,14 @@ class ModifyMusicInfoActivity : Tools() {
     private var artistPosition = -1
     private var positionInArtist = -1
 
+    private lateinit var path : String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
 
         // On récupère notre musique à modifier :
-        val path = intent.getSerializableExtra("PATH") as String
+        path = intent.getSerializableExtra("PATH") as String
         musicFile = MyMediaPlayer.allMusics.first{it.path == path}
 
         // On récupère la position de notre musique dans les playlists utilisés par le lecteur :
@@ -152,7 +156,7 @@ class ModifyMusicInfoActivity : Tools() {
         MyMediaPlayer.allPlaylists = playlists
 
         // Modifions les infos de la musique dans nos deux autres playlists :
-        Log.d("index",MyMediaPlayer.currentPlaylist.indexOf(musicFile).toString())
+        Log.d("index", MyMediaPlayer.currentPlaylist.indexOf(musicFile).toString())
         if (MyMediaPlayer.currentPlaylist.size != 0 && indexCurrentPlaylist != -1){
             MyMediaPlayer.currentPlaylist[indexCurrentPlaylist] = musicFile
         }
@@ -189,6 +193,8 @@ class ModifyMusicInfoActivity : Tools() {
                 )
             }
         }
+        returnIntent.putExtra("modifiedSongPath", path)
+        setResult(RESULT_OK, returnIntent)
         finish()
     }
 

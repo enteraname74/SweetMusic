@@ -10,7 +10,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.PorterDuff
 import android.graphics.drawable.BitmapDrawable
-import android.media.*
+import android.media.AudioFocusRequest
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,7 +23,14 @@ import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.palette.graphics.Palette
-import androidx.palette.graphics.Target
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.adapters.MusicList
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
+import com.example.musicplayer.notification.MusicNotificationService
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,14 +38,14 @@ import java.io.IOException
 
 
 // Classe représentant la lecture d'une musique :
-class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
+class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.OnMusicListener {
 
     private lateinit var titleTv : TextView
     lateinit var currentTimeTv : TextView
     private lateinit var totalTimeTv : TextView
     lateinit var seekBar : SeekBar
     private lateinit var currentList : ImageView
-    private lateinit var pausePlay : ImageView
+    private lateinit var pausePlayButton : ImageView
     private lateinit var nextBtn : ImageView
     private lateinit var previousBtn : ImageView
     private lateinit var musicIcon : ImageView
@@ -44,18 +53,22 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     private lateinit var currentSong : Music
     private lateinit var sort : ImageView
 
+    private lateinit var bottomSheetLayout: LinearLayout
+    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var headerCurrentListButton: TextView
+    private lateinit var currentListRecyclerView: RecyclerView
+    private lateinit var adapter : MusicList
+
     private var myThread = Thread(FunctionalSeekBar(this))
 
     private var sameMusic = false
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d("RECEIVE IN MUSIC PLAYER ACTIVITY",intent.extras?.getBoolean("STOP").toString())
-
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
-                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
-                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
 
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
@@ -66,7 +79,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
-        println("create")
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
 
@@ -75,7 +87,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         totalTimeTv = findViewById(R.id.total_time)
         seekBar = findViewById(R.id.seek_bar)
         currentList = findViewById(R.id.current_playlist)
-        pausePlay = findViewById(R.id.pause_play)
+        pausePlayButton = findViewById(R.id.pause_play)
         nextBtn = findViewById(R.id.next)
         previousBtn = findViewById(R.id.previous)
         musicIcon = findViewById(R.id.album_cover_big)
@@ -91,7 +103,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
         currentList.setOnClickListener{ seeList() }
-        pausePlay.setOnClickListener{ pausePlay() }
+        pausePlayButton.setOnClickListener{ pausePlay(pausePlayButton) }
         nextBtn.setOnClickListener{ playNextSong() }
         previousBtn.setOnClickListener{ playPreviousSong() }
         favoriteBtn.setOnClickListener{ setFavorite() }
@@ -110,7 +122,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
                 fromUser: Boolean
             ) {
                 if (fromUser) {
-                    Log.d("THERE", progress.toString())
                     mediaPlayer.seekTo(progress)
                 }
             }
@@ -126,6 +137,57 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         quitActivity.setOnClickListener{ finish() }
 
         registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
+
+        bottomSheetLayout = findViewById(R.id.bottom_sheet_dialog_song_list)
+        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+        headerCurrentListButton = findViewById(R.id.bottom_sheet_current_playlist_text_view)
+        currentListRecyclerView = findViewById(R.id.bottom_sheet_recycler_view)
+
+        CoroutineScope(Dispatchers.IO).launch{
+            adapter = MusicList(MyMediaPlayer.currentPlaylist, "currentList",applicationContext,this@MusicPlayerActivity)
+            currentListRecyclerView.layoutManager = LinearLayoutManager(this@MusicPlayerActivity)
+            currentListRecyclerView.adapter = adapter
+        }
+
+        headerCurrentListButton.setOnClickListener { openCloseBottomSheet() }
+
+        sheetBehavior.addBottomSheetCallback(object : BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_SETTLING) {
+                    currentListRecyclerView.layoutManager?.scrollToPosition(MyMediaPlayer.currentIndex)
+                }
+            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Si on a plus de musiques dans la playlist à jouer, il faut quitter cette activité
+        if(MyMediaPlayer.currentIndex == -1) {
+            finish()
+        } else {
+            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+
+            if (!mediaPlayer.isPlaying){
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else {
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+
+            CoroutineScope(Dispatchers.Main).launch { setColor() }
+
+            // Vérifions si la musique est en favoris :
+            getFavoriteState()
+
+            titleTv.text = currentSong.name
+            songTitleInfo?.text = currentSong.name
+            totalTimeTv.text = convertDuration(currentSong.duration)
+
+            mediaPlayer.setOnCompletionListener { playNextSong() }
+        }
     }
 
     private fun setResourcesWithMusic(){
@@ -141,22 +203,13 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
 
-        currentList.setOnClickListener{ seeList() }
-        pausePlay.setOnClickListener{ pausePlay() }
-        nextBtn.setOnClickListener{ playNextSong() }
-        previousBtn.setOnClickListener{ playPreviousSong() }
-        favoriteBtn.setOnClickListener{ setFavorite() }
-        sort.setOnClickListener{ changeSorting() }
-
-        registerForContextMenu(musicIcon)
-
         playMusic()
     }
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        menu?.add(0, 0, 0, resources.getString(R.string.add_to))
-        menu?.add(0, 1, 0, resources.getString(R.string.modify))
+        menu?.add(0, 10, 0, resources.getString(R.string.add_to))
+        menu?.add(0, 11, 0, resources.getString(R.string.modify))
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -166,6 +219,73 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
                 true
             }
             1 -> {
+                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
+                if (MyMediaPlayer.currentIndex == item.groupId) {
+                    if (MyMediaPlayer.currentPlaylist.size > 1) {
+                        playNextSong()
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                    } else {
+                        Log.d("SHOULD FINISH","")
+                        MyMediaPlayer.currentIndex = -1
+                        mediaPlayer.pause()
+                        Toast.makeText(
+                            this,
+                            resources.getString(R.string.no_songs_left_in_the_current_playlist),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        finish()
+                    }
+                    MyMediaPlayer.currentPlaylist.removeAt(item.groupId)
+                } else {
+                    MyMediaPlayer.currentPlaylist.removeAt(item.groupId)
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                }
+                adapter.notifyItemRemoved(item.groupId)
+
+                Toast.makeText(
+                    this,
+                    resources.getString(R.string.deleted_from_playlist),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                // Si il n'y a plus de musiques, on
+                true
+            }
+            2 -> {
+                val intent = Intent(this, ModifyMusicInfoActivity::class.java)
+                intent.putExtra("PATH", MyMediaPlayer.currentPlaylist[item.groupId].path)
+                modifyMusicLauncher.launch(intent)
+                true
+            }
+            3 -> {
+                // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
+                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                val songToPlayNext = adapter.musics[item.groupId]
+
+                // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
+                if (currentMusic != songToPlayNext) {
+                    MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
+
+                    // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+
+                    MyMediaPlayer.currentPlaylist.add(
+                        MyMediaPlayer.currentIndex + 1,
+                        songToPlayNext
+                    )
+
+                    adapter.notifyItemRemoved(item.groupId)
+                    adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
+                    Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            10 -> {
+                Toast.makeText(this, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
+                true
+            }
+            11 -> {
                 // MODIFY INFOS :
                 val intent = Intent(this@MusicPlayerActivity,ModifyMusicInfoActivity::class.java)
                 intent.putExtra("PATH",currentSong.path)
@@ -178,7 +298,23 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+    private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if(result.resultCode == Activity.RESULT_OK) {
+            CoroutineScope(Dispatchers.Main).launch {
+                val path = result.data?.getSerializableExtra("modifiedSongPath") as String
+                val modifiedSong = MyMediaPlayer.currentPlaylist.find { it.path == path }
+
+                adapter.notifyItemChanged(MyMediaPlayer.currentPlaylist.indexOf(modifiedSong))
+            }
+        }
+    }
+
+    private fun openCloseBottomSheet() {
+        if(sheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED){
+            sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
     }
 
     private fun seeList() {
@@ -263,7 +399,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
             seekBar.max = mediaPlayer.duration
 
             if (!mediaPlayer.isPlaying){
-                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             }
         }
     }
@@ -288,42 +424,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         }
         mediaPlayer.reset()
         setResourcesWithMusic()
-    }
-
-    private fun pausePlay(){
-        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-            .setAudioAttributes(PlaybackService.audioAttributes)
-            .setAcceptsDelayedFocusGain(true)
-            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
-            .build()
-
-        if(!(mediaPlayer.isPlaying)){
-            when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
-                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                    Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-                }
-
-                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                    mediaPlayer.start()
-                    pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", false)
-                    applicationContext.sendBroadcast(intentForNotification)
-                }
-                else -> {
-                    Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
-                }
-            }
-        } else {
-            mediaPlayer.pause()
-            PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
-            pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-
-            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-            intentForNotification.putExtra("STOP", true)
-            applicationContext.sendBroadcast(intentForNotification)
-        }
     }
 
     // Permet de savoir si une chanson est en favoris :
@@ -412,40 +512,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        // Si on a plus de musiques dans la playlist à jouer, il faut quitter cette activité
-        if(MyMediaPlayer.currentIndex == -1) {
-            finish()
-        } else {
-            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-
-
-            if (!mediaPlayer.isPlaying){
-                pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else {
-                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            }
-
-            CoroutineScope(Dispatchers.Main).launch { setColor() }
-
-            // Vérifions si la musique est en favoris :
-            getFavoriteState()
-
-            titleTv.text = currentSong.name
-            songTitleInfo?.text = currentSong.name
-            totalTimeTv.text = convertDuration(currentSong.duration)
-
-            mediaPlayer.setOnCompletionListener { playNextSong() }
-        }
-    }
-
     override fun onPrepared(p0: MediaPlayer?) {
         mediaPlayer.start()
         seekBar.progress = 0
         seekBar.max = mediaPlayer.duration
-        pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
 
         val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         // Si il n'y a pas de notifications, on l'affiche
@@ -500,7 +571,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
 
         currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        pausePlay.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        pausePlayButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
         favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
@@ -515,5 +586,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener {
         super.onDestroy()
         Log.d("MUSIC PLAYER KILL", "")
         unregisterReceiver(broadcastReceiver)
+    }
+
+    override fun onMusicClick(position: Int) {
+        MyMediaPlayer.currentIndex = position
+        setResourcesWithMusic()
     }
 }

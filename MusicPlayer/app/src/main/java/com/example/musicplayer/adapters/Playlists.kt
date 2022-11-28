@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.adapters
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.R
+import com.example.musicplayer.Playlist
 import java.io.Serializable
 import java.lang.Error
 

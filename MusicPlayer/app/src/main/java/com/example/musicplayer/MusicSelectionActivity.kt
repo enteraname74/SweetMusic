@@ -6,6 +6,9 @@ import android.util.Log
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.adapters.MusicListSelection
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 
 
 class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, SearchView.OnQueryTextListener {

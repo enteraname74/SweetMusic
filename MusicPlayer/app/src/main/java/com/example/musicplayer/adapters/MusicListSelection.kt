@@ -1,4 +1,4 @@
-package com.example.musicplayer
+package com.example.musicplayer.adapters
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -11,6 +11,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.Music
+import com.example.musicplayer.R
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
@@ -18,7 +20,8 @@ data class MusicListSelection(
     var musics : ArrayList<Music>,
     val selectedMusicsPositions : ArrayList<Int>,
     private val context : Context,
-    private val mOnMusicListener : OnMusicListener) : RecyclerView.Adapter<MusicListSelection.MusicListViewHolder>(), Serializable {
+    private val mOnMusicListener : OnMusicListener
+) : RecyclerView.Adapter<MusicListSelection.MusicListViewHolder>(), Serializable {
 
     class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, Serializable {
 

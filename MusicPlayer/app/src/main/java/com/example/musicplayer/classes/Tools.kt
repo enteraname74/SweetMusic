@@ -1,9 +1,11 @@
-package com.example.musicplayer
+package com.example.musicplayer.classes
 
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.os.Environment
 import android.util.Log
 import android.widget.ImageView
@@ -12,6 +14,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import com.example.musicplayer.*
+import com.example.musicplayer.adapters.MusicList
 import java.io.*
 
 open class Tools : AppCompatActivity() {
@@ -112,6 +116,42 @@ open class Tools : AppCompatActivity() {
         }
         adapter.notifyDataSetChanged()
         playMusic()
+    }
+
+    open fun pausePlay(pausePlayButton : ImageView){
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(PlaybackService.audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
+            .build()
+
+        if(!(mediaPlayer.isPlaying)){
+            when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                }
+
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    mediaPlayer.start()
+                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", false)
+                    applicationContext.sendBroadcast(intentForNotification)
+                }
+                else -> {
+                    Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            mediaPlayer.pause()
+            PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+            pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+
+            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+            intentForNotification.putExtra("STOP", true)
+            applicationContext.sendBroadcast(intentForNotification)
+        }
     }
 
     /************************ WRITE OR READ INTO FILES : ***************************/

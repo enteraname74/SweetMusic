@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import com.example.musicplayer.MyMediaPlayer
+import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.PlaybackService
 
 class PausePlayNotificationReceiver : BroadcastReceiver() {

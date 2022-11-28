@@ -1,14 +1,12 @@
 package com.example.musicplayer
 
 import android.content.res.Resources
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.viewpager2.widget.ViewPager2
+import com.example.musicplayer.adapters.FindNewSongsAdapter
+import com.example.musicplayer.classes.Tools
 import com.google.android.material.tabs.TabLayoutMediator
-import java.io.IOException
 
 class FindNewSongsActivity : Tools() {
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout

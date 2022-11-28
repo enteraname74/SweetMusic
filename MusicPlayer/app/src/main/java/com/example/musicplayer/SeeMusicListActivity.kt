@@ -16,9 +16,11 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.adapters.MusicList
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
@@ -176,75 +178,7 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            0 -> {
-                Toast.makeText(this, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
-                true
-            }
-            1 -> {
-                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
-                if (MyMediaPlayer.currentIndex == item.groupId) {
-                    if (MyMediaPlayer.currentPlaylist.size > 1) {
-                        playNextSong(adapter)
-                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-                    } else {
-                        Log.d("SHOULD FINISH","")
-                        MyMediaPlayer.currentIndex = -1
-                        mediaPlayer.pause()
-                        Toast.makeText(
-                            this,
-                            resources.getString(R.string.no_songs_left_in_the_current_playlist),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        finish()
-                    }
-                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
-                } else {
-                    MyMediaPlayer.currentPlaylist.remove(list[item.groupId])
-                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-                }
-                adapter.notifyItemRemoved(item.groupId)
 
-                Toast.makeText(
-                    this,
-                    resources.getString(R.string.deleted_from_playlist),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                // Si il n'y a plus de musiques, on
-                true
-            }
-            2 -> {
-                val intent = Intent(this@SeeMusicListActivity, ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PLAYLIST_NAME", "Main")
-                val positionMainList = MyMediaPlayer.allMusics.indexOf(list[item.groupId])
-                intent.putExtra("POSITION", positionMainList)
-                resultLauncher.launch(intent)
-                true
-            }
-            3 -> {
-                // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                val songToPlayNext = adapter.musics[item.groupId]
-
-                // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
-                if (currentMusic != songToPlayNext) {
-                    MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
-
-                    // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
-                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-
-                    MyMediaPlayer.currentPlaylist.add(
-                        MyMediaPlayer.currentIndex + 1,
-                        songToPlayNext
-                    )
-
-                    adapter.notifyItemRemoved(item.groupId)
-                    adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
-                    Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
-                }
-                true
-            }
             else -> {
                 onContextItemSelected(item)
             }

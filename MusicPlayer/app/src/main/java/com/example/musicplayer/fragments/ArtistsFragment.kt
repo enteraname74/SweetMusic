@@ -16,9 +16,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
-import com.example.musicplayer.Artist
-import com.example.musicplayer.Artists
+import com.example.musicplayer.classes.Artist
+import com.example.musicplayer.adapters.Artists
 import com.example.musicplayer.Music
+import com.example.musicplayer.classes.MyMediaPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

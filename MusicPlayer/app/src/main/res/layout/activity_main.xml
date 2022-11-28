@@ -241,8 +241,9 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/primary_color">
+        android:background="@color/primary_color"
+        app:itemTextColor="@color/text_color"
+        app:itemIconTint="@color/text_color">
 
     </com.google.android.material.navigation.NavigationView>
-
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -1,4 +1,6 @@
-package com.example.musicplayer
+package com.example.musicplayer.classes
+
+import com.example.musicplayer.Music
 
 class Album(
     var albumName : String,

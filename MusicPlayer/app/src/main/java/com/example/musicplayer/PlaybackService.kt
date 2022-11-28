@@ -7,14 +7,12 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.session.MediaSession
-import android.media.session.PlaybackState
 import android.os.IBinder
-import android.provider.MediaStore
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.KeyEvent
-import android.widget.Toast
+import com.example.musicplayer.classes.MyMediaPlayer
 
 class PlaybackService : Service() {
     var mediaPlayer = MyMediaPlayer.getInstance

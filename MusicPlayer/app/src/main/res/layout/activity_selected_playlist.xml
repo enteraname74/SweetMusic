@@ -161,18 +161,6 @@
 
         </com.google.android.material.imageview.ShapeableImageView>
 
-        <TextView
-            android:id="@+id/no_song_playing"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/text_color"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:text="@string/no_song_is_playing"
-            android:gravity="center_horizontal|center_vertical"
-            android:visibility="gone">
-        </TextView>
-
         <RelativeLayout
             android:id="@+id/info_song_playing"
             android:layout_width="match_parent"
