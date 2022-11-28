@@ -74,5 +74,6 @@
     <string name="retrieved_all_new_musics">New songs retrieved</string>
     <string name="no_songs_left_in_the_current_playlist">No songs left in the queue</string>
     <string name="back_button">back button</string>
-    <string name="add_music_to_favourites">Added this music to the favourites</string>
+    <string name="add_music_to_favourites">Music added to the favourites</string>
+    <string name="remove_music_from_favourites">Music removed from the favourites</string>
 </resources>

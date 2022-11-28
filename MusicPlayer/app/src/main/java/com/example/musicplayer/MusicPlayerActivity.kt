@@ -6,9 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.PorterDuff
+import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -22,6 +20,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +43,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     lateinit var currentTimeTv : TextView
     private lateinit var totalTimeTv : TextView
     lateinit var seekBar : SeekBar
-    private lateinit var currentList : ImageView
     private lateinit var pausePlayButton : ImageView
     private lateinit var nextBtn : ImageView
     private lateinit var previousBtn : ImageView
@@ -73,6 +71,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             titleTv.text = currentSong.name
+            CoroutineScope(Dispatchers.Main).launch { setColor() }
         }
     }
 
@@ -86,7 +85,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         currentTimeTv = findViewById(R.id.current_time)
         totalTimeTv = findViewById(R.id.total_time)
         seekBar = findViewById(R.id.seek_bar)
-        currentList = findViewById(R.id.current_playlist)
         pausePlayButton = findViewById(R.id.pause_play)
         nextBtn = findViewById(R.id.next)
         previousBtn = findViewById(R.id.previous)
@@ -102,7 +100,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
-        currentList.setOnClickListener{ seeList() }
         pausePlayButton.setOnClickListener{ pausePlay(pausePlayButton) }
         nextBtn.setOnClickListener{ playNextSong() }
         previousBtn.setOnClickListener{ playPreviousSong() }
@@ -170,7 +167,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
-
             if (!mediaPlayer.isPlaying){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             } else {
@@ -207,7 +203,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     }
 
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-        super.onCreateContextMenu(menu, v, menuInfo);
+        super.onCreateContextMenu(menu, v, menuInfo)
         menu?.add(0, 10, 0, resources.getString(R.string.add_to))
         menu?.add(0, 11, 0, resources.getString(R.string.modify))
     }
@@ -311,23 +307,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     private fun openCloseBottomSheet() {
         if(sheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED){
-            sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED)
         } else {
-            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
-    }
-
-    private fun seeList() {
-        val intent = Intent(this@MusicPlayerActivity, SeeMusicListActivity::class.java)
-        resultLauncher.launch(intent)
-    }
-
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            sameMusic = result.data?.getSerializableExtra("SAME MUSIC") as Boolean
-            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-
-            playMusic()
+            sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED)
         }
     }
 
@@ -351,7 +333,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                 MyMediaPlayer.currentPlaylist.shuffle()
                 MyMediaPlayer.currentPlaylist.remove(currentSong)
                 MyMediaPlayer.currentPlaylist.add(0,currentSong)
-                MyMediaPlayer.currentIndex = 0;
+                MyMediaPlayer.currentIndex = 0
             }
             2 -> {
                 // On choisit la fonction de replay de la meme musique, on supprime d'abord toute la playlist actuelle :
@@ -443,11 +425,13 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
             currentSong.favorite = false
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+            Toast.makeText(this, getString(R.string.remove_music_from_favourites),Toast.LENGTH_SHORT).show()
         } else {
             MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
             MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
             currentSong.favorite = true
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
+            Toast.makeText(this, getString(R.string.add_music_to_favourites),Toast.LENGTH_SHORT).show()
         }
 
         // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
@@ -540,7 +524,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     }
 
     private fun setColor(){
-        val background = findViewById<LinearLayout>(R.id.music_player)
         var bitmap : Bitmap? = null
         if (currentSong.albumCover != null) {
             // Passons d'abord notre byteArray en bitmap :
@@ -555,31 +538,38 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap
         }
-
-        val backgroundColor: Palette.Swatch? =
-            if (Palette.from(bitmap as Bitmap).generate().darkVibrantSwatch == null) {
-                Palette.from(bitmap).generate().swatches[0]
+        val dominantColor: Palette.Swatch? =
+            if (Palette.from(bitmap as Bitmap).generate().lightVibrantSwatch == null) {
+                Palette.from(bitmap).generate().dominantSwatch
             } else {
-                Palette.from(bitmap).generate().darkVibrantSwatch
+                Palette.from(bitmap).generate().lightVibrantSwatch
             }
+        //val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch
+        val newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
+        val newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.2f)
+        val newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
 
-        background.setBackgroundColor(backgroundColor?.rgb as Int)
-        titleTv.setTextColor(backgroundColor.titleTextColor)
-        currentTimeTv.setTextColor(backgroundColor.titleTextColor)
-        totalTimeTv.setTextColor(backgroundColor.titleTextColor)
+        findViewById<LinearLayout>(R.id.music_player).setBackgroundColor(newPrimaryColor)
+        titleTv.setTextColor(newTextColor)
+        currentTimeTv.setTextColor(newTextColor)
+        totalTimeTv.setTextColor(newTextColor)
 
-        seekBar.progressDrawable.setTint(backgroundColor.titleTextColor)
+        seekBar.progressDrawable.setTint(newTextColor)
+        seekBar.thumb.setTint(newTextColor)
 
-        currentList.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        pausePlayButton.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        nextBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        previousBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        favoriteBtn.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.quit_activity).setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
-        sort.setColorFilter(backgroundColor.titleTextColor, PorterDuff.Mode.MULTIPLY)
+        pausePlayButton.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        nextBtn.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        previousBtn.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        favoriteBtn.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.quit_activity).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        sort.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
 
-        window.navigationBarColor = backgroundColor.rgb
-        window.statusBarColor = backgroundColor.rgb
+        bottomSheetLayout.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
+        adapter.backgroundColor = newSecondaryColor
+        adapter.notifyDataSetChanged()
+
+        window.navigationBarColor = newSecondaryColor
+        window.statusBarColor = newPrimaryColor
     }
 
     override fun onDestroy() {

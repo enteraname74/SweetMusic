@@ -345,7 +345,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         findViewById<TextView>(R.id.playlist_name).setTextColor(newTextColor)
         findViewById<TextView>(R.id.song_title_info).setTextColor(newTextColor)
 
-        findViewById<LinearLayout>(R.id.quit_activity_panel).setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
         findViewById<ImageView>(R.id.quit_activity).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.add_songs).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.shuffle).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
@@ -359,6 +358,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         findViewById<LinearLayout>(R.id.background).setBackgroundColor(newPrimaryColor)
 
         window.navigationBarColor = newPrimaryColor
-        window.statusBarColor = newPrimaryColor
+        window.statusBarColor = newSecondaryColor
     }
 }
