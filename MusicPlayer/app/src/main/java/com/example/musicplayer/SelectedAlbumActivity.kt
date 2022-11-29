@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -45,6 +46,9 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         pausePlayButton = findViewById(R.id.pause_play)
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         albumPosition = intent.getSerializableExtra("POSITION") as Int
+
+        findViewById<ImageView>(R.id.add_songs).visibility = View.GONE
+        CoroutineScope(Dispatchers.Main).launch { findViewById<ImageView>(R.id.modify_playlist).setOnClickListener { modifyAlbum() } }
 
         album = MyMediaPlayer.allAlbums[albumPosition]
         musics = album.albumList
@@ -374,5 +378,17 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
 
         window.navigationBarColor = newPrimaryColor
         window.statusBarColor = newSecondaryColor
+    }
+
+    private fun modifyAlbum() {
+        val intent = Intent(this,ModifyAlbumInfoActivity::class.java)
+        intent.putExtra("POS",albumPosition)
+        modifyAlbumLauncher.launch(intent)
+    }
+
+    private var modifyAlbumLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            findViewById<TextView>(R.id.playlist_name).text = album.albumName
+        }
     }
 }

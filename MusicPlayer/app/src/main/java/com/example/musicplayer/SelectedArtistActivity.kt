@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -46,6 +47,9 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         pausePlayButton = findViewById(R.id.pause_play)
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         artistPosition = intent.getSerializableExtra("POSITION") as Int
+
+        findViewById<ImageView>(R.id.modify_playlist).visibility = View.GONE
+        findViewById<ImageView>(R.id.add_songs).visibility = View.GONE
 
         artist = MyMediaPlayer.allArtists[artistPosition]
         musics = artist.musicList

@@ -79,15 +79,15 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="40dp"
+                android:paddingTop="5dp"
                 android:orientation="horizontal">
 
                 <ImageView
                     android:contentDescription="@string/modify_playlist"
                     android:id="@+id/modify_playlist"
                     android:layout_width="0dp"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_height="match_parent"
                     android:layout_marginBottom="5dp"
                     android:layout_weight="1"
                     android:src="@drawable/ic_baseline_edit_24"
@@ -98,9 +98,8 @@
                     android:id="@+id/add_songs"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_baseline_add_24"
                     app:tint="@color/text_color" />
 
@@ -109,9 +108,8 @@
                     android:id="@+id/shuffle"
                     android:layout_width="0dp"
                     android:layout_weight="1"
-                    android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
-                    android:layout_height="32dp"
+                    android:layout_height="match_parent"
                     android:src="@drawable/ic_baseline_shuffle_24"
                     app:tint="@color/text_color" />
 

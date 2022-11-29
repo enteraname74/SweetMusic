@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.musicplayer.MainActivity
+import com.example.musicplayer.MusicPlayerActivity
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.R
 import com.example.musicplayer.receivers.DeletedNotificationIntentReceiver
@@ -21,7 +22,6 @@ import com.example.musicplayer.receivers.PreviousMusicNotificationReceiver
 
 class MusicNotificationService(private val context : Context) {
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    private val mediaPlayer = MyMediaPlayer.getInstance
     private lateinit var notificationMusicPlayer : NotificationCompat.Builder
     private lateinit var pausePlayIntent : PendingIntent
     private lateinit var previousMusicIntent : PendingIntent

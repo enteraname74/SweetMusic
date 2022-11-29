@@ -4,26 +4,27 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Size
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.musicplayer.classes.Album
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class ModifyPlaylistInfoActivity : Tools() {
-    private lateinit var playlist : Playlist
-    private var position : Int = 0
-    private lateinit var allPlaylists : ArrayList<Playlist>
+class ModifyAlbumInfoActivity : Tools() {
+    private var albumPos : Int = -1
+    private lateinit var album : Album
     private lateinit var playlistCoverField : ImageView
     private lateinit var playlistNameField : EditText
 
@@ -31,28 +32,15 @@ class ModifyPlaylistInfoActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_playlist_info)
 
-        // On récupère notre playlist à modifier :
-        position = intent.getSerializableExtra("POSITION") as Int
+        albumPos = intent.getSerializableExtra("POS") as Int
+        album = MyMediaPlayer.allAlbums[albumPos]
 
-        allPlaylists = MyMediaPlayer.allPlaylists
-        playlist = allPlaylists[position]
-
-        // On récupère les différents champs modifiable :
         playlistCoverField = findViewById(R.id.playlist_cover)
         playlistNameField = findViewById(R.id.edit_playlist_name)
 
-        if (playlist.isFavoriteList){
-            playlistNameField.isFocusable = false
-            playlistNameField.isFocusableInTouchMode = false
-            playlistNameField.isEnabled = false
-            playlistNameField.isCursorVisible = false
-            playlistNameField.setBackgroundColor(Color.TRANSPARENT)
-        }
-
-        // On indique les infos actuelles de la musique dans nos champs :
-        if (playlist.playlistCover != null){
+        if (album.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
-            val bytes = playlist.playlistCover
+            val bytes = album.albumCover
             var bitmap: Bitmap? = null
             if ((bytes != null) && bytes.isNotEmpty()) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
@@ -62,7 +50,7 @@ class ModifyPlaylistInfoActivity : Tools() {
             playlistCoverField.setImageResource(R.drawable.michael)
         }
 
-        playlistNameField.setText(playlist.listName)
+        playlistNameField.setText(album.albumName)
 
         playlistCoverField.setOnClickListener{ selectImage() }
         val validateButton = findViewById<Button>(R.id.validate_button)
@@ -74,7 +62,7 @@ class ModifyPlaylistInfoActivity : Tools() {
     }
 
     private fun selectImage() {
-        val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         resultImageLauncher.launch(intent)
     }
 
@@ -93,30 +81,41 @@ class ModifyPlaylistInfoActivity : Tools() {
     private fun onValidateButtonClick(){
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
-        val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
-        if (verification == null || verification == playlist ) {
-
-            playlist.listName = playlistNameField.text.toString()
+        CoroutineScope(Dispatchers.IO).launch {
+            album.albumName = playlistNameField.text.toString()
             val drawable = playlistCoverField.drawable
             val bitmapDrawable = drawable as BitmapDrawable
             val bitmap = bitmapDrawable.bitmap
 
             val byteArray = bitmapToByteArray(bitmap)
 
-            playlist.playlistCover = byteArray
+            album.albumCover = byteArray
 
-            // Mettons à jour nos playlists :
-            allPlaylists[position] = playlist
-            MyMediaPlayer.allPlaylists = allPlaylists
+            MyMediaPlayer.allAlbums[albumPos] = album
+
+            // Mettons à jour toutes les musiques de l'album :
+            for (music in album.albumList) {
+                music.album = album.albumName
+                music.albumCover = album.albumCover
+
+                // Mise à jour dans la playlist principale :
+                MyMediaPlayer.allMusics.find { it.path == music.path }?.album = album.albumName
+                MyMediaPlayer.allMusics.find { it.path == music.path }?.albumCover = album.albumCover
+
+                // Mise à jour dans les palylists :
+                for (playlist in MyMediaPlayer.allPlaylists) {
+                    playlist.musicList.find { it.path == music.path }?.album = album.albumName
+                    playlist.musicList.find { it.path == music.path }?.albumCover = album.albumCover
+                }
+            }
 
             CoroutineScope(Dispatchers.IO).launch {
-                writePlaylistsToFile(savePlaylistsFile, allPlaylists)
+                writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
+                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
             }
 
             setResult(RESULT_OK)
             finish()
-        } else {
-            Toast.makeText(this, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
         }
     }
 

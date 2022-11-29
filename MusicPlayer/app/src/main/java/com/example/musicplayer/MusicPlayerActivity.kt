@@ -108,7 +108,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
         registerForContextMenu(musicIcon)
 
-        playMusic()
+        CoroutineScope(Dispatchers.Main).launch { playMusic() }
 
         this@MusicPlayerActivity.runOnUiThread(myThread)
 
@@ -130,8 +130,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
         })
 
-        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
-        quitActivity.setOnClickListener{ finish() }
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener{ finish() }
 
         registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
@@ -156,6 +155,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
+
+        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onResume() {
@@ -176,13 +177,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             CoroutineScope(Dispatchers.Main).launch { setColor() }
 
             // Vérifions si la musique est en favoris :
-            getFavoriteState()
+            CoroutineScope(Dispatchers.Main).launch { getFavoriteState() }
 
             titleTv.text = currentSong.name
             songTitleInfo?.text = currentSong.name
             totalTimeTv.text = convertDuration(currentSong.duration)
-
-            mediaPlayer.setOnCompletionListener { playNextSong() }
         }
     }
 

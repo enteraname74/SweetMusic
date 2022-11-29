@@ -16,10 +16,14 @@
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
+        android:screenOrientation="portrait"
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicPlayer"
-        tools:targetApi="31"
-        android:screenOrientation="portrait">
+        tools:targetApi="31">
+        <activity
+            android:name=".ModifyAlbumInfoActivity"
+            android:exported="false" />
+
         <receiver
             android:name=".receivers.DeletedNotificationIntentReceiver"
             android:enabled="true"
@@ -44,8 +48,8 @@
                 <action android:name="com.example.musicplayer.intent.action.TEST" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name="androidx.media.session.MediaButtonReceiver"
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
@@ -60,7 +64,7 @@
         <activity
             android:name=".FindNewSongsActivity"
             android:exported="false"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".SetDataActivity"
             android:exported="false"
