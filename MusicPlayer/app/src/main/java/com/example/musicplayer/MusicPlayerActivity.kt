@@ -56,6 +56,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     private lateinit var headerCurrentListButton: TextView
     private lateinit var currentListRecyclerView: RecyclerView
     private lateinit var adapter : MusicList
+    private var changingFavouriteState = false
 
     private var myThread = Thread(FunctionalSeekBar(this))
 
@@ -448,61 +449,63 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     // Permet de changer le statut favoris de la chanson :
     private fun setFavorite(){
-        CoroutineScope(Dispatchers.Main).launch {
-
-            try {
-                if(currentSong.favorite){
-                    MyMediaPlayer.initialPlaylist.find { it.path == currentSong.path }?.favorite = false
-                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
-                    currentSong.favorite = false
-                    favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                    Toast.makeText(this@MusicPlayerActivity, getString(R.string.remove_music_from_favourites),Toast.LENGTH_SHORT).show()
-                } else {
-                    MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
-                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
-                    currentSong.favorite = true
-                    favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
-                    Toast.makeText(this@MusicPlayerActivity, getString(R.string.add_music_to_favourites),Toast.LENGTH_SHORT).show()
-                }
-
-                // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
-                // Commencons par la playlist principale :
-                val allMusics  = MyMediaPlayer.allMusics
-                for (element in allMusics){
-                    // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
-                    if (element.path == currentSong.path){
-                        element.favorite = currentSong.favorite
-                        break
+        if (!changingFavouriteState) {
+            changingFavouriteState = true
+            CoroutineScope(Dispatchers.Main).launch {
+                try {
+                    if(currentSong.favorite){
+                        MyMediaPlayer.initialPlaylist.find { it.path == currentSong.path }?.favorite = false
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
+                        currentSong.favorite = false
+                        favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                    } else {
+                        MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
+                        currentSong.favorite = true
+                        favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
                     }
-                }
-                // Ensuite, mettons à jour nos playlists :
-                val allPlaylists = MyMediaPlayer.allPlaylists
-                for (playlist in allPlaylists){
-                    for (element in playlist.musicList){
+
+                    // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
+                    // Commencons par la playlist principale :
+                    val allMusics  = MyMediaPlayer.allMusics
+                    for (element in allMusics){
+                        // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
                         if (element.path == currentSong.path){
                             element.favorite = currentSong.favorite
                             break
                         }
                     }
-                }
-                // Mettons à jour la playlist favoris :
-                val favoritePlaylist = allPlaylists[0]
-                var shouldBeInFavoriteList = true
-                for (element in favoritePlaylist.musicList){
-                    if (element.path == currentSong.path){
-                        favoritePlaylist.musicList.remove(element)
-                        shouldBeInFavoriteList = false
-                        break
+                    // Ensuite, mettons à jour nos playlists :
+                    val allPlaylists = MyMediaPlayer.allPlaylists
+                    for (playlist in allPlaylists){
+                        for (element in playlist.musicList){
+                            if (element.path == currentSong.path){
+                                element.favorite = currentSong.favorite
+                                break
+                            }
+                        }
                     }
-                }
-                if (shouldBeInFavoriteList){
-                    favoritePlaylist.musicList.add(currentSong)
-                }
+                    // Mettons à jour la playlist favoris :
+                    val favoritePlaylist = allPlaylists[0]
+                    var shouldBeInFavoriteList = true
+                    for (element in favoritePlaylist.musicList){
+                        if (element.path == currentSong.path){
+                            favoritePlaylist.musicList.remove(element)
+                            shouldBeInFavoriteList = false
+                            break
+                        }
+                    }
+                    if (shouldBeInFavoriteList){
+                        favoritePlaylist.musicList.add(currentSong)
+                    }
 
-                CoroutineScope(Dispatchers.IO).launch{ writeAllAsync(allMusics,allPlaylists) }
-            } catch (e: ArrayIndexOutOfBoundsException) {
-                Log.d("MPA", "Erro changing state of fav")
+                    writeAllAsync(allMusics,allPlaylists)
+                } catch (e: ArrayIndexOutOfBoundsException) {
+                    Log.d("MPA", "Erro changing state of fav")
+                    Log.e("error", e.toString())
+                }
             }
+            changingFavouriteState = false
         }
     }
 
