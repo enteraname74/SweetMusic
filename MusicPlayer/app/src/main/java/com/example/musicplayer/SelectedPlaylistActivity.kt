@@ -69,7 +69,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 
-        adapter = MusicList(musics, playlist.listName, applicationContext, this@SelectedPlaylistActivity)
+        adapter = MusicList(musics, playlist.listName, this, this)
         menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
         menuRecyclerView.adapter = adapter
 

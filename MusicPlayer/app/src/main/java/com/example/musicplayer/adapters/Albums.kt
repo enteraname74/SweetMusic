@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.R
 import com.example.musicplayer.classes.Album
+import com.google.android.material.imageview.ShapeableImageView
 import java.io.Serializable
 
 class Albums (
@@ -22,7 +23,7 @@ class Albums (
     class AlbumsViewHolder(itemView : View, private var onAlbumsListener : OnAlbumsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable {
 
         var albumName : TextView
-        var albumCover : ImageView
+        var albumCover : ShapeableImageView
         var artistName : TextView
 
         init{

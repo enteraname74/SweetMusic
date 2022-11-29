@@ -47,7 +47,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_playlists, container, false)
         adapter = Playlists(
-            MyMediaPlayer.allPlaylists,context as Context,this,
+            MyMediaPlayer.allPlaylists,requireContext(),this,
             R.layout.playlist_file_linear
         )
 

@@ -72,8 +72,8 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 
-        adapter = MusicList(musics, artist.artistName, applicationContext, this@SelectedArtistActivity)
-        menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedArtistActivity)
+        adapter = MusicList(musics, artist.artistName, this, this)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
 
         val artistName = findViewById<TextView>(R.id.playlist_name)
@@ -83,7 +83,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         quitActivity.setOnClickListener{ finish() }
 
         val shuffleButton = findViewById<ImageView>(R.id.shuffle)
-        shuffleButton.setOnClickListener { playRandom(musics, this@SelectedArtistActivity) }
+        shuffleButton.setOnClickListener { playRandom(musics, this) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 

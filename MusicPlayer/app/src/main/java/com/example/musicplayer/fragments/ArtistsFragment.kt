@@ -37,7 +37,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_artists, container, false)
-        adapter = Artists(MyMediaPlayer.allArtists, context as Context, this)
+        adapter = Artists(MyMediaPlayer.allArtists, requireContext(), this)
 
         searchView = view.findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)

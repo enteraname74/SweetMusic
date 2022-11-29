@@ -27,7 +27,7 @@ class DeletedMusicsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = DeletedMusicList(MyMediaPlayer.allDeletedMusics,"deletedSongs", activity?.applicationContext as Context)
+        adapter = DeletedMusicList(MyMediaPlayer.allDeletedMusics,"deletedSongs", requireContext())
     }
 
     override fun onCreateView(

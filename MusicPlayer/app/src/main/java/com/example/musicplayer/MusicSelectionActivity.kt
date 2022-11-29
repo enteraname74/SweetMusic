@@ -30,8 +30,7 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
 
         menuRecyclerView = findViewById(R.id.all_songs_list)
 
-        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsInfos,applicationContext,this)
-
+        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsInfos,this,this)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
 

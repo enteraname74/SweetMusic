@@ -14,10 +14,13 @@
     android:layout_marginEnd="10dp"
     android:layout_marginStart="10dp">
 
-    <ImageView
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/album_cover"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        app:shapeAppearance="@style/rounCornerForSmallImage"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
         android:contentDescription="Album Cover"
         android:src="@drawable/icone_musique" />
 

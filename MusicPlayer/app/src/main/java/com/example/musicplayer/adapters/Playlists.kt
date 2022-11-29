@@ -8,11 +8,11 @@ import android.view.ContextMenu
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.R
 import com.example.musicplayer.Playlist
+import com.google.android.material.imageview.ShapeableImageView
 import java.io.Serializable
 import java.lang.Error
 
@@ -25,7 +25,7 @@ class Playlists (
     class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener {
 
         var playlistName : TextView
-        var playlistCover : ImageView
+        var playlistCover : ShapeableImageView
         var songNumber : TextView? = null
 
         init{

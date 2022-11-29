@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Music
 import com.example.musicplayer.R
+import com.google.android.material.imageview.ShapeableImageView
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
@@ -25,7 +26,7 @@ data class MusicListSelection(
 
     class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, Serializable {
 
-        var albumCover : ImageView? = null
+        var albumCover : ShapeableImageView? = null
         var songName : TextView? = null
         var artist : TextView? = null
         var albumName : TextView? = null
@@ -61,7 +62,6 @@ data class MusicListSelection(
     }
 
     override fun onBindViewHolder(holder: MusicListViewHolder, position: Int) {
-        Log.d("POSITION", position.toString())
         val currentMusic = musics[position]
 
         if(currentMusic.albumCover != null){

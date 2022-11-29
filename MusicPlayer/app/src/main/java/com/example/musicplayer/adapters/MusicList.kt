@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Music
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.R
+import com.google.android.material.imageview.ShapeableImageView
 import java.io.Serializable
 
 // Classe permettant de représenter une liste de musiques :
@@ -27,7 +28,7 @@ data class MusicList(
 
     class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener{
 
-        var albumCover : ImageView? = null
+        var albumCover : ShapeableImageView? = null
         var songName : TextView? = null
         var artist : TextView? = null
         var albumName : TextView? = null

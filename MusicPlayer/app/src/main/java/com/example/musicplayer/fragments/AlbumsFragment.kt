@@ -37,7 +37,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_albums, container, false)
-        adapter = Albums(MyMediaPlayer.allAlbums,context as Context,this@AlbumsFragment)
+        adapter = Albums(MyMediaPlayer.allAlbums,requireContext(),this@AlbumsFragment)
 
         searchView = view.findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)

@@ -36,7 +36,7 @@ class FoundMusicsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = NewMusicsList(ArrayList<Music>(), "Main",activity?.applicationContext as Context)
+        adapter = NewMusicsList(ArrayList<Music>(), "Main",requireContext())
     }
 
     override fun onCreateView(
