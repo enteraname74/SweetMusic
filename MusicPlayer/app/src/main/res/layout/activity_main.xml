@@ -9,231 +9,144 @@
     android:background="@color/primary_color"
     tools:context=".MainActivity">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/primary_color">
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@color/primary_color">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="50dp">
-
-                <ImageView
-                    android:id="@+id/open_menu"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:src="@drawable/ic_baseline_menu_24"
-                    android:layout_marginStart="10dp"
-                    app:tint="@color/text_color">
-                </ImageView>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginTop="5dp"
-                    android:gravity="center_horizontal"
-                    android:text="@string/app_name"
-                    android:textColor="@color/text_color"
-                    android:textSize="20sp"
-                    android:textStyle="bold">
-
-                </TextView>
-            </RelativeLayout>
-
-            <Button
-                android:id="@+id/shuffle_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/secondary_color"
-                android:text="@string/shuffle"
-                android:textColor="@color/text_color"
-                android:layout_marginRight="10dp"
-                android:layout_gravity="end"
-                android:layout_marginEnd="10dp">
-            </Button>
-
-
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tab_layout"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:background="@color/primary_color"
-                app:tabMode="fixed"
-                app:tabIndicatorGravity="bottom"
-                app:tabTextColor="@color/text_color"
-                app:tabSelectedTextColor="@color/white"
-                app:tabIndicatorAnimationMode="elastic"
-                app:tabIndicatorHeight="4dp"
-                app:tabIndicatorColor="@color/secondary_color">
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/musics" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/playlists" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/albums" />
-
-                <com.google.android.material.tabs.TabItem
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/artists" />
-
-            </com.google.android.material.tabs.TabLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/fetching_songs"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:background="@color/secondary_color"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/loading_data"
-                android:textColor="@color/text_color"
-                android:textSize="15sp" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                android:indeterminateTint="@color/text_color"
-                android:indeterminateTintMode="multiply" />
-
-        </LinearLayout>
-
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/view_pager"
-            android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_height="0dp"
-            android:gravity="center"
-            android:visibility="gone">
-
-        </androidx.viewpager2.widget.ViewPager2>
-
-        <LinearLayout
-            android:id="@+id/bottom_infos"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:orientation="horizontal"
-            android:layout_gravity="bottom"
-            android:background="@color/primary_color">
-
-            <com.google.android.material.imageview.ShapeableImageView
-                app:shapeAppearance="@style/softRoundCorner"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:id="@+id/album_cover_info"
-                android:layout_width="60dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/icone_musique"
-                android:layout_marginStart="5dp">
-
-            </com.google.android.material.imageview.ShapeableImageView>
-
-            <TextView
-                android:id="@+id/no_song_playing"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:textColor="@color/text_color"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:text="@string/no_song_is_playing"
-                android:gravity="center_horizontal|center_vertical"
-                android:visibility="gone">
-            </TextView>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@color/primary_color">
 
                 <RelativeLayout
-                    android:id="@+id/info_song_playing"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="10dp">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="50dp">
+
+                    <ImageView
+                        android:id="@+id/open_menu"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_baseline_menu_24"
+                        android:layout_marginStart="10dp"
+                        app:tint="@color/text_color">
+                    </ImageView>
 
                     <TextView
-                        android:id="@+id/song_title_info"
-                        android:layout_width="100dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
-                        android:ellipsize="marquee"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:scrollHorizontally="true"
-                        android:singleLine="true"
-                        android:text="@string/name_of_the_song"
-                        android:textColor="@color/text_color" />
+                        android:layout_marginTop="5dp"
+                        android:gravity="center_horizontal"
+                        android:text="@string/app_name"
+                        android:textColor="@color/text_color"
+                        android:textSize="20sp"
+                        android:textStyle="bold">
 
-
-                    <ImageView
-                        android:id="@+id/previous"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="20dp"
-                        android:layout_toEndOf="@+id/song_title_info"
-                        android:src="@drawable/ic_baseline_skip_previous_24"
-                        app:tint="@color/text_color">
-
-                    </ImageView>
-
-                    <ImageView
-                        android:id="@+id/next"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@+id/pause_play"
-                        android:src="@drawable/ic_baseline_skip_next_24"
-                        app:tint="@color/text_color">
-
-
-                    </ImageView>
-
-                    <ImageView
-                        android:id="@+id/pause_play"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:layout_toEndOf="@+id/previous"
-                        android:src="@drawable/ic_baseline_pause_circle_outline_24"
-                        app:tint="@color/text_color">
-                    </ImageView>
+                    </TextView>
                 </RelativeLayout>
+
+                <Button
+                    android:id="@+id/shuffle_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/secondary_color"
+                    android:text="@string/shuffle"
+                    android:textColor="@color/text_color"
+                    android:layout_marginRight="10dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="10dp">
+                </Button>
+
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:background="@color/primary_color"
+                    app:tabMode="fixed"
+                    app:tabIndicatorGravity="bottom"
+                    app:tabTextColor="@color/text_color"
+                    app:tabSelectedTextColor="@color/white"
+                    app:tabIndicatorAnimationMode="elastic"
+                    app:tabIndicatorHeight="4dp"
+                    app:tabIndicatorColor="@color/secondary_color">
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/musics" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/playlists" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/albums" />
+
+                    <com.google.android.material.tabs.TabItem
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/artists" />
+
+                </com.google.android.material.tabs.TabLayout>
+
             </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fetching_songs"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@color/secondary_color"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/loading_data"
+                    android:textColor="@color/text_color"
+                    android:textSize="15sp" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/text_color"
+                    android:indeterminateTintMode="multiply" />
+
+            </LinearLayout>
+
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/view_pager"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="0dp"
+                android:gravity="center"
+                android:visibility="gone">
+
+            </androidx.viewpager2.widget.ViewPager2>
         </LinearLayout>
-    </LinearLayout>
+
+        <include layout="@layout/bottom_sheet_dialog_player" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navigation_view"

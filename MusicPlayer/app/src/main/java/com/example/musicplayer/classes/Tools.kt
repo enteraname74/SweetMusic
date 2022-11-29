@@ -1,5 +1,6 @@
 package com.example.musicplayer.classes
 
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -143,6 +144,22 @@ open class Tools : AppCompatActivity() {
                 false
             }
         }
+    }
+
+    fun stopMusic(){
+        val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+            .setAudioAttributes(PlaybackService.audioAttributes)
+            .setAcceptsDelayedFocusGain(true)
+            .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
+            .build()
+
+        mediaPlayer.stop()
+        MyMediaPlayer.currentIndex = -1
+        MyMediaPlayer.currentPlaylist = ArrayList<Music>()
+        MyMediaPlayer.initialPlaylist = ArrayList<Music>()
+        PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(1)
     }
 
     open fun pausePlay(pausePlayButton : ImageView){

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,6 +34,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     private lateinit var menuRecyclerView : RecyclerView
 
     private lateinit var pausePlayButton : ImageView
+
+    private lateinit var bottomSheetLayout: LinearLayout
+    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +74,25 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
+
+        bottomSheetLayout = findViewById(R.id.bottom_infos)
+        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+
+        sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN || newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    stopMusic()
+                }
+            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+
+        findViewById<LinearLayout>(R.id.bottom_infos).setOnClickListener {
+                onBottomMenuClick(
+                    MyMediaPlayer.currentIndex,
+                    this
+                )
+            }
     }
 
     override fun onResume() {
@@ -84,12 +107,11 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val nextBtn = findViewById<ImageView>(R.id.next)
         val previousBtn = findViewById<ImageView>(R.id.previous)
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         if (MyMediaPlayer.currentIndex != -1){
             CoroutineScope(Dispatchers.Main).launch {
-                bottomInfos.visibility = View.VISIBLE
+                sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
                 if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
                     // Passons d'abord notre byteArray en bitmap :
@@ -106,19 +128,12 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
                 nextBtn?.setOnClickListener { playNextSong(adapter) }
                 previousBtn?.setOnClickListener { playPreviousSong(adapter) }
-                bottomInfos.setOnClickListener {
-                    onBottomMenuClick(
-                        MyMediaPlayer.currentIndex,
-                        this@SelectedPlaylistActivity
-                    )
-                }
                 songTitleInfo?.isSelected = true
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {
-                bottomInfos.visibility = View.GONE
+                sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 albumCoverInfo?.setImageResource(R.drawable.icone_musique)
-                bottomInfos?.setOnClickListener(null)
             }
         }
 

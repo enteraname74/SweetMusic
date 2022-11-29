@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -12,6 +13,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.util.Size
 import android.view.MenuItem
 import android.view.View
@@ -20,10 +22,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
+import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.adapters.VpAdapter
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
@@ -37,6 +42,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     private lateinit var viewPager : ViewPager2
 
     private lateinit var pausePlayButton : ImageView
+
+    private lateinit var bottomSheetLayout: LinearLayout
+    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -124,6 +132,25 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
 
         openMenu.setOnClickListener { openNavigationMenu(drawerLayout) }
+
+        bottomSheetLayout = findViewById(R.id.bottom_infos)
+        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+
+        sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN || newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    stopMusic()
+                }
+            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+
+        findViewById<LinearLayout>(R.id.bottom_infos).setOnClickListener {
+            onBottomMenuClick(
+                MyMediaPlayer.currentIndex,
+                this@MainActivity
+            )
+        }
     }
 
     override fun onResume() {
@@ -144,12 +171,11 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         }
 
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         if (MyMediaPlayer.currentIndex != -1) {
             CoroutineScope(Dispatchers.Main).launch {
-                bottomInfos.visibility = View.VISIBLE
+                sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
                 if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
                     // Passons d'abord notre byteArray en bitmap :
@@ -167,19 +193,12 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 }
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
-                bottomInfos.setOnClickListener {
-                    onBottomMenuClick(
-                        MyMediaPlayer.currentIndex,
-                        this@MainActivity
-                    )
-                }
                 songTitleInfo?.isSelected = true
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {
-                bottomInfos.visibility = View.GONE
+                sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 albumCoverInfo?.setImageResource(R.drawable.icone_musique)
-                bottomInfos?.setOnClickListener(null)
             }
         }
 

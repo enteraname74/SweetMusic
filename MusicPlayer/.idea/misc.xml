@@ -58,6 +58,7 @@
         <entry key="app/src/main/res/layout/album_and_artist_layout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/album_file.xml" value="0.3515625" />
         <entry key="app/src/main/res/layout/artist_file.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/bottom_sheet_dialog_player.xml" value="0.33" />
         <entry key="app/src/main/res/layout/bottom_sheet_dialog_song_list.xml" value="0.3515625" />
         <entry key="app/src/main/res/layout/fragment_album.xml" value="0.20833333333333334" />
         <entry key="app/src/main/res/layout/fragment_albums.xml" value="0.24947916666666667" />
