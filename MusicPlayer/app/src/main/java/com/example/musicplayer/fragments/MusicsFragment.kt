@@ -86,12 +86,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
-            println("not the same song. Selected : $position, Normal : ${MyMediaPlayer.currentIndex}")
             sameMusic = false
         }
         // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
         if (adapter.musics != MyMediaPlayer.currentPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
-            println("changement playlist")
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.playlistName = "Main"
@@ -100,25 +98,27 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         MyMediaPlayer.currentIndex = position
 
-        val notificationManager = context?.applicationContext?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        // Si il n'y a pas de notifications, on l'affiche
-        if(notificationManager.activeNotifications.isEmpty()) {
-            val service = MusicNotificationService(context?.applicationContext as Context)
-            if (mediaPlayer.isPlaying){
-                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-            } else {
-                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+        CoroutineScope(Dispatchers.Default).launch {
+            val notificationManager = context?.applicationContext?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            // Si il n'y a pas de notifications, on l'affiche
+            if(notificationManager.activeNotifications.isEmpty()) {
+                val service = MusicNotificationService(context?.applicationContext as Context)
+                if (mediaPlayer.isPlaying){
+                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                } else {
+                    service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                }
             }
-        }
 
-        if(mediaPlayer.isPlaying){
-            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-            intentForNotification.putExtra("STOP", false)
-            context?.applicationContext?.sendBroadcast(intentForNotification)
-        } else {
-            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-            intentForNotification.putExtra("STOP", true)
-            context?.applicationContext?.sendBroadcast(intentForNotification)
+            if(mediaPlayer.isPlaying){
+                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                intentForNotification.putExtra("STOP", false)
+                context?.applicationContext?.sendBroadcast(intentForNotification)
+            } else {
+                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                intentForNotification.putExtra("STOP", true)
+                context?.applicationContext?.sendBroadcast(intentForNotification)
+            }
         }
 
         val intent = Intent(context, MusicPlayerActivity::class.java)

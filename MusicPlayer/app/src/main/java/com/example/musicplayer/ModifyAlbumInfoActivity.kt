@@ -10,10 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Size
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.musicplayer.classes.Album
 import com.example.musicplayer.classes.MyMediaPlayer
@@ -38,6 +35,9 @@ class ModifyAlbumInfoActivity : Tools() {
         playlistCoverField = findViewById(R.id.playlist_cover)
         playlistNameField = findViewById(R.id.edit_playlist_name)
 
+        findViewById<TextView>(R.id.title_activity).text = getString(R.string.modify_album_informations)
+        findViewById<TextView>(R.id.playlist_name).text = getString(R.string.name_of_the_album)
+
         if (album.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
             val bytes = album.albumCover
@@ -56,9 +56,11 @@ class ModifyAlbumInfoActivity : Tools() {
         val validateButton = findViewById<Button>(R.id.validate_button)
         val cancelButton = findViewById<Button>(R.id.cancel_button)
 
-        validateButton.setOnClickListener{ onValidateButtonClick() }
-        cancelButton.setOnClickListener{ onCancelButtonClick() }
-        findViewById<ImageView>(R.id.quit_activity).setOnClickListener { finish() }
+        CoroutineScope(Dispatchers.Main).launch {
+            validateButton.setOnClickListener{ onValidateButtonClick() }
+            cancelButton.setOnClickListener{ onCancelButtonClick() }
+            findViewById<ImageView>(R.id.quit_activity).setOnClickListener { finish() }
+        }
     }
 
     private fun selectImage() {

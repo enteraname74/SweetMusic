@@ -19,6 +19,7 @@ import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ModifyPlaylistInfoActivity : Tools() {
     private lateinit var playlist : Playlist
@@ -93,30 +94,34 @@ class ModifyPlaylistInfoActivity : Tools() {
     private fun onValidateButtonClick(){
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
-        val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
-        if (verification == null || verification == playlist ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
 
-            playlist.listName = playlistNameField.text.toString()
-            val drawable = playlistCoverField.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            val bitmap = bitmapDrawable.bitmap
+            if (verification == null || verification == playlist ) {
+                playlist.listName = playlistNameField.text.toString()
+                val drawable = playlistCoverField.drawable
+                val bitmapDrawable = drawable as BitmapDrawable
+                val bitmap = bitmapDrawable.bitmap
 
-            val byteArray = bitmapToByteArray(bitmap)
+                val byteArray = bitmapToByteArray(bitmap)
 
-            playlist.playlistCover = byteArray
+                playlist.playlistCover = byteArray
 
-            // Mettons à jour nos playlists :
-            allPlaylists[position] = playlist
-            MyMediaPlayer.allPlaylists = allPlaylists
+                // Mettons à jour nos playlists :
+                allPlaylists[position] = playlist
+                MyMediaPlayer.allPlaylists = allPlaylists
 
-            CoroutineScope(Dispatchers.IO).launch {
-                writePlaylistsToFile(savePlaylistsFile, allPlaylists)
+                CoroutineScope(Dispatchers.IO).launch {
+                    writePlaylistsToFile(savePlaylistsFile, allPlaylists)
+                }
+
+                setResult(RESULT_OK)
+                finish()
+            } else {
+                withContext(Dispatchers.Main){
+                    Toast.makeText(this@ModifyPlaylistInfoActivity, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
+                }
             }
-
-            setResult(RESULT_OK)
-            finish()
-        } else {
-            Toast.makeText(this, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
         }
     }
 

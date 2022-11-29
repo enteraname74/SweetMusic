@@ -96,7 +96,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         titleTv.isSelected = true
 
         // Lorsqu'une musique se finit, on passe à la suivante automatiquement :
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        CoroutineScope(Dispatchers.Main).launch { mediaPlayer.setOnCompletionListener { playNextSong() } }
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
@@ -130,7 +130,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
         })
 
-        findViewById<ImageView>(R.id.quit_activity).setOnClickListener{ finish() }
+        CoroutineScope(Dispatchers.Main).launch { findViewById<ImageView>(R.id.quit_activity).setOnClickListener{ finish() }}
 
         registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
@@ -145,7 +145,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             currentListRecyclerView.adapter = adapter
         }
 
-        headerCurrentListButton.setOnClickListener { openCloseBottomSheet() }
+        CoroutineScope(Dispatchers.Main).launch { headerCurrentListButton.setOnClickListener { openCloseBottomSheet() }}
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -155,8 +155,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
-
-        mediaPlayer.setOnCompletionListener { playNextSong() }
     }
 
     override fun onResume() {

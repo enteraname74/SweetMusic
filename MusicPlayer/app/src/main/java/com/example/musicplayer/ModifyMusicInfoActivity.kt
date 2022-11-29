@@ -35,6 +35,8 @@ class ModifyMusicInfoActivity : Tools() {
 
     private lateinit var path : String
 
+    private var hasAlbumCoverChanged = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
@@ -115,6 +117,7 @@ class ModifyMusicInfoActivity : Tools() {
                 null
             )
             albumCoverField.setImageBitmap(bitmap)
+            hasAlbumCoverChanged = true
         }
     }
 
@@ -127,13 +130,17 @@ class ModifyMusicInfoActivity : Tools() {
         musicFile.album = albumNameField.text.toString().trim()
         musicFile.artist = artistNameField.text.toString().trim()
 
-        val drawable = albumCoverField.drawable
-        val bitmapDrawable = drawable as BitmapDrawable
-        val bitmap = bitmapDrawable.bitmap
+        if (hasAlbumCoverChanged) {
+            val drawable = albumCoverField.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            val bitmap = bitmapDrawable.bitmap
 
-        val byteArray = bitmapToByteArray(bitmap)
+            val byteArray = bitmapToByteArray(bitmap)
 
-        musicFile.albumCover = byteArray
+            musicFile.albumCover = byteArray
+        } else {
+            musicFile.albumCover = MyMediaPlayer.allMusics.find { it.album == musicFile.album && it.artist == musicFile.artist && it.albumCover != null }?.albumCover
+        }
 
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
         val allMusics = MyMediaPlayer.allMusics

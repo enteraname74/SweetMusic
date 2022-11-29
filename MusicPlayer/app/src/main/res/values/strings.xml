@@ -34,9 +34,11 @@
     <string name="artist">Artist :</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
-    <string name="modify_playlist_informations">Modify Playlist Informations</string>
+    <string name="modify_playlist_informations">Modify playlist informations</string>
+    <string name="modify_album_informations">Modify album informations</string>
     <string name="playlist_image">Playlist image :</string>
     <string name="name_of_the_playlist">Name of the playlist :</string>
+    <string name="name_of_the_album">Name of the album :</string>
     <string name="title_of_the_song">Title of the song</string>
     <string name="timer">0:00</string>
     <string name="sort">sort</string>
