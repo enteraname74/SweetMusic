@@ -1,8 +1,10 @@
 package com.example.musicplayer.fragments
 
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -33,6 +35,15 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
     private var searchIsOn = false
     private val mediaPlayer = MyMediaPlayer.getInstance
 
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = MusicList(ArrayList<Music>(), "Main",activity?.applicationContext as Context, this)
@@ -52,8 +63,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         menuRecyclerView.layoutManager = LinearLayoutManager(view.context)
         menuRecyclerView.adapter = adapter
 
-        val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
-        val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
+        context?.registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
         return view
     }

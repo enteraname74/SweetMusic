@@ -22,12 +22,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.adapters.VpAdapter
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
+import com.example.musicplayer.fragments.MusicsFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
@@ -54,26 +56,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
-            CoroutineScope(Dispatchers.Main).launch {
-                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                    // Passons d'abord notre byteArray en bitmap :
-                    val bytes =
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                    var bitmap: Bitmap? = null
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    }
-                    withContext(Dispatchers.Main) {
-                        albumCoverInfo.setImageBitmap(bitmap)
-                    }
-                } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
-                }
-            }
+            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
         }
     }
 
@@ -351,5 +334,10 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     override fun onPause() {
         super.onPause()
         unregisterReceiver(broadcastReceiver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopMusic()
     }
 }

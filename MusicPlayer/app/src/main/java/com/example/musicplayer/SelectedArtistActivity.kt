@@ -1,8 +1,10 @@
 package com.example.musicplayer
 
 import android.app.NotificationManager
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.media.Image
@@ -39,6 +41,18 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
     private lateinit var bottomSheetLayout: LinearLayout
     private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,6 +147,8 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 albumCoverInfo?.setImageResource(R.drawable.icone_musique)
             }
         }
+
+        registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
         if (!mediaPlayer.isPlaying){
             pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)

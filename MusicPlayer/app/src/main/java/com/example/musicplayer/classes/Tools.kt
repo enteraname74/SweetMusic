@@ -17,6 +17,10 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
 import com.example.musicplayer.adapters.MusicList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.*
 
 open class Tools : AppCompatActivity() {
@@ -195,6 +199,29 @@ open class Tools : AppCompatActivity() {
             val intentForNotification = Intent("BROADCAST_NOTIFICATION")
             intentForNotification.putExtra("STOP", true)
             applicationContext.sendBroadcast(intentForNotification)
+        }
+    }
+
+    fun updateBottomPanel(songTitle : TextView, albumCover : ImageView) {
+        CoroutineScope(Dispatchers.IO).launch {
+            withContext(Dispatchers.Main) {
+                songTitle.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            }
+
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                // Passons d'abord notre byteArray en bitmap :
+                val bytes =
+                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                var bitmap: Bitmap? = null
+                if (bytes != null && bytes.isNotEmpty()) {
+                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                }
+                withContext(Dispatchers.Main) {
+                    albumCover.setImageBitmap(bitmap)
+                }
+            } else {
+                albumCover.setImageResource(R.drawable.michael)
+            }
         }
     }
 

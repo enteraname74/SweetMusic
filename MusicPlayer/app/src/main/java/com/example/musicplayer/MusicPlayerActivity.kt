@@ -199,6 +199,73 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         playMusic()
     }
 
+    override fun playMusic(){
+        /*
+        Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
+         */
+        if (!sameMusic) {
+            mediaPlayer.reset()
+            try {
+                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                    .setAudioAttributes(PlaybackService.audioAttributes)
+                    .setAcceptsDelayedFocusGain(true)
+                    .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
+                    .build()
+
+                when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
+                    AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                        Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                    }
+
+                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                        mediaPlayer.setDataSource(currentSong.path)
+                        mediaPlayer.setOnPreparedListener(this)
+                        mediaPlayer.prepareAsync()
+                    }
+                    else -> {
+                        Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: IOException) {
+                Log.e("ERROR MEDIA PLAYER", e.toString())
+                e.printStackTrace()
+            }
+        } else {
+            seekBar.progress = 0
+            seekBar.max = mediaPlayer.duration
+
+            if (!mediaPlayer.isPlaying){
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+        }
+    }
+
+    override fun onPrepared(p0: MediaPlayer?) {
+        mediaPlayer.start()
+        seekBar.progress = 0
+        seekBar.max = mediaPlayer.duration
+        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // Si il n'y a pas de notifications, on l'affiche
+        if(notificationManager.activeNotifications.isEmpty()) {
+            val service = MusicNotificationService(applicationContext as Context)
+            if (mediaPlayer.isPlaying){
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            } else {
+                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+            }
+        }
+
+        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+        if (mediaPlayer.isPlaying){
+            intentForNotification.putExtra("STOP", false)
+        } else {
+            intentForNotification.putExtra("STOP", true)
+        }
+        applicationContext.sendBroadcast(intentForNotification)
+    }
+
     override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         menu?.add(0, 10, 0, resources.getString(R.string.add_to))
@@ -342,47 +409,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         sort.setImageResource(MyMediaPlayer.iconsList[MyMediaPlayer.iconIndex])
     }
 
-    override fun playMusic(){
-        /*
-        Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
-         */
-        if (!sameMusic) {
-            mediaPlayer.reset()
-            try {
-                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                    .setAudioAttributes(PlaybackService.audioAttributes)
-                    .setAcceptsDelayedFocusGain(true)
-                    .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
-                    .build()
-
-                when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
-                    AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                        Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-                    }
-
-                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                        mediaPlayer.setDataSource(currentSong.path)
-                        mediaPlayer.setOnPreparedListener(this)
-                        mediaPlayer.prepareAsync()
-                    }
-                    else -> {
-                        Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: IOException) {
-                Log.e("ERROR MEDIA PLAYER", e.toString())
-                e.printStackTrace()
-            }
-        } else {
-            seekBar.progress = 0
-            seekBar.max = mediaPlayer.duration
-
-            if (!mediaPlayer.isPlaying){
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            }
-        }
-    }
-
     private fun playNextSong(){
         sameMusic = false
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
@@ -493,32 +519,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         }
     }
 
-    override fun onPrepared(p0: MediaPlayer?) {
-        mediaPlayer.start()
-        seekBar.progress = 0
-        seekBar.max = mediaPlayer.duration
-        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-        val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        // Si il n'y a pas de notifications, on l'affiche
-        if(notificationManager.activeNotifications.isEmpty()) {
-            val service = MusicNotificationService(applicationContext as Context)
-            if (mediaPlayer.isPlaying){
-                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-            } else {
-                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
-            }
-        }
-
-        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-        if (mediaPlayer.isPlaying){
-            intentForNotification.putExtra("STOP", false)
-        } else {
-            intentForNotification.putExtra("STOP", true)
-        }
-        applicationContext.sendBroadcast(intentForNotification)
-    }
-
     private fun setColor(){
         var bitmap : Bitmap? = null
         if (currentSong.albumCover != null) {
@@ -575,7 +575,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     }
 
     override fun onMusicClick(position: Int) {
-        MyMediaPlayer.currentIndex = position
-        setResourcesWithMusic()
+        if (MyMediaPlayer.currentIndex != position) {
+            sameMusic = false
+            MyMediaPlayer.currentIndex = position
+            setResourcesWithMusic()
+        }
     }
 }

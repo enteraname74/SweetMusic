@@ -45,9 +45,22 @@ class PlaybackService : Service() {
                     intentForNotification.putExtra("STOP", false)
                     applicationContext.sendBroadcast(intentForNotification)
                 }
-                else -> {
+                AudioManager.AUDIOFOCUS_LOSS -> {
                     if (mediaPlayer.isPlaying) {
                         Log.d("SERVICE", "LOSS FOCUS WHILE PLAYING")
+                        val intentForBroadcast = Intent("BROADCAST")
+                        intentForBroadcast.putExtra("STOP",true)
+                        applicationContext.sendBroadcast(intentForBroadcast)
+
+                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                        intentForNotification.putExtra("STOP", true)
+                        applicationContext.sendBroadcast(intentForNotification)
+                        mediaPlayer.pause()
+                    }
+                }
+                else -> {
+                    if (mediaPlayer.isPlaying) {
+                        Log.d("SERVICE", "LOSS FOCUS ELSE WHILE PLAYING")
                         val intentForBroadcast = Intent("BROADCAST")
                         intentForBroadcast.putExtra("STOP",true)
                         applicationContext.sendBroadcast(intentForBroadcast)
