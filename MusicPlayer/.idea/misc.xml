@@ -35,6 +35,8 @@
         <entry key="app/src/main/res/drawable/ic_baseline_play_circle_outline_24.xml" value="0.323" />
         <entry key="app/src/main/res/drawable/ic_baseline_playlist_play_24.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/ic_baseline_queue_music_24.xml" value="0.329" />
+        <entry key="app/src/main/res/drawable/ic_baseline_replay_24.xml" value="0.2995" />
+        <entry key="app/src/main/res/drawable/ic_baseline_shuffle_24.xml" value="0.2995" />
         <entry key="app/src/main/res/drawable/ic_baseline_skip_next_24.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/ic_baseline_skip_previous_24.xml" value="0.329" />
         <entry key="app/src/main/res/drawable/ic_baseline_sync_24.xml" value="0.329" />

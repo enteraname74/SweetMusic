@@ -141,7 +141,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         currentListRecyclerView = findViewById(R.id.bottom_sheet_recycler_view)
 
         CoroutineScope(Dispatchers.IO).launch{
-            adapter = MusicList(MyMediaPlayer.currentPlaylist, "currentList",applicationContext,this@MusicPlayerActivity)
+            adapter = MusicList(MyMediaPlayer.currentPlaylist, "currentList",this@MusicPlayerActivity,this@MusicPlayerActivity)
             currentListRecyclerView.layoutManager = LinearLayoutManager(this@MusicPlayerActivity)
             currentListRecyclerView.adapter = adapter
         }

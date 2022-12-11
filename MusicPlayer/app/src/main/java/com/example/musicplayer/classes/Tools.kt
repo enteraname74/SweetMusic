@@ -173,32 +173,51 @@ open class Tools : AppCompatActivity() {
             .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
             .build()
 
-        if(!(mediaPlayer.isPlaying)){
-            when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
-                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                    Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-                }
+        if(PlaybackService.audioManager.isMusicActive){
+            if(!(mediaPlayer.isPlaying)){
+                when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
+                    AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                        Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
+                    }
 
-                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                    mediaPlayer.start()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                        mediaPlayer.start()
+                        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
 
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", false)
-                    applicationContext.sendBroadcast(intentForNotification)
+                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                        intentForNotification.putExtra("STOP", false)
+                        applicationContext.sendBroadcast(intentForNotification)
+                    }
+                    else -> {
+                        Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
+                    }
                 }
-                else -> {
-                    Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
-                }
+            } else {
+                mediaPlayer.pause()
+                PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+
+                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                intentForNotification.putExtra("STOP", true)
+                applicationContext.sendBroadcast(intentForNotification)
             }
         } else {
-            mediaPlayer.pause()
-            PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
-            pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            if (mediaPlayer.isPlaying){
+                mediaPlayer.pause()
+                PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
 
-            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-            intentForNotification.putExtra("STOP", true)
-            applicationContext.sendBroadcast(intentForNotification)
+                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                intentForNotification.putExtra("STOP", true)
+                applicationContext.sendBroadcast(intentForNotification)
+            } else {
+                mediaPlayer.start()
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                intentForNotification.putExtra("STOP", false)
+                applicationContext.sendBroadcast(intentForNotification)
+            }
         }
     }
 

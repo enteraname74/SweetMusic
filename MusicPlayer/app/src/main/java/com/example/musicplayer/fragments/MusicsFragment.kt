@@ -101,8 +101,10 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
         // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
         if (adapter.musics != MyMediaPlayer.currentPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
+            CoroutineScope(Dispatchers.Main).launch {
+                MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
+            }
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
-            MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
             MyMediaPlayer.playlistName = "Main"
             sameMusic = false
         }

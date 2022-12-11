@@ -38,17 +38,9 @@ class MusicNotificationService(private val context : Context) {
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
                 updateNotification(R.drawable.ic_baseline_play_circle_outline_24)
 
-                val intentForBroadcast = Intent("BROADCAST")
-                intentForBroadcast.putExtra("STOP",true)
-                context.sendBroadcast(intentForBroadcast)
-
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
                 updateNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                val intentForBroadcast = Intent("BROADCAST")
-                intentForBroadcast.putExtra("STOP",false)
-                context.sendBroadcast(intentForBroadcast)
             }
         }
     }
