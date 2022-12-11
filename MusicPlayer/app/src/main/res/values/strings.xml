@@ -6,9 +6,6 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_song_is_playing">NO SONG IS PLAYING</string>
     <string name="name_of_the_song">Name of the Song</string>
     <string name="playlist_s_cover">Playlist\'s cover</string>
@@ -51,9 +48,9 @@
     <string name="select">Select</string>
     <string name="playlist_file_playlists">Playlist file (.playlists) :</string>
     <string name="add_to">ADD TO</string>
-    <string name="remove">REMOVE</string>
-    <string name="modify">MODIFY</string>
-    <string name="play_next">PLAY NEXT</string>
+    <string name="remove">Remove</string>
+    <string name="modify">Modify song</string>
+    <string name="play_next">Play next</string>
     <string name="added_in_the_playlist">Added in the playlist</string>
     <string name="cannot_retrieve_files">Couldn\'t retrieve music files</string>
     <string name="permission">PERMISSION IS REQUIRED FOR THIS APP TO FUNCTION. PLEASE ALLOW PERMISSIONS FROM SETTINGS</string>
@@ -78,5 +75,8 @@
     <string name="back_button">back button</string>
     <string name="add_music_to_favourites">Music added to the favourites</string>
     <string name="remove_music_from_favourites">Music removed from the favourites</string>
-    <string name="add_to_a_playlist">add to a playlist</string>
+    <string name="add_to_a_playlist">Add to a playlist</string>
+    <string name="remove_from_playlist">Remove from playlist</string>
+    <string name="delete_playlist">Delete playlist</string>
+    <string name="delete_music">Delete music</string>
 </resources>

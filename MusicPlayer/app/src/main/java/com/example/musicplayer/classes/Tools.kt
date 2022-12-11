@@ -9,14 +9,14 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Environment
 import android.util.Log
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
 import com.example.musicplayer.adapters.MusicList
+import com.example.musicplayer.adapters.Playlists
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -173,51 +173,32 @@ open class Tools : AppCompatActivity() {
             .setOnAudioFocusChangeListener(PlaybackService.onAudioFocusChange)
             .build()
 
-        if(PlaybackService.audioManager.isMusicActive){
-            if(!(mediaPlayer.isPlaying)){
-                when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
-                    AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                        Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
-                    }
-
-                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                        mediaPlayer.start()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                        intentForNotification.putExtra("STOP", false)
-                        applicationContext.sendBroadcast(intentForNotification)
-                    }
-                    else -> {
-                        Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
-                    }
+        if(!(mediaPlayer.isPlaying)){
+            when (PlaybackService.audioManager.requestAudioFocus(audioFocusRequest)) {
+                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                    Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                mediaPlayer.pause()
-                PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
 
-                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                intentForNotification.putExtra("STOP", true)
-                applicationContext.sendBroadcast(intentForNotification)
+                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    mediaPlayer.start()
+                    pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+
+                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                    intentForNotification.putExtra("STOP", false)
+                    applicationContext.sendBroadcast(intentForNotification)
+                }
+                else -> {
+                    Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
+                }
             }
         } else {
-            if (mediaPlayer.isPlaying){
-                mediaPlayer.pause()
-                PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            mediaPlayer.pause()
+            PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+            pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
 
-                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                intentForNotification.putExtra("STOP", true)
-                applicationContext.sendBroadcast(intentForNotification)
-            } else {
-                mediaPlayer.start()
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                intentForNotification.putExtra("STOP", false)
-                applicationContext.sendBroadcast(intentForNotification)
-            }
+            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+            intentForNotification.putExtra("STOP", true)
+            applicationContext.sendBroadcast(intentForNotification)
         }
     }
 
@@ -294,12 +275,11 @@ open class Tools : AppCompatActivity() {
         return content
     }
 
-    fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
-        MyMediaPlayer.allPlaylists = content
+    fun writePlaylistsToFile(){
         val path = applicationContext.filesDir
         try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
+            val oos = ObjectOutputStream(FileOutputStream(File(path, savePlaylistsFile)))
+            oos.writeObject(MyMediaPlayer.allPlaylists)
             oos.close()
         } catch (error : IOException){
             Log.d("Error write playlists",error.toString())
@@ -328,15 +308,14 @@ open class Tools : AppCompatActivity() {
 
     fun writeAllAsync(musics : ArrayList<Music>, playlists : ArrayList<Playlist>){
         writeAllMusicsToFile(saveAllMusicsFile, musics)
-        writePlaylistsToFile(savePlaylistsFile, playlists)
-        println("reussie")
+        writePlaylistsToFile()
     }
 
     fun readPlaylistsAsync(){
         MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
         if (MyMediaPlayer.allPlaylists.size == 0){
             MyMediaPlayer.allPlaylists.add(Playlist("Favorites",ArrayList(),null,true))
-            writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
+            writePlaylistsToFile()
         }
     }
 
@@ -368,5 +347,177 @@ open class Tools : AppCompatActivity() {
 
     fun openNavigationMenu(drawerLayout : DrawerLayout){
         drawerLayout.openDrawer(GravityCompat.START)
+    }
+
+    /***************************** BOTTOM SHEET DIALOG : ***********************/
+
+    fun bottomSheetAddTo(position: Int){
+        // ADD TO PLAYLIST
+        Toast.makeText(applicationContext, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
+    }
+
+    fun bottomSheetRemoveFromApp(adapter : MusicList, position : Int, sheetBehavior : BottomSheetBehavior<LinearLayout>) {
+        val musicToRemove = adapter.musics[position]
+        adapter.musics.removeAt(position)
+        adapter.notifyItemRemoved(position)
+        MyMediaPlayer.allMusics.remove(musicToRemove)
+
+        // Enlevons la musique de nos playlists :
+        for(playlist in MyMediaPlayer.allPlaylists) {
+            if (playlist.musicList.contains(musicToRemove)){
+                playlist.musicList.remove(musicToRemove)
+            }
+        }
+
+        // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
+        if (MyMediaPlayer.currentIndex != -1) {
+            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
+                MyMediaPlayer.initialPlaylist.remove(musicToRemove)
+            }
+            if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
+                // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
+                Log.d("CONTAINS","")
+                if (musicToRemove.path == currentSong.path) {
+                    Log.d("SAME","")
+                    // Si on peut passer à la musique suivante, on le fait :
+                    if (MyMediaPlayer.currentPlaylist.size > 1) {
+                        Log.d("PLAY NEXT","")
+                        playNextSong(adapter)
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                    } else {
+                        // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
+                        CoroutineScope(Dispatchers.Main).launch {
+                            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                        }
+                        MyMediaPlayer.currentIndex = -1
+                        mediaPlayer.pause()
+                    }
+                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                } else {
+                    Log.d("JUST DELETE","")
+                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                }
+            }
+        }
+
+        // Si la musique était en favoris, on lui enlève ce statut :
+        musicToRemove.favorite = false
+
+        CoroutineScope(Dispatchers.IO).launch {
+            MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
+            writeAllDeletedSong()
+            writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+            writePlaylistsToFile()
+        }
+
+        Toast.makeText(
+            applicationContext,
+            resources.getString(R.string.deleted_from_app),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    fun bottomSheetRemoveFromPlaylist(adapter : MusicList, position : Int, playlistPosition : Int, playlist : Playlist) {
+        val musicToRemove = adapter.musics[position]
+        adapter.musics.remove(musicToRemove)
+        adapter.notifyItemRemoved(position)
+        MyMediaPlayer.allPlaylists[playlistPosition].musicList.remove(musicToRemove)
+
+        // Si on enlève une musique de la playlist des favoris, on enlève son statut de favoris :
+        if (playlist.isFavoriteList){
+            val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
+            val positionInInitialList = MyMediaPlayer.initialPlaylist.indexOf(musicToRemove)
+            val positionInCurrentList = MyMediaPlayer.currentPlaylist.indexOf(musicToRemove)
+
+            if(globalPosition != -1)  {
+                MyMediaPlayer.allMusics[globalPosition].favorite = false
+            }
+
+            if(positionInInitialList != -1)  {
+                MyMediaPlayer.initialPlaylist[positionInInitialList].favorite = false
+            }
+
+            if(positionInCurrentList != -1)  {
+                MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
+            }
+
+            CoroutineScope(Dispatchers.IO).launch {
+                launch{writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)}
+            }
+
+            for (playlist in MyMediaPlayer.allPlaylists){
+                if (playlist.musicList.contains(musicToRemove)){
+                    val position = playlist.musicList.indexOf(musicToRemove)
+                    playlist.musicList[position].favorite = false
+                }
+            }
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            launch{writePlaylistsToFile()}
+        }
+
+        Toast.makeText(applicationContext,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
+
+    }
+
+    fun bottomSheetModifyMusic(context : Context, position: Int, adapter: MusicList) {
+        val intent = Intent(context, ModifyMusicInfoActivity::class.java)
+        intent.putExtra("PATH", adapter.musics[position].path)
+        startActivity(intent)
+    }
+
+    fun bottomSheetPlayNext(adapter: MusicList, position: Int) {
+        if (MyMediaPlayer.currentPlaylist.size > 0) {
+            // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
+            val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            val songToPlayNext = adapter.musics[position]
+
+            // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
+            if (currentMusic != songToPlayNext) {
+                MyMediaPlayer.initialPlaylist.remove(songToPlayNext)
+                MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
+
+                // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
+                MyMediaPlayer.currentIndex =
+                    MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+
+                MyMediaPlayer.initialPlaylist.add(
+                    MyMediaPlayer.currentIndex + 1,
+                    songToPlayNext
+                )
+                MyMediaPlayer.currentPlaylist.add(
+                    MyMediaPlayer.currentIndex + 1,
+                    songToPlayNext
+                )
+                Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.music_will_be_played_next),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    fun bottomSheetRemovePlaylist(position: Int, adapter : Playlists) {
+        if (MyMediaPlayer.allPlaylists[position].isFavoriteList){
+            Toast.makeText(applicationContext,resources.getString(R.string.cannot_delete_favorite_playlist),Toast.LENGTH_SHORT).show()
+        } else {
+            MyMediaPlayer.allPlaylists.removeAt(position)
+            adapter.allPlaylists = MyMediaPlayer.allPlaylists
+            adapter.notifyItemRemoved(position)
+
+            writePlaylistsToFile()
+            Toast.makeText(applicationContext,resources.getString(R.string.playlist_deleted),Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun bottomSheetModifyPlaylist(context : Context, position: Int) {
+        val intent = Intent(context, ModifyPlaylistInfoActivity::class.java)
+        intent.putExtra("POSITION",position)
+        startActivity(intent)
     }
 }

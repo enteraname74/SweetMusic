@@ -140,140 +140,31 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         startActivity(intent)
     }
 
-    override fun onLongMusicClick(positon: Int) {
+    override fun onLongMusicClick(position: Int) {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
         bottomSheetDialog.show()
-    }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        Log.d("music fragment",item.itemId.toString())
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetAddTo(position)
+            bottomSheetDialog.dismiss()
+        }
 
-        return when (item.itemId) {
-            0 -> {
-                // ADD TO PLAYLIST
-                Toast.makeText(context, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
-                true
-            }
-            1 -> {
-                // DELETE FROM APP
-                val musicToRemove = adapter.musics[item.groupId]
-                adapter.musics.removeAt(item.groupId)
-                adapter.notifyItemRemoved(item.groupId)
-                MyMediaPlayer.allMusics.remove(musicToRemove)
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetRemoveFromApp(adapter,position,(activity as MainActivity).sheetBehavior)
+            bottomSheetDialog.dismiss()
+        }
 
-                // Enlevons la musique de nos playlists :
-                for(playlist in MyMediaPlayer.allPlaylists) {
-                    if (playlist.musicList.contains(musicToRemove)){
-                        playlist.musicList.remove(musicToRemove)
-                    }
-                }
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetModifyMusic(requireContext(),position,adapter)
+            bottomSheetDialog.dismiss()
+        }
 
-                // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
-                if (MyMediaPlayer.currentIndex != -1) {
-                    val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                    if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
-                        MyMediaPlayer.initialPlaylist.remove(musicToRemove)
-                    }
-                    if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
-                        // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
-                        Log.d("CONTAINS","")
-                        if (musicToRemove.path == currentSong.path) {
-                            Log.d("SAME","")
-                            // Si on peut passer à la musique suivante, on le fait :
-                            if (MyMediaPlayer.currentPlaylist.size > 1) {
-                                Log.d("PLAY NEXT","")
-                                (activity as MainActivity).playNextSong(adapter)
-                                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
-                            } else {
-                                Log.d("REPLACE STATUS","")
-                                // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
-                                val noSongPlaying = activity?.findViewById<TextView>(R.id.no_song_playing)
-                                val infoSongPlaying = activity?.findViewById<RelativeLayout>(R.id.info_song_playing)
-                                val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
-                                val bottomInfos = activity?.findViewById<LinearLayout>(R.id.bottom_infos)
-
-                                noSongPlaying?.visibility = View.VISIBLE
-                                infoSongPlaying?.visibility = View.GONE
-                                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
-                                bottomInfos?.setOnClickListener(null)
-                                MyMediaPlayer.currentIndex = -1
-
-                                mediaPlayer.pause()
-                            }
-                            MyMediaPlayer.currentPlaylist.remove(musicToRemove)
-                        } else {
-                            Log.d("JUST DELETE","")
-                            MyMediaPlayer.currentPlaylist.remove(musicToRemove)
-                            // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
-                            MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
-                        }
-                    }
-                }
-
-                // Si la musique était en favoris, on lui enlève ce statut :
-                musicToRemove.favorite = false
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
-                    writeAllDeletedSong()
-                    writeAllMusicsToFile(MyMediaPlayer.allMusics)
-                    writePlaylistsToFile()
-                }
-
-                Toast.makeText(
-                    context,
-                    resources.getString(R.string.deleted_from_app),
-                    Toast.LENGTH_SHORT
-                ).show()
-                true
-            }
-            2 -> {
-                // MODIFY INFOS :
-                val intent = Intent(context, ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH", adapter.musics[item.groupId].path)
-                resultLauncher.launch(intent)
-                true
-            }
-            3 -> {
-                if (MyMediaPlayer.currentPlaylist.size > 0) {
-                    // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                    val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                    val songToPlayNext = adapter.musics[item.groupId]
-
-                    // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
-                    if (currentMusic != songToPlayNext) {
-                        MyMediaPlayer.initialPlaylist.remove(songToPlayNext)
-                        MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
-
-                        // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
-                        MyMediaPlayer.currentIndex =
-                            MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-
-                        MyMediaPlayer.initialPlaylist.add(
-                            MyMediaPlayer.currentIndex + 1,
-                            songToPlayNext
-                        )
-                        MyMediaPlayer.currentPlaylist.add(
-                            MyMediaPlayer.currentIndex + 1,
-                            songToPlayNext
-                        )
-                        Toast.makeText(
-                            context,
-                            resources.getString(R.string.music_will_be_played_next),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-                true
-            }
-            else -> {
-                super.onContextItemSelected(item)
-            }
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetPlayNext(adapter,position)
+            bottomSheetDialog.dismiss()
         }
     }
-
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     private fun writeAllMusicsToFile(content : ArrayList<Music>){
         MyMediaPlayer.allMusics = content

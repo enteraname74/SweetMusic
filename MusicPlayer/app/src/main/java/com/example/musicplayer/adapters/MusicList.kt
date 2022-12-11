@@ -117,6 +117,6 @@ data class MusicList(
     interface OnMusicListener {
         fun onMusicClick(position : Int)
 
-        fun onLongMusicClick(positon : Int)
+        fun onLongMusicClick(position : Int)
     }
 }

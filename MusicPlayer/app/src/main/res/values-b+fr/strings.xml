@@ -1,15 +1,10 @@
 <resources>
     <string name="app_name">Music Player</string>
     <string name="title_activity_playlists_menu">PlaylistsMenuActivity</string>
-    <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Suivant</string>
     <string name="previous">Précédent</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_song_is_playing">AUCUN SON N\'EST JOUÉ</string>
     <string name="name_of_the_song">Nom de la musique</string>
     <string name="playlist_s_cover">Image de la playlist</string>
@@ -40,21 +35,21 @@
     <string name="playlist_image">Couverture de la playlist :</string>
     <string name="name_of_the_playlist">Nom de la playlist :</string>
     <string name="name_of_the_album">Nom de l\'album :</string>
-    <string name="title_of_the_song">Titre de la chanson</string>
+    <string name="title_of_the_song">Titre de la musique</string>
     <string name="timer">0:00</string>
     <string name="sort">mélanger</string>
     <string name="pause_play">pause et jeu</string>
     <string name="favorite">favoris</string>
-    <string name="add_songs">Ajouter des chansons</string>
+    <string name="add_songs">Ajouter des musiques</string>
     <string name="list_type">Playlist jouée</string>
     <string name="select_the_saved_files">Selectionnez les fichiers de sauvegardes</string>
     <string name="music_file_musics">Fichier de musiques (.musics) :</string>
     <string name="select">Choisir</string>
     <string name="playlist_file_playlists">Fichier de playlists (.playlists) :</string>
     <string name="add_to">AJOUTER</string>
-    <string name="remove">SUPPRIMER</string>
-    <string name="modify">MODIFIER</string>
-    <string name="play_next">JOUER ENSUITE</string>
+    <string name="remove">Supprimer</string>
+    <string name="modify">Modifier la musique</string>
+    <string name="play_next">Jouer ensuite</string>
     <string name="added_in_the_playlist">Ajout dans une playlist</string>
     <string name="cannot_retrieve_files">Impossible de récupérer les musiques</string>
     <string name="permission">CETTE PERMISSION EST REQUISE POUR LE BON FONCTIONNEMENT DE L\'APPLICATION. VEUILLEZ L\'ACTIVER DANS LES PARAMÈTRES DE CETTE DERNIÈRE</string>
@@ -70,14 +65,17 @@
     <string name="loading_data">Chargement des données</string>
     <string name="new_songs">Nouvelles Musiques</string>
     <string name="deleted_songs">Musiques Supprimées</string>
-    <string name="searching_new_songs">Recherche de nouvelles chansons</string>
+    <string name="searching_new_songs">Recherche de nouvelles musiques</string>
     <string name="retrieve_music">Récupérer</string>
     <string name="retrieved_music">Musique récupérée</string>
-    <string name="add_new_songs">Ajouter ces nouvelles chansons</string>
+    <string name="add_new_songs">Ajouter ces nouvelles musiques</string>
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
     <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
     <string name="back_button">back button</string>
     <string name="add_music_to_favourites">Musique ajoutée aux favoris</string>
     <string name="remove_music_from_favourites">Musique retirée des favoris</string>
-    <string name="add_to_a_playlist">add to a playlist</string>
+    <string name="add_to_a_playlist">Ajouter à une playlist</string>
+    <string name="remove_from_playlist">Retirer de la playlist</string>
+    <string name="delete_playlist">Supprimer la playlist</string>
+    <string name="delete_music">Supprimer la musique</string>
 </resources>

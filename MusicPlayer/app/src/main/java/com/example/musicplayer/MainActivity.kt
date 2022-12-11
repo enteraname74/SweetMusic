@@ -46,7 +46,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     private lateinit var pausePlayButton : ImageView
 
     private lateinit var bottomSheetLayout: LinearLayout
-    private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+    lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -145,9 +145,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             // Créons d'abord la playlist des favoris :
             CoroutineScope(Dispatchers.IO).launch {
                 val favoritePlaylist = Playlist("Favorites",ArrayList(),null, true)
-                val playlists = ArrayList<Playlist>()
-                playlists.add(favoritePlaylist)
-                writePlaylistsToFile(savePlaylistsFile,playlists)
+                MyMediaPlayer.allPlaylists = ArrayList<Playlist>()
+                MyMediaPlayer.allPlaylists.add(favoritePlaylist)
+                writePlaylistsToFile()
             }
 
             CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
@@ -181,7 +181,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         } else {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
             }
         }
 

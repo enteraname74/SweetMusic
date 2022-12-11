@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,7 +10,6 @@ import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
-import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +21,7 @@ import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -52,6 +53,10 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
         }
     }
+
+    private var newPrimaryColor = R.color.primary_color
+    private var newSecondaryColor = R.color.secondary_color
+    private var newTextColor = R.color.text_color
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -184,9 +189,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             adapter.musics = musics
             menuRecyclerView.adapter = adapter
 
-            val playlists = readAllPlaylistsFromFile(savePlaylistsFile)
-            playlists[playlistPosition].musicList = musics
-            writePlaylistsToFile(savePlaylistsFile, playlists)
+            MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
+            MyMediaPlayer.allPlaylists [playlistPosition].musicList = musics
+            writePlaylistsToFile()
         }
     }
 
@@ -213,110 +218,46 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         startActivity(intent)
     }
 
-    override fun onLongMusicClick(positon: Int) {
-        TODO("Not yet implemented")
-    }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            0 -> {
-                Toast.makeText(this,resources.getString(R.string.added_in_the_playlist),Toast.LENGTH_SHORT).show()
-                true
-            }
-            1 -> {
-                val musicToRemove = adapter.musics[item.groupId]
-                adapter.musics.remove(musicToRemove)
-                adapter.notifyItemRemoved(item.groupId)
-                MyMediaPlayer.allPlaylists[playlistPosition].musicList.remove(musicToRemove)
+    @SuppressLint("ResourceAsColor")
+    override fun onLongMusicClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
+        bottomSheetDialog.show()
 
-                // Si on enlève une musique de la playlist des favoris, on enlève son statut de favoris :
-                if (playlist.isFavoriteList){
-                    val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
-                    val positionInInitialList = MyMediaPlayer.initialPlaylist.indexOf(musicToRemove)
-                    val positionInCurrentList = MyMediaPlayer.currentPlaylist.indexOf(musicToRemove)
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)?.setBackgroundColor(newPrimaryColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.add_to_a_playlist_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.remove_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<ImageView>(R.id.modify_music_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.modify_music_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.play_next_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.play_next_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.window?.navigationBarColor = newPrimaryColor
 
-                    if(globalPosition != -1)  {
-                        MyMediaPlayer.allMusics[globalPosition].favorite = false
-                    }
-
-                    if(positionInInitialList != -1)  {
-                        MyMediaPlayer.initialPlaylist[positionInInitialList].favorite = false
-                    }
-
-                    if(positionInCurrentList != -1)  {
-                        MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
-                    }
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        launch{writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)}
-                    }
-
-                    for (playlist in MyMediaPlayer.allPlaylists){
-                        if (playlist.musicList.contains(musicToRemove)){
-                            val position = playlist.musicList.indexOf(musicToRemove)
-                            playlist.musicList[position].favorite = false
-                        }
-                    }
-                }
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    launch{writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)}
-                }
-
-                Toast.makeText(this,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
-
-                true
-            }
-            2 -> {
-                // MODIFY INFOS :
-                val intent = Intent(this@SelectedPlaylistActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH", adapter.musics[item.groupId].path)
-                resultModifyMusic.launch(intent)
-                true
-            }
-            3 -> {
-                if (MyMediaPlayer.currentPlaylist.size > 0) {
-                    // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                    val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                    val songToPlayNext = adapter.musics[item.groupId]
-
-                    // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
-                    if (currentMusic != songToPlayNext) {
-                        MyMediaPlayer.initialPlaylist.remove(songToPlayNext)
-                        MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
-
-                        // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
-                        MyMediaPlayer.currentIndex =
-                            MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-
-                        MyMediaPlayer.initialPlaylist.add(
-                            MyMediaPlayer.currentIndex + 1,
-                            songToPlayNext
-                        )
-                        MyMediaPlayer.currentPlaylist.add(
-                            MyMediaPlayer.currentIndex + 1,
-                            songToPlayNext
-                        )
-                        Toast.makeText(
-                            this,
-                            resources.getString(R.string.music_will_be_played_next),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-                true
-            }
-            else -> {
-                onContextItemSelected(item)
-            }
+        bottomSheetDialog.findViewById<TextView>(R.id.delete_music)?.apply {
+            text = getString(R.string.remove_from_playlist)
+            setTextColor(newTextColor)
         }
-    }
 
-    private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            // On récupère les musiques avec la modification effectuée :
-            allMusicsBackup = MyMediaPlayer.allPlaylists[playlistPosition].musicList
-            adapter.notifyDataSetChanged()
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
+            bottomSheetAddTo(position)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+            bottomSheetRemoveFromPlaylist(adapter, position, playlistPosition, playlist)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
+            bottomSheetModifyMusic(this,position,adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
+            bottomSheetPlayNext(adapter,position)
+            bottomSheetDialog.dismiss()
         }
     }
 
@@ -358,6 +299,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         return true
     }
 
+    @SuppressLint("ResourceAsColor")
     private fun setColorTheme(){
         var bitmap: Bitmap? = null
         val playlistCover = findViewById<ImageView>(R.id.cover)
@@ -377,9 +319,9 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         }
 
         val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch
-        val newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
-        val newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.1f)
-        val newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
+        newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
+        newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.1f)
+        newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
 
         searchView.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
         menuRecyclerView.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)

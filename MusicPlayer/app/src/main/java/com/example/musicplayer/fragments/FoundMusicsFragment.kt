@@ -12,22 +12,21 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
 import com.example.musicplayer.Music
 import com.example.musicplayer.adapters.NewMusicsList
 import com.example.musicplayer.classes.MyMediaPlayer
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
 
-class FoundMusicsFragment : Fragment() {
+class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
     private lateinit var adapter : NewMusicsList
     private lateinit  var menuRecyclerView : RecyclerView
     private lateinit var fetchingSongs : LinearLayout
@@ -36,7 +35,7 @@ class FoundMusicsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = NewMusicsList(ArrayList<Music>(), "Main",requireContext())
+        adapter = NewMusicsList(ArrayList<Music>(), this, requireContext())
     }
 
     override fun onCreateView(
@@ -156,29 +155,6 @@ class FoundMusicsFragment : Fragment() {
         }
     }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        Log.d("new songs fragment",item.itemId.toString())
-
-        return when (item.itemId) {
-            30 -> {
-                val musicToRemove = adapter.musics[item.groupId]
-                adapter.musics.removeAt(item.groupId)
-                adapter.notifyItemRemoved(item.groupId)
-
-                MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
-                CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
-
-                Toast.makeText(
-                    context,
-                    resources.getString(R.string.retrieved_music),
-                    Toast.LENGTH_SHORT
-                ).show()
-                true
-            }
-            else -> super.onContextItemSelected(item)
-        }
-    }
-
     private fun addSongsToAllMusics(){
         for (music in adapter.musics){
             MyMediaPlayer.allMusics.add(music)
@@ -200,6 +176,31 @@ class FoundMusicsFragment : Fragment() {
             oos.close()
         } catch (error : IOException){
             Log.d("Error write deleted",error.toString())
+        }
+    }
+
+    override fun onMusicClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_find_new_songs)
+        bottomSheetDialog.show()
+
+        bottomSheetDialog.findViewById<ImageView>(R.id.action_img)?.setImageResource(R.drawable.ic_baseline_delete_24)
+        bottomSheetDialog.findViewById<TextView>(R.id.action_text)?.text = getString(R.string.delete_music)
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.action)?.setOnClickListener {
+            val musicToRemove = adapter.musics[position]
+            adapter.musics.removeAt(position)
+            adapter.notifyItemRemoved(position)
+
+            MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
+            CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
+
+            Toast.makeText(
+                context,
+                resources.getString(R.string.retrieved_music),
+                Toast.LENGTH_SHORT
+            ).show()
+            bottomSheetDialog.dismiss()
         }
     }
 

@@ -112,7 +112,7 @@ class ModifyPlaylistInfoActivity : Tools() {
                 MyMediaPlayer.allPlaylists = allPlaylists
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    writePlaylistsToFile(savePlaylistsFile, allPlaylists)
+                    writePlaylistsToFile()
                 }
 
                 setResult(RESULT_OK)

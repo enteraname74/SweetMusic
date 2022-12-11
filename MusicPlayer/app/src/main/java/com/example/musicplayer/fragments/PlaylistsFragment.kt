@@ -13,10 +13,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +22,7 @@ import com.example.musicplayer.*
 import com.example.musicplayer.adapters.Playlists
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.Playlist
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -84,6 +82,23 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         intent.putExtra("POSITION", position)
 
         startActivity(intent)
+    }
+
+    override fun onPlayListLongClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
+        bottomSheetDialog.show()
+
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetModifyPlaylist(requireContext(),position)
+            bottomSheetDialog.dismiss()
+        }
     }
 
     private fun addPlaylist(){
@@ -190,38 +205,6 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         } catch (e: IOException) {
             Log.d("ERROR","")
             e.printStackTrace()
-        }
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            10 -> {
-                if (MyMediaPlayer.allPlaylists[item.groupId].isFavoriteList){
-                    Toast.makeText(context,resources.getString(R.string.cannot_delete_favorite_playlist),Toast.LENGTH_SHORT).show()
-                } else {
-                    MyMediaPlayer.allPlaylists.removeAt(item.groupId)
-                    adapter.allPlaylists = MyMediaPlayer.allPlaylists
-                    adapter.notifyItemRemoved(item.groupId)
-
-                    writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
-                    Toast.makeText(context,resources.getString(R.string.playlist_deleted),Toast.LENGTH_SHORT).show()
-                }
-                true
-            }
-            11 -> {
-                val intent = Intent(context, ModifyPlaylistInfoActivity::class.java)
-                intent.putExtra("POSITION",item.groupId)
-                resultLauncher.launch(intent)
-                true
-            }
-            else -> {
-                super.onContextItemSelected(item)
-            }
-        }
-    }
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            adapter.allPlaylists = MyMediaPlayer.allPlaylists
         }
     }
 }

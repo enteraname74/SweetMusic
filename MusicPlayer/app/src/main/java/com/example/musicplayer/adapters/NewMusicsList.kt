@@ -3,7 +3,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.view.*
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.Music
@@ -14,10 +13,10 @@ import java.io.Serializable
 // Classe permettant de représenter une liste de musiques :
 data class NewMusicsList(
     var musics : ArrayList<Music>,
-    var listName : String,
+    private val mOnMusicListener : NewMusicsList.OnMusicListener,
     private val context : Context) : RecyclerView.Adapter<NewMusicsList.NewMusicListViewHolder>(), Serializable {
 
-    class NewMusicListViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable, View.OnCreateContextMenuListener{
+    class NewMusicListViewHolder(itemView : View, private var onMusicListener : NewMusicsList.OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable {
 
         var albumCover : ShapeableImageView? = null
         var songName : TextView? = null
@@ -33,17 +32,11 @@ data class NewMusicsList(
             albumName = itemView.findViewById(R.id.album_name)
 
             itemView.setOnClickListener(this)
-            itemView.setOnCreateContextMenuListener(this)
         }
 
-        override fun onClick(v: View?) {
-            itemView.showContextMenu()
+        override fun onClick(p0: View?) {
+            this.onMusicListener.onMusicClick(bindingAdapterPosition)
         }
-
-        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 30, 0, itemView.resources.getString(R.string.remove))
-        }
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewMusicListViewHolder {
@@ -52,7 +45,7 @@ data class NewMusicsList(
                 R.layout.music_file,
                 parent,
                 false
-            )
+            ), mOnMusicListener
         )
     }
 
@@ -79,5 +72,9 @@ data class NewMusicsList(
 
     override fun getItemCount(): Int {
         return musics.size
+    }
+
+    interface OnMusicListener {
+        fun onMusicClick(position : Int)
     }
 }

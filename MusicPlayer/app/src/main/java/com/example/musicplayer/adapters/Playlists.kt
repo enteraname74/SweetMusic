@@ -22,7 +22,7 @@ class Playlists (
     private val mOnPlaylistListener : OnPlaylistsListener,
     private val resourceName : Int) : RecyclerView.Adapter<Playlists.PlaylistsViewHolder>(), Serializable {
 
-    class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener {
+    class PlaylistsViewHolder(itemView : View, private var onPlaylistsListener : OnPlaylistsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable {
 
         var playlistName : TextView
         var playlistCover : ShapeableImageView
@@ -41,7 +41,6 @@ class Playlists (
 
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
-            itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onClick(v: View?) {
@@ -49,14 +48,8 @@ class Playlists (
         }
 
         override fun onLongClick(v: View?): Boolean {
-            Log.d("LONG PRESS","")
-            itemView.showContextMenu()
+            this.onPlaylistsListener.onPlayListLongClick(bindingAdapterPosition)
             return true
-        }
-
-        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 10, 0, itemView.resources.getString(R.string.remove))
-            menu?.add(this.bindingAdapterPosition, 11, 0, itemView.resources.getString(R.string.modify))
         }
     }
 
@@ -99,9 +92,8 @@ class Playlists (
 
     interface OnPlaylistsListener {
         fun onPlaylistClick(position : Int)
+
+        fun onPlayListLongClick(position: Int)
     }
 
-    fun addList(list : Playlist) {
-        allPlaylists.add(list)
-    }
 }
