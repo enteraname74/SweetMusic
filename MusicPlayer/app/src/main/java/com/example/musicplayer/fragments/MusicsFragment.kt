@@ -21,6 +21,7 @@ import com.example.musicplayer.Music
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.notification.MusicNotificationService
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.*
 import java.io.*
 
@@ -135,6 +136,12 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         intent.putExtra("SAME MUSIC", sameMusic)
 
         startActivity(intent)
+    }
+
+    override fun onLongMusicClick(positon: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
+        bottomSheetDialog.show()
     }
 
     override fun onContextItemSelected(item: MenuItem): Boolean {

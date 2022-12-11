@@ -26,7 +26,7 @@ data class MusicList(
     var backgroundColor: Int = -1,
     var colorsForText : Palette.Swatch? = null) : RecyclerView.Adapter<MusicList.MusicListViewHolder>(), Serializable {
 
-    class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable, View.OnCreateContextMenuListener{
+    class MusicListViewHolder(itemView : View, private var onMusicListener : OnMusicListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener, View.OnLongClickListener,Serializable {
 
         var albumCover : ShapeableImageView? = null
         var songName : TextView? = null
@@ -47,7 +47,6 @@ data class MusicList(
 
             itemView.setOnClickListener(this)
             itemView.setOnLongClickListener(this)
-            itemView.setOnCreateContextMenuListener(this)
         }
 
         override fun onClick(v: View?) {
@@ -55,18 +54,9 @@ data class MusicList(
         }
 
         override fun onLongClick(v: View?): Boolean {
-            Log.d("LONG PRESS","")
-            itemView.showContextMenu()
+            this.onMusicListener.onLongMusicClick(bindingAdapterPosition)
             return true
         }
-
-        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-            menu?.add(this.bindingAdapterPosition, 0, 0, itemView.resources.getString(R.string.add_to))
-            menu?.add(this.bindingAdapterPosition, 1, 0, itemView.resources.getString(R.string.remove))
-            menu?.add(this.bindingAdapterPosition, 2, 0, itemView.resources.getString(R.string.modify))
-            menu?.add(this.bindingAdapterPosition, 3, 0, itemView.resources.getString(R.string.play_next))
-        }
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MusicListViewHolder {
@@ -126,5 +116,7 @@ data class MusicList(
 
     interface OnMusicListener {
         fun onMusicClick(position : Int)
+
+        fun onLongMusicClick(positon : Int)
     }
 }

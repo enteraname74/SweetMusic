@@ -596,4 +596,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             setResourcesWithMusic()
         }
     }
+
+    override fun onLongMusicClick(positon: Int) {
+        TODO("Not yet implemented")
+    }
 }

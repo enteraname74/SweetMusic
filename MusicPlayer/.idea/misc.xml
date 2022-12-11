@@ -26,6 +26,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_downward_24.xml" value="0.193" />
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_forward_ios_24.xml" value="0.335" />
         <entry key="app/src/main/res/drawable/ic_baseline_arrow_upward_24.xml" value="0.354" />
+        <entry key="app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.254" />
         <entry key="app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.354" />
         <entry key="app/src/main/res/drawable/ic_baseline_favorite_24.xml" value="0.3395" />
         <entry key="app/src/main/res/drawable/ic_baseline_favorite_border_24.xml" value="0.3395" />
@@ -58,6 +59,7 @@
         <entry key="app/src/main/res/layout/album_and_artist_layout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/album_file.xml" value="0.3515625" />
         <entry key="app/src/main/res/layout/artist_file.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/bottom_sheet_dialog_music_menu.xml" value="0.2894399315946986" />
         <entry key="app/src/main/res/layout/bottom_sheet_dialog_player.xml" value="0.33" />
         <entry key="app/src/main/res/layout/bottom_sheet_dialog_song_list.xml" value="0.3515625" />
         <entry key="app/src/main/res/layout/fragment_album.xml" value="0.20833333333333334" />

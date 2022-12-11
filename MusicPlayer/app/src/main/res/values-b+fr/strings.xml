@@ -79,4 +79,5 @@
     <string name="back_button">back button</string>
     <string name="add_music_to_favourites">Musique ajoutée aux favoris</string>
     <string name="remove_music_from_favourites">Musique retirée des favoris</string>
+    <string name="add_to_a_playlist">add to a playlist</string>
 </resources>

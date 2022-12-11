@@ -190,6 +190,10 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         startActivity(intent)
     }
 
+    override fun onLongMusicClick(positon: Int) {
+        TODO("Not yet implemented")
+    }
+
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             0 -> {

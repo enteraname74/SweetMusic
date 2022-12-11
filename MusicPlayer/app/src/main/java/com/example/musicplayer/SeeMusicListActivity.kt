@@ -176,6 +176,10 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
         finish()
     }
 
+    override fun onLongMusicClick(positon: Int) {
+        TODO("Not yet implemented")
+    }
+
     override fun onContextItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
 
