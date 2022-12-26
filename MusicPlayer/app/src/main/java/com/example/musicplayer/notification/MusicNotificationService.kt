@@ -13,10 +13,12 @@ import android.graphics.Color
 import android.media.MediaMetadata
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.musicplayer.MainActivity
 import com.example.musicplayer.MusicPlayerActivity
+import com.example.musicplayer.PlaybackService
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.R
 import com.example.musicplayer.receivers.DeletedNotificationIntentReceiver
@@ -31,8 +33,6 @@ class MusicNotificationService(private val context : Context) {
     private lateinit var pausePlayIntent : PendingIntent
     private lateinit var previousMusicIntent : PendingIntent
     private lateinit var nextMusicIntent : PendingIntent
-
-    private lateinit var mediaSession : MediaSessionCompat
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -131,8 +131,6 @@ class MusicNotificationService(private val context : Context) {
     private fun updateNotification(pauseIcon : Int) {
         var bitmap : Bitmap? = null
 
-        mediaSession = MediaSessionCompat(context, context.packageName+"mediaSessionPlayer")
-
         if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
             // Passons d'abord notre byteArray en bitmap :
             val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
@@ -143,7 +141,20 @@ class MusicNotificationService(private val context : Context) {
             bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.michael)
         }
 
-        mediaSession.setMetadata(MediaMetadataCompat.Builder().putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap).build())
+        PlaybackService.mediaSession.setMetadata(MediaMetadataCompat.Builder()
+            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
+            .putLong(
+                MediaMetadataCompat.METADATA_KEY_DURATION,
+                MyMediaPlayer.getInstance.duration.toLong()
+            )
+            .build())
+
+        val state = PlaybackStateCompat.Builder()
+            .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_SEEK_TO)
+            .setState(PlaybackStateCompat.STATE_PLAYING, MyMediaPlayer.getInstance.currentPosition.toLong(), 1.0F)
+            .build()
+
+        PlaybackService.mediaSession.setPlaybackState(state)
 
         notificationMusicPlayer
             .clearActions()
@@ -154,7 +165,7 @@ class MusicNotificationService(private val context : Context) {
             .setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
             .setLargeIcon(bitmap)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
-                .setMediaSession(mediaSession.sessionToken)
+                .setMediaSession(PlaybackService.mediaSession.sessionToken)
                 .setShowActionsInCompactView(0, 1, 2)
             )
 

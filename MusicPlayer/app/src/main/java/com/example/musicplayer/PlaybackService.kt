@@ -16,8 +16,6 @@ import com.example.musicplayer.classes.MyMediaPlayer
 
 class PlaybackService : Service() {
     var mediaPlayer = MyMediaPlayer.getInstance
-    private lateinit var mediaSession : MediaSessionCompat
-    private lateinit var mediaSessionToken : MediaSession.Token
 
     override fun onBind(intent: Intent): IBinder? {
         Log.d("ON BIND","")
@@ -82,6 +80,11 @@ class PlaybackService : Service() {
         mediaSession = MediaSessionCompat(applicationContext, packageName+"mediaSessionPlayer")
 
         mediaSession.setCallback(object : MediaSessionCompat.Callback() {
+
+            override fun onSeekTo(pos: Long) {
+                MyMediaPlayer.getInstance.seekTo(pos.toInt())
+            }
+
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
                 Log.d("MediaButtonEvent", mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT).toString())
 
@@ -237,7 +240,7 @@ class PlaybackService : Service() {
         })
 
         val state = PlaybackStateCompat.Builder()
-            .setActions(PlaybackStateCompat.ACTION_PLAY)
+            .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_SEEK_TO)
             .setState(PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0F)
             .build()
 
@@ -256,5 +259,6 @@ class PlaybackService : Service() {
         lateinit var onAudioFocusChange : AudioManager.OnAudioFocusChangeListener
         lateinit var audioAttributes : AudioAttributes
         lateinit var audioManager : AudioManager
+        lateinit var mediaSession : MediaSessionCompat
     }
 }
