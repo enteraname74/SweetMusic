@@ -1,5 +1,6 @@
 package com.example.musicplayer.notification
 
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -8,6 +9,10 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.media.MediaMetadata
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.musicplayer.MainActivity
@@ -27,6 +32,8 @@ class MusicNotificationService(private val context : Context) {
     private lateinit var previousMusicIntent : PendingIntent
     private lateinit var nextMusicIntent : PendingIntent
 
+    private lateinit var mediaSession : MediaSessionCompat
+
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             Log.d("RECEIVE IN NOTIFICATION",intent.extras?.getBoolean("STOP").toString())
@@ -36,11 +43,11 @@ class MusicNotificationService(private val context : Context) {
                 context.unregisterReceiver(this)
             } else if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                updateNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                updateNotification(R.drawable.ic_baseline_play_arrow_24)
 
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                updateNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                updateNotification(R.drawable.ic_baseline_pause_24)
                 val intentForBroadcast = Intent("BROADCAST")
                 intentForBroadcast.putExtra("STOP", false)
                 context.sendBroadcast(intentForBroadcast)
@@ -113,6 +120,7 @@ class MusicNotificationService(private val context : Context) {
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0, 1, 2)
             )
+            .setColor(context.getColor(R.color.primary_color))
 
         notificationManager.notify(
             1,
@@ -123,6 +131,8 @@ class MusicNotificationService(private val context : Context) {
     private fun updateNotification(pauseIcon : Int) {
         var bitmap : Bitmap? = null
 
+        mediaSession = MediaSessionCompat(context, context.packageName+"mediaSessionPlayer")
+
         if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
             // Passons d'abord notre byteArray en bitmap :
             val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
@@ -132,6 +142,9 @@ class MusicNotificationService(private val context : Context) {
         } else {
             bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.michael)
         }
+
+        mediaSession.setMetadata(MediaMetadataCompat.Builder().putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap).build())
+
         notificationMusicPlayer
             .clearActions()
             .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
@@ -140,6 +153,10 @@ class MusicNotificationService(private val context : Context) {
             .setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
             .setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
             .setLargeIcon(bitmap)
+            .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
+                .setMediaSession(mediaSession.sessionToken)
+                .setShowActionsInCompactView(0, 1, 2)
+            )
 
         notificationManager.notify(1, notificationMusicPlayer.build())
     }
