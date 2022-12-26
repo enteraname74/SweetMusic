@@ -66,6 +66,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            Log.d("RECEIVE IN MP", intent.extras?.getBoolean("STOP").toString())
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
@@ -258,16 +259,20 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         if(notificationManager.activeNotifications.isEmpty()) {
             val service = MusicNotificationService(applicationContext as Context)
             if (mediaPlayer.isPlaying){
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
                 service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
             } else {
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
                 service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
             }
         }
 
         val intentForNotification = Intent("BROADCAST_NOTIFICATION")
         if (mediaPlayer.isPlaying){
+            pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             intentForNotification.putExtra("STOP", false)
         } else {
+            pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             intentForNotification.putExtra("STOP", true)
         }
         applicationContext.sendBroadcast(intentForNotification)
@@ -319,6 +324,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     }
 
     private fun playNextSong(){
+        Log.d("MP", "play next func")
         sameMusic = false
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
