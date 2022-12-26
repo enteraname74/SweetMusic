@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.NotificationManager
 import android.content.BroadcastReceiver
@@ -30,6 +31,7 @@ import com.example.musicplayer.classes.Tools
 import com.example.musicplayer.notification.MusicNotificationService
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,6 +78,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         }
     }
 
+    private var newPrimaryColor = R.color.primary_color
+    private var newSecondaryColor = R.color.secondary_color
+    private var newTextColor = R.color.text_color
+
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
@@ -107,7 +113,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         favoriteBtn.setOnClickListener{ setFavorite() }
         sort.setOnClickListener{ changeSorting() }
 
-        registerForContextMenu(musicIcon)
+        musicIcon.setOnLongClickListener { showBottomSheet() }
 
         CoroutineScope(Dispatchers.Main).launch { playMusic() }
 
@@ -267,109 +273,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         applicationContext.sendBroadcast(intentForNotification)
     }
 
-    override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        menu?.add(0, 10, 0, resources.getString(R.string.add_to))
-        menu?.add(0, 11, 0, resources.getString(R.string.modify))
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            0 -> {
-                Toast.makeText(this, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
-                true
-            }
-            1 -> {
-                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
-                if (MyMediaPlayer.currentIndex == item.groupId) {
-                    if (MyMediaPlayer.currentPlaylist.size > 1) {
-                        playNextSong()
-                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-                    } else {
-                        Log.d("SHOULD FINISH","")
-                        MyMediaPlayer.currentIndex = -1
-                        mediaPlayer.pause()
-                        Toast.makeText(
-                            this,
-                            resources.getString(R.string.no_songs_left_in_the_current_playlist),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        finish()
-                    }
-                    MyMediaPlayer.currentPlaylist.removeAt(item.groupId)
-                } else {
-                    MyMediaPlayer.currentPlaylist.removeAt(item.groupId)
-                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-                }
-                adapter.notifyItemRemoved(item.groupId)
-
-                Toast.makeText(
-                    this,
-                    resources.getString(R.string.deleted_from_playlist),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                // Si il n'y a plus de musiques, on
-                true
-            }
-            2 -> {
-                val intent = Intent(this, ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH", MyMediaPlayer.currentPlaylist[item.groupId].path)
-                modifyMusicLauncher.launch(intent)
-                true
-            }
-            3 -> {
-                // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
-                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                val songToPlayNext = adapter.musics[item.groupId]
-
-                // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
-                if (currentMusic != songToPlayNext) {
-                    MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
-
-                    // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
-                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-
-                    MyMediaPlayer.currentPlaylist.add(
-                        MyMediaPlayer.currentIndex + 1,
-                        songToPlayNext
-                    )
-
-                    adapter.notifyItemRemoved(item.groupId)
-                    adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
-                    Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
-                }
-                true
-            }
-            10 -> {
-                Toast.makeText(this, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
-                true
-            }
-            11 -> {
-                // MODIFY INFOS :
-                val intent = Intent(this@MusicPlayerActivity,ModifyMusicInfoActivity::class.java)
-                intent.putExtra("PATH",currentSong.path)
-                modifyMusicLauncher.launch(intent)
-                true
-            }
-            else -> {
-                onContextItemSelected(item)
-            }
-        }
-    }
-
-    private var modifyMusicLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if(result.resultCode == Activity.RESULT_OK) {
-            CoroutineScope(Dispatchers.Main).launch {
-                val path = result.data?.getSerializableExtra("modifiedSongPath") as String
-                val modifiedSong = MyMediaPlayer.currentPlaylist.find { it.path == path }
-
-                adapter.notifyItemChanged(MyMediaPlayer.currentPlaylist.indexOf(modifiedSong))
-            }
-        }
-    }
-
     private fun openCloseBottomSheet() {
         if(sheetBehavior.state != BottomSheetBehavior.STATE_EXPANDED){
             sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED)
@@ -449,63 +352,67 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     // Permet de changer le statut favoris de la chanson :
     private fun setFavorite(){
-        if (!changingFavouriteState) {
-            changingFavouriteState = true
-            CoroutineScope(Dispatchers.Main).launch {
-                try {
-                    if(currentSong.favorite){
-                        MyMediaPlayer.initialPlaylist.find { it.path == currentSong.path }?.favorite = false
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
-                        currentSong.favorite = false
-                        favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
-                    } else {
-                        MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
-                        currentSong.favorite = true
-                        favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
-                    }
-
-                    // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
-                    // Commencons par la playlist principale :
-                    val allMusics  = MyMediaPlayer.allMusics
-                    for (element in allMusics){
-                        // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
-                        if (element.path == currentSong.path){
-                            element.favorite = currentSong.favorite
-                            break
+        CoroutineScope(Dispatchers.Main).launch {
+            if (!changingFavouriteState) {
+                changingFavouriteState = true
+                CoroutineScope(Dispatchers.Main).launch {
+                    try {
+                        if(currentSong.favorite){
+                            MyMediaPlayer.initialPlaylist.find { it.path == currentSong.path }?.favorite = false
+                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = false
+                            currentSong.favorite = false
+                            favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                        } else {
+                            MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
+                            MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
+                            currentSong.favorite = true
+                            favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
                         }
-                    }
-                    // Ensuite, mettons à jour nos playlists :
-                    val allPlaylists = MyMediaPlayer.allPlaylists
-                    for (playlist in allPlaylists){
-                        for (element in playlist.musicList){
+
+                        // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
+                        // Commencons par la playlist principale :
+                        val allMusics  = MyMediaPlayer.allMusics
+                        for (element in allMusics){
+                            // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
                             if (element.path == currentSong.path){
                                 element.favorite = currentSong.favorite
                                 break
                             }
                         }
-                    }
-                    // Mettons à jour la playlist favoris :
-                    val favoritePlaylist = allPlaylists[0]
-                    var shouldBeInFavoriteList = true
-                    for (element in favoritePlaylist.musicList){
-                        if (element.path == currentSong.path){
-                            favoritePlaylist.musicList.remove(element)
-                            shouldBeInFavoriteList = false
-                            break
+                        // Ensuite, mettons à jour nos playlists :
+                        val allPlaylists = MyMediaPlayer.allPlaylists
+                        for (playlist in allPlaylists){
+                            for (element in playlist.musicList){
+                                if (element.path == currentSong.path){
+                                    element.favorite = currentSong.favorite
+                                    break
+                                }
+                            }
                         }
-                    }
-                    if (shouldBeInFavoriteList){
-                        favoritePlaylist.musicList.add(currentSong)
-                    }
+                        // Mettons à jour la playlist favoris :
+                        val favoritePlaylist = allPlaylists[0]
+                        var shouldBeInFavoriteList = true
+                        for (element in favoritePlaylist.musicList){
+                            if (element.path == currentSong.path){
+                                favoritePlaylist.musicList.remove(element)
+                                shouldBeInFavoriteList = false
+                                break
+                            }
+                        }
+                        if (shouldBeInFavoriteList){
+                            favoritePlaylist.musicList.add(currentSong)
+                        }
 
-                    writeAllAsync(allMusics,allPlaylists)
-                } catch (e: ArrayIndexOutOfBoundsException) {
-                    Log.d("MPA", "Erro changing state of fav")
-                    Log.e("error", e.toString())
+                        CoroutineScope(Dispatchers.IO).launch {
+                            writeAllAsync(allMusics,allPlaylists)
+                            changingFavouriteState = false
+                        }
+                    } catch (e: ArrayIndexOutOfBoundsException) {
+                        Log.d("MPA", "Erro changing state of fav")
+                        Log.e("error", e.toString())
+                    }
                 }
             }
-            changingFavouriteState = false
         }
     }
 
@@ -534,6 +441,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         }
     }
 
+    @SuppressLint("ResourceAsColor")
     private fun setColor(){
         var bitmap : Bitmap? = null
         if (currentSong.albumCover != null) {
@@ -556,9 +464,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                 Palette.from(bitmap).generate().lightVibrantSwatch
             }
         //val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch
-        val newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
-        val newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.2f)
-        val newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
+        newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
+        newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.2f)
+        newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
 
         findViewById<LinearLayout>(R.id.music_player).setBackgroundColor(newPrimaryColor)
         titleTv.setTextColor(newTextColor)
@@ -597,7 +505,94 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         }
     }
 
-    override fun onLongMusicClick(positon: Int) {
-        TODO("Not yet implemented")
+    @SuppressLint("ResourceAsColor")
+    override fun onLongMusicClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
+        bottomSheetDialog.show()
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)?.setBackgroundColor(newPrimaryColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.add_to_a_playlist_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<TextView>(R.id.delete_music)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.remove_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<ImageView>(R.id.modify_music_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.modify_music_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.play_next_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.play_next_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.window?.navigationBarColor = newPrimaryColor
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
+            bottomSheetAddTo(position, this, adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+            val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
+            if (MyMediaPlayer.currentIndex == position) {
+                if (MyMediaPlayer.currentPlaylist.size > 1) {
+                    playNextSong()
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                } else {
+                    MyMediaPlayer.currentIndex = -1
+                    mediaPlayer.pause()
+                    Toast.makeText(
+                        this,
+                        resources.getString(R.string.no_songs_left_in_the_current_playlist),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish()
+                }
+                MyMediaPlayer.currentPlaylist.removeAt(position)
+            } else {
+                MyMediaPlayer.currentPlaylist.removeAt(position)
+                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+            }
+            adapter.notifyItemRemoved(position)
+
+            Toast.makeText(
+                this,
+                resources.getString(R.string.deleted_from_playlist),
+                Toast.LENGTH_SHORT
+            ).show()
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
+            bottomSheetModifyMusic(this,position,adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
+            bottomSheetPlayNext(adapter,position)
+            bottomSheetDialog.dismiss()
+        }
+    }
+
+    @SuppressLint("ResourceAsColor")
+    private fun showBottomSheet() : Boolean {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_player_activity)
+        bottomSheetDialog.show()
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)?.setBackgroundColor(newPrimaryColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.add_to_a_playlist_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.modify_music_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.modify_music_text)?.setTextColor(newTextColor)
+        bottomSheetDialog.window?.navigationBarColor = newPrimaryColor
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
+            bottomSheetAddTo(MyMediaPlayer.currentIndex, this, adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
+            bottomSheetModifyMusic(this,MyMediaPlayer.currentIndex,adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        return true
     }
 }

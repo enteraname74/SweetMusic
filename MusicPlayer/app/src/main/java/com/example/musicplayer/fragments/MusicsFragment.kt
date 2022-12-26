@@ -146,7 +146,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         bottomSheetDialog.show()
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
-            (activity as MainActivity).bottomSheetAddTo(position)
+            (activity as MainActivity).bottomSheetAddTo(position, requireContext(), adapter)
             bottomSheetDialog.dismiss()
         }
 

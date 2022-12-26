@@ -1,7 +1,6 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -13,7 +12,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
-import android.util.Log
 import android.util.Size
 import android.view.MenuItem
 import android.view.View
@@ -22,14 +20,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
-import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.adapters.VpAdapter
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
-import com.example.musicplayer.fragments.MusicsFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator

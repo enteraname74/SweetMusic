@@ -35,9 +35,8 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
         menuRecyclerView.adapter = adapter
 
         val validateButton = findViewById<Button>(R.id.validate)
-        val cancelButton = findViewById<Button>(R.id.cancel)
         validateButton.setOnClickListener{ onValidateButtonClick() }
-        cancelButton.setOnClickListener{ onCancelButtonClick() }
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener { finish() }
     }
 
     override fun onMusicClick(position: Int) {
@@ -67,12 +66,6 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
         }
     }
 
-    private fun onCancelButtonClick(){
-        val returnIntent = Intent()
-        setResult(RESULT_CANCELED, returnIntent)
-        finish()
-    }
-
     override fun onQueryTextSubmit(p0: String?): Boolean {
         return manageSearchBarEvents(p0)
     }
@@ -100,7 +93,7 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
                     if (list.size > 0) {
                         adapter.musics = list
                     } else {
-                        adapter.musics = ArrayList<Music>()
+                        adapter.musics = ArrayList()
                     }
                 }
                 adapter.notifyDataSetChanged()

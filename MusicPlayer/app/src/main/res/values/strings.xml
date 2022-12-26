@@ -44,9 +44,9 @@
     <string name="add_songs">Add songs</string>
     <string name="list_type">Current List</string>
     <string name="select_the_saved_files">Select the saved files</string>
-    <string name="music_file_musics">Music file (.musics) :</string>
+    <string name="music_file_musics">Music file (.musics)</string>
     <string name="select">Select</string>
-    <string name="playlist_file_playlists">Playlist file (.playlists) :</string>
+    <string name="playlist_file_playlists">Playlist file (.playlists)</string>
     <string name="add_to">ADD TO</string>
     <string name="remove">Remove</string>
     <string name="modify">Modify song</string>
@@ -79,4 +79,12 @@
     <string name="remove_from_playlist">Remove from playlist</string>
     <string name="delete_playlist">Delete playlist</string>
     <string name="delete_music">Delete music</string>
+    <string name="your_playlists">Your playlists</string>
+    <string name="validate_selection">Validate selection</string>
+    <string name="number_of_songs">Number of Songs</string>
+    <string name="songs_number">%1d songs</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="wrong_file">Wrong file !</string>
+    <string name="correct_file">Correct file !</string>
 </resources>

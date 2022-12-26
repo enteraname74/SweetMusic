@@ -19,36 +19,30 @@
         app:shapeAppearance="@style/rounCornerForSmallImage"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
-        android:contentDescription="Album Cover"
-        android:src="@drawable/icone_musique" />
+        android:contentDescription="@string/album_art"
+        android:src="@drawable/icone_musique"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:layout_marginLeft="4dp"
         android:orientation="vertical"
         android:layout_marginStart="4dp">
-
 
         <TextView
             android:id="@+id/playlist_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Name of the Playlist"
+            android:text="@string/name_of_the_playlist"
             android:singleLine="true"
-            android:textColor="@color/text_color"
-            >
-        </TextView>
+            android:textColor="@color/text_color"/>
 
         <TextView
             android:id="@+id/number_of_songs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Number of Songs"
+            android:text="@string/number_of_songs"
             android:singleLine="true"
-            android:textColor="@color/text_color">
-
-        </TextView>
+            android:textColor="@color/text_color"/>
     </LinearLayout>
 </LinearLayout>

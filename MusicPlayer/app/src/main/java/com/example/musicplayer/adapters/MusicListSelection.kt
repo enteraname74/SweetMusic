@@ -80,11 +80,7 @@ data class MusicListSelection(
         holder.artist?.text = currentMusic.artist
         holder.albumName?.text = currentMusic.album
 
-        if (currentMusic.path in selectedMusicsInfos.values) {
-            holder.checkbox?.isChecked = holder.checkbox?.isChecked != true
-        } else {
-            holder.checkbox?.isChecked = false
-        }
+        holder.checkbox?.isChecked = currentMusic.path in selectedMusicsInfos.values
     }
 
     override fun getItemCount(): Int {

@@ -351,9 +351,12 @@ open class Tools : AppCompatActivity() {
 
     /***************************** BOTTOM SHEET DIALOG : ***********************/
 
-    fun bottomSheetAddTo(position: Int){
-        // ADD TO PLAYLIST
-        Toast.makeText(applicationContext, resources.getString(R.string.added_in_the_playlist), Toast.LENGTH_SHORT).show()
+    fun bottomSheetAddTo(position: Int, context : Context, adapter : MusicList){
+        val selectedMusic = adapter.musics[position]
+        val globalPosition = MyMediaPlayer.allMusics.indexOf(selectedMusic)
+        val intent = Intent(context, AddToPlaylistActivity::class.java)
+        intent.putExtra("POSITION", globalPosition)
+        startActivity(intent)
     }
 
     fun bottomSheetRemoveFromApp(adapter : MusicList, position : Int, sheetBehavior : BottomSheetBehavior<LinearLayout>) {

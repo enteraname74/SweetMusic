@@ -13,4 +13,6 @@
     <color name="third_color">#F9F9FB</color>
     <color name="text_color">#171b26</color>
     <color name="selected_music_color">#8B96B8</color>
+    <color name="error_color">#eb503d</color>
+    <color name="valid_color">#31d15a</color>
 </resources>

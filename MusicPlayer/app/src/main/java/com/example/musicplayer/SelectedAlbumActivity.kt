@@ -218,7 +218,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
-            bottomSheetAddTo(position)
+            bottomSheetAddTo(position, this, adapter)
             bottomSheetDialog.dismiss()
         }
 

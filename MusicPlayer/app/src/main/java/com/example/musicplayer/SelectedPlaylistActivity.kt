@@ -179,10 +179,16 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data?.getSerializableExtra("addedSongs") as ArrayList<Int>
-            val allMusics = readAllMusicsFromFile(saveAllMusicsFile)
             for (position in data){
-                if (musics.find { it.path == allMusics[position].path } == null){
-                    musics.add(allMusics[position])
+                if (musics.find { it.path == MyMediaPlayer.allMusics[position].path } == null){
+                    if (playlist.isFavoriteList) {
+                        MyMediaPlayer.allMusics[position].favorite = true
+                        MyMediaPlayer.currentPlaylist.find { it.path == MyMediaPlayer.allMusics[position].path }?.favorite = true
+                        for (playlist in MyMediaPlayer.allPlaylists) {
+                            playlist.musicList.find { it.path == MyMediaPlayer.allMusics[position].path }?.favorite = true
+                        }
+                    }
+                    musics.add(MyMediaPlayer.allMusics[position])
                 }
             }
             playlist.musicList = musics
@@ -190,7 +196,10 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             menuRecyclerView.adapter = adapter
 
             MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
-            MyMediaPlayer.allPlaylists [playlistPosition].musicList = musics
+            MyMediaPlayer.allPlaylists[playlistPosition].musicList = musics
+            if (playlist.isFavoriteList) {
+                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+            }
             writePlaylistsToFile()
         }
     }
@@ -241,7 +250,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
-            bottomSheetAddTo(position)
+            bottomSheetAddTo(position, this, adapter)
             bottomSheetDialog.dismiss()
         }
 
