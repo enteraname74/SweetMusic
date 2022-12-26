@@ -505,6 +505,29 @@ open class Tools : AppCompatActivity() {
         }
     }
 
+    fun bottomSheetPlayNextInCurrentPlaylist(adapter: MusicList, position : Int) {
+        // Lorsque l'on veut jouer une musique après celle qui ce joue actuellement, on supprime d'abord la musique de la playlist :
+        val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+        val songToPlayNext = adapter.musics[position]
+
+        // On empêche de pouvoir ajouter la même musique pour éviter des problèmes de position négatif :
+        if (currentMusic != songToPlayNext) {
+            MyMediaPlayer.currentPlaylist.remove(songToPlayNext)
+
+            // Assurons nous de récupérer la bonne position de la musique qui se joue actuellement :
+            MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+
+            MyMediaPlayer.currentPlaylist.add(
+                MyMediaPlayer.currentIndex + 1,
+                songToPlayNext
+            )
+
+            adapter.notifyItemRemoved(position)
+            adapter.notifyItemInserted(MyMediaPlayer.currentIndex + 1)
+            Toast.makeText(this,resources.getString(R.string.music_will_be_played_next), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     fun bottomSheetRemovePlaylist(position: Int, adapter : Playlists) {
         if (MyMediaPlayer.allPlaylists[position].isFavoriteList){
             Toast.makeText(applicationContext,resources.getString(R.string.cannot_delete_favorite_playlist),Toast.LENGTH_SHORT).show()

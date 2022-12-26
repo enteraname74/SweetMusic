@@ -537,6 +537,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                 } else {
                     MyMediaPlayer.currentIndex = -1
                     mediaPlayer.pause()
+                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancel(1)
                     Toast.makeText(
                         this,
                         resources.getString(R.string.no_songs_left_in_the_current_playlist),
@@ -565,7 +567,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
-            bottomSheetPlayNext(adapter,position)
+            bottomSheetPlayNextInCurrentPlaylist(adapter,position)
             bottomSheetDialog.dismiss()
         }
     }
