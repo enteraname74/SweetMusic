@@ -120,7 +120,6 @@ class MusicNotificationService(private val context : Context) {
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0, 1, 2)
             )
-            .setColor(context.getColor(R.color.primary_color))
 
         notificationManager.notify(
             1,
@@ -156,6 +155,12 @@ class MusicNotificationService(private val context : Context) {
                 MediaMetadataCompat.METADATA_KEY_DURATION,
                 MyMediaPlayer.getInstance.duration.toLong()
             )
+            .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
+            // Pour les vieilles versions d'android
+            .putString(MediaMetadata.METADATA_KEY_TITLE, MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
+            .putString(MediaMetadata.METADATA_KEY_ARTIST, MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
+            // A small bitmap for the artwork is also recommended
+            .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
             .build())
 
         val state = PlaybackStateCompat.Builder()
@@ -176,9 +181,6 @@ class MusicNotificationService(private val context : Context) {
             .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
             .addAction(pauseIcon,"pausePlay",pausePlayIntent)
             .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
-            .setContentTitle(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
-            .setContentText(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
-            .setLargeIcon(bitmap)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setMediaSession(PlaybackService.mediaSession.sessionToken)
                 .setShowActionsInCompactView(0, 1, 2)
