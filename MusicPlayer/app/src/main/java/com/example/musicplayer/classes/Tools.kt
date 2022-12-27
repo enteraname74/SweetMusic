@@ -33,8 +33,11 @@ open class Tools : AppCompatActivity() {
     /************************ USES THE MEDIAPLAYER : ***************************/
 
     fun verifiyAllMusics(adapter : MusicList) {
+        var count = 0
+
         for (music in MyMediaPlayer.allMusics) {
             if (!File(music.path).exists()) {
+
                 val position = adapter.musics.indexOf(music)
                 adapter.musics.removeAt(position)
                 adapter.notifyItemRemoved(position)
@@ -78,23 +81,22 @@ open class Tools : AppCompatActivity() {
                         }
                     }
                 }
-
-                // Si la musique était en favoris, on lui enlève ce statut :
-                music.favorite = false
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    MyMediaPlayer.allDeletedMusics.add(0, music)
-                    writeAllDeletedSong()
-                    writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
-                    writePlaylistsToFile()
-                }
-
-                Toast.makeText(
-                    applicationContext,
-                    resources.getString(R.string.deleted_from_app),
-                    Toast.LENGTH_SHORT
-                ).show()
+                count+=1
             }
+        }
+
+        if (count > 0) {
+            CoroutineScope(Dispatchers.IO).launch {
+                writeAllDeletedSong()
+                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writePlaylistsToFile()
+            }
+
+            Toast.makeText(
+                applicationContext,
+                resources.getString(R.string.x_musics_automatically_removed, count),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

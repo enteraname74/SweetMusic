@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Music Player</string>
+    <string name="app_name">Sweet Music</string>
     <string name="title_activity_playlists_menu">PlaylistsMenuActivity</string>
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
@@ -86,4 +86,5 @@
     <string name="songs_number">%1d songs</string>
     <string name="wrong_file">Mauvais fichier !</string>
     <string name="correct_file">Fichier correct !</string>
+    <string name="x_musics_automatically_removed">%1$d musiques retirées de l\'application automatiquement</string>
 </resources>
