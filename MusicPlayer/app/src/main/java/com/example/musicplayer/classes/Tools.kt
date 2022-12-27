@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Environment
-import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +31,72 @@ open class Tools : AppCompatActivity() {
     var mediaPlayer = MyMediaPlayer.getInstance
 
     /************************ USES THE MEDIAPLAYER : ***************************/
+
+    fun verifiyAllMusics(adapter : MusicList) {
+        for (music in MyMediaPlayer.allMusics) {
+            if (!File(music.path).exists()) {
+                val position = adapter.musics.indexOf(music)
+                adapter.musics.removeAt(position)
+                adapter.notifyItemRemoved(position)
+                MyMediaPlayer.allMusics.remove(music)
+
+                // Enlevons la musique de nos playlists :
+                for (playlist in MyMediaPlayer.allPlaylists) {
+                    if (playlist.musicList.contains(music)) {
+                        playlist.musicList.remove(music)
+                    }
+                }
+
+                // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
+                if (MyMediaPlayer.currentIndex != -1) {
+                    val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                    if (MyMediaPlayer.initialPlaylist.contains(music)) {
+                        MyMediaPlayer.initialPlaylist.remove(music)
+                    }
+                    if (MyMediaPlayer.currentPlaylist.contains(music)) {
+                        // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
+                        Log.d("CONTAINS", "")
+                        if (music.path == currentSong.path) {
+                            Log.d("SAME", "")
+                            // Si on peut passer à la musique suivante, on le fait :
+                            if (MyMediaPlayer.currentPlaylist.size > 1) {
+                                Log.d("PLAY NEXT", "")
+                                playNextSong(adapter)
+                                MyMediaPlayer.currentIndex =
+                                    MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                            } else {
+                                MyMediaPlayer.currentIndex = -1
+                                mediaPlayer.pause()
+                            }
+                            MyMediaPlayer.currentPlaylist.remove(music)
+                        } else {
+                            Log.d("JUST DELETE", "")
+                            MyMediaPlayer.currentPlaylist.remove(music)
+                            // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
+                            MyMediaPlayer.currentIndex =
+                                MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                        }
+                    }
+                }
+
+                // Si la musique était en favoris, on lui enlève ce statut :
+                music.favorite = false
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    MyMediaPlayer.allDeletedMusics.add(0, music)
+                    writeAllDeletedSong()
+                    writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                    writePlaylistsToFile()
+                }
+
+                Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.deleted_from_app),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
 
     open fun playMusic(){
         mediaPlayer.reset()
@@ -351,7 +416,7 @@ open class Tools : AppCompatActivity() {
         drawerLayout.openDrawer(GravityCompat.START)
     }
 
-    /***************************** BOTTOM SHEET DIALOG : ***********************/
+    /***************************** BOTTOM SHEET DIALOG : **********************/
 
     fun bottomSheetAddTo(position: Int, context : Context, adapter : MusicList){
         val selectedMusic = adapter.musics[position]

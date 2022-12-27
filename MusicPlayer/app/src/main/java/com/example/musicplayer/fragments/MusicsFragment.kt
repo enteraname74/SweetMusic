@@ -91,6 +91,8 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         nextButton.setOnClickListener { (activity as MainActivity).playNextSong(adapter) }
         previousButton.setOnClickListener { (activity as MainActivity).playPreviousSong(adapter) }
         mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong(adapter) }
+
+        CoroutineScope(Dispatchers.Main).launch { (activity as MainActivity).verifiyAllMusics(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
