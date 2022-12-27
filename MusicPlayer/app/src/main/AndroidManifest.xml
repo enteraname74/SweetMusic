@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
+        android:largeHeap="true"
         android:name=".notification.NotificationMusicPlayer"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
