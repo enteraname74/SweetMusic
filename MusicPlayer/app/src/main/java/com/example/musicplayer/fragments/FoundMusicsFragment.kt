@@ -3,6 +3,7 @@ package com.example.musicplayer.fragments
 import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.ThumbnailUtils
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -20,10 +21,7 @@ import com.example.musicplayer.Music
 import com.example.musicplayer.adapters.NewMusicsList
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.*
 
 class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
@@ -32,6 +30,10 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
     private lateinit var fetchingSongs : LinearLayout
     private val saveAllMusicsFile = "allMusics.musics"
     private val saveAllDeletedFiles = "allDeleted.musics"
+    private lateinit var fetchingState : TextView
+    private lateinit var determinateProgressBar : ProgressBar
+    private lateinit var indeterminateProgressBar : ProgressBar
+    private lateinit var fetchingJob : Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +47,6 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_found_musics, container, false)
 
-
         menuRecyclerView = view.findViewById(R.id.menu_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(view.context)
         menuRecyclerView.adapter = adapter
@@ -55,12 +56,16 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         val addNewSongs = view.findViewById<Button>(R.id.add_songs)
         addNewSongs.setOnClickListener { addSongsToAllMusics() }
 
+        fetchingState = view.findViewById(R.id.fetching_state)
+        determinateProgressBar = view.findViewById(R.id.determinate_bar)
+        indeterminateProgressBar = view.findViewById(R.id.indeterminate_bar)
+
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
+        fetchingJob = CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
     }
 
     private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
@@ -109,9 +114,17 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
                 Toast.makeText(activity, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
             }
             else -> {
+                var count = 0
+                withContext(Dispatchers.Main) {
+                    fetchingState.text = getString(R.string.fetching_found_songs)
+                    indeterminateProgressBar.visibility = View.GONE
+                    determinateProgressBar.visibility = View.VISIBLE
+                    determinateProgressBar.max = cursor.count
+                }
                 while (cursor.moveToNext()) {
                     // Si la musique n'est pas présente dans notre liste, alors on ajoute la musique dans la liste des musiques trouvées :
-                    if ((MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) && (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null)) {
+                    if (//(MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) &&
+                        (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null)) {
                         val albumId = cursor.getLong(5)
                         val albumUri = ContentUris.withAppendedId(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
@@ -119,14 +132,17 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
 
                         val albumCover: ByteArray? = try {
                             withContext(Dispatchers.IO) {
+                                /*
                                 val bitmap = activity?.contentResolver?.loadThumbnail(
                                     albumUri,
                                     Size(400, 400),
                                     null
                                 )
-                                bitmapToByteArray(bitmap as Bitmap)
+                                 */
+                                val bitmap = ThumbnailUtils.createAudioThumbnail(File(cursor.getString(4)),Size(350,350),null)
+                                bitmapToByteArray(bitmap)
                             }
-                        } catch (error: FileNotFoundException) {
+                        } catch (error: IOException) {
                             null
                         }
                         val music = Music(
@@ -141,9 +157,12 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
                             musics.add(music)
                         }
                     }
+                    withContext(Dispatchers.Main){
+                        count+=1
+                        determinateProgressBar.setProgress(count,true)
+                    }
                 }
                 cursor.close()
-                musics.reverse()
 
                 withContext(Dispatchers.Main){
                     adapter.musics = musics
@@ -156,8 +175,8 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
     }
 
     private fun addSongsToAllMusics(){
-        for (music in adapter.musics){
-            MyMediaPlayer.allMusics.add(music)
+        for (music in adapter.musics.asReversed()){
+            MyMediaPlayer.allMusics.add(0, music)
         }
         CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile() }
         Toast.makeText(
@@ -202,6 +221,11 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
             ).show()
             bottomSheetDialog.dismiss()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fetchingJob.cancel()
     }
 
 }

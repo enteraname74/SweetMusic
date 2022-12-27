@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -19,6 +21,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.TypedArrayUtils
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.VpAdapter
@@ -144,7 +147,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 writePlaylistsToFile()
             }
 
-            CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
+            //CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
         }
 
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
@@ -259,13 +262,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                     )
 
                     val albumCover : ByteArray? = try {
-                        val bitmap = contentResolver.loadThumbnail(
-                            albumUri,
-                            Size(400, 400),
-                            null
-                        )
+                        val bitmap = ThumbnailUtils.createAudioThumbnail(File(cursor.getString(4)),Size(350,350),null)
                         bitmapToByteArray(bitmap)
-                    } catch (error : FileNotFoundException){
+                    } catch (error : IOException){
                         null
                     }
                     val music = Music(
@@ -281,7 +280,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                     }
                 }
                 cursor.close()
-                MyMediaPlayer.allMusics.reverse()
+                MyMediaPlayer.allMusics
 
                 writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
 

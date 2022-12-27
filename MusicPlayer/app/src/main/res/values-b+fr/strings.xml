@@ -66,6 +66,7 @@
     <string name="new_songs">Nouvelles Musiques</string>
     <string name="deleted_songs">Musiques Supprimées</string>
     <string name="searching_new_songs">Recherche de nouvelles musiques</string>
+    <string name="fetching_found_songs">Récupérations des musiques trouvées</string>
     <string name="retrieve_music">Récupérer</string>
     <string name="retrieved_music">Musique récupérée</string>
     <string name="add_new_songs">Ajouter ces nouvelles musiques</string>
