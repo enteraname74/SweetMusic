@@ -67,7 +67,7 @@
         android:layout_height="200dp"
         android:layout_gravity="center"
         android:layout_margin="10dp"
-        android:src="@drawable/michael">
+        android:src="@drawable/ic_saxophone_svg">
 
     </com.google.android.material.imageview.ShapeableImageView>
 

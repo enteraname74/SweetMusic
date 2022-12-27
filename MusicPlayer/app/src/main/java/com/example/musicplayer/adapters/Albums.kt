@@ -67,7 +67,7 @@ class Albums (
             }
             holder.albumCover.setImageBitmap(bitmap)
         } else {
-            holder.albumCover.setImageResource(R.drawable.michael)
+            holder.albumCover.setImageResource(R.drawable.ic_saxophone_svg)
         }
     }
 

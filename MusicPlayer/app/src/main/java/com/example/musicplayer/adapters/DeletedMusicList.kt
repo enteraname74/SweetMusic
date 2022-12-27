@@ -68,7 +68,7 @@ data class DeletedMusicList(
             }
             holder.albumCover?.setImageBitmap(bitmap)
         } else {
-            holder.albumCover?.setImageResource(R.drawable.michael)
+            holder.albumCover?.setImageResource(R.drawable.ic_saxophone_svg)
         }
 
         holder.songName?.text = currentMusic.name

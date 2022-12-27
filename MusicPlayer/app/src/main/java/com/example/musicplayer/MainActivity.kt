@@ -159,7 +159,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
-        if (MyMediaPlayer.currentIndex != -1) {
+        if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
@@ -175,7 +175,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                         albumCoverInfo.setImageBitmap(bitmap)
                     }
                 } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
+                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
                 }
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }

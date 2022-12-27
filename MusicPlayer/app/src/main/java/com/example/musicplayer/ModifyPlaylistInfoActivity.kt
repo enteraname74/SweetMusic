@@ -60,7 +60,7 @@ class ModifyPlaylistInfoActivity : Tools() {
             }
             playlistCoverField.setImageBitmap(bitmap)
         } else {
-            playlistCoverField.setImageResource(R.drawable.michael)
+            playlistCoverField.setImageResource(R.drawable.ic_saxophone_svg)
         }
 
         playlistNameField.setText(playlist.listName)

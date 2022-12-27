@@ -123,7 +123,7 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
                 }
                 while (cursor.moveToNext()) {
                     // Si la musique n'est pas présente dans notre liste, alors on ajoute la musique dans la liste des musiques trouvées :
-                    if (//(MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) &&
+                    if ((MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) &&
                         (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null)) {
                         val albumId = cursor.getLong(5)
                         val albumUri = ContentUris.withAppendedId(

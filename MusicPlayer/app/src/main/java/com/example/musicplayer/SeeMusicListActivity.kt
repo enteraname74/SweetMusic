@@ -136,7 +136,7 @@ class SeeMusicListActivity : Tools(), MusicList.OnMusicListener {
                     }
                     albumCoverInfo.setImageBitmap(bitmap)
                 } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
+                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
                 }
             }
 

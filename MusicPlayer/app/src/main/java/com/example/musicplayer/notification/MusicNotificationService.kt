@@ -68,7 +68,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.michael)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_saxophone_svg)
         }
 
         val activityIntent = Intent(context, MainActivity::class.java)
@@ -109,7 +109,7 @@ class MusicNotificationService(private val context : Context) {
 
         notificationMusicPlayer = NotificationCompat.Builder(context, MUSIC_NOTIFICATION_CHANNEL_ID)
             .setLargeIcon(bitmap)
-            .setSmallIcon(R.drawable.icone_musique)
+            .setSmallIcon(R.drawable.ic_saxophone_svg)
             .setContentTitle(currentSong.name)
             .setContentText(currentSong.artist)
             .setContentIntent(activityPendingIntent)
@@ -146,7 +146,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.michael)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_saxophone_svg)
         }
 
         PlaybackService.mediaSession.setMetadata(MediaMetadataCompat.Builder()

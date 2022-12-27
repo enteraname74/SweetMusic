@@ -69,8 +69,6 @@ class ModifyMusicInfoActivity : Tools() {
                 }
             }
         }
-        Log.d("position Artist", artistPosition.toString())
-        Log.d("position in Artist", positionInArtist.toString())
 
         // On récupère les différents champs modifiable :
         albumCoverField = findViewById(R.id.album_image)
@@ -88,7 +86,7 @@ class ModifyMusicInfoActivity : Tools() {
             }
             albumCoverField.setImageBitmap(bitmap)
         } else {
-            albumCoverField.setImageResource(R.drawable.michael)
+            albumCoverField.setImageResource(R.drawable.ic_saxophone_svg)
         }
 
         musicNameField.setText(musicFile.name)

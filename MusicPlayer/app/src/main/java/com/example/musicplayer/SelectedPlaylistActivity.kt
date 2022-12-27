@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -25,6 +24,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
 
 class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
     private lateinit var playlist : Playlist
@@ -128,7 +128,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         val nextBtn = findViewById<ImageView>(R.id.next)
         val previousBtn = findViewById<ImageView>(R.id.previous)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
+        Log.d("PLAYLIST ACTIVITY", MyMediaPlayer.currentIndex.toString())
         if (MyMediaPlayer.currentIndex != -1){
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -142,7 +142,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                     }
                     albumCoverInfo.setImageBitmap(bitmap)
                 } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
+                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
                 }
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
@@ -153,7 +153,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         } else {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
             }
         }
 
@@ -321,10 +320,16 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             }
             playlistCover.setImageBitmap(bitmap)
         } else {
-            playlistCover.setImageResource(R.drawable.michael)
+            playlistCover.setImageResource(R.drawable.ic_saxophone_svg)
             val drawable = playlistCover.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            bitmap = bitmapDrawable.bitmap
+            bitmap = Bitmap.createBitmap(
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
         }
 
         val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch

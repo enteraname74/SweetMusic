@@ -134,7 +134,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                 }
                 albumCoverInfo?.setImageBitmap(bitmap)
             } else {
-                albumCoverInfo?.setImageResource(R.drawable.michael)
+                albumCoverInfo?.setImageResource(R.drawable.ic_saxophone_svg)
             }
 
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)

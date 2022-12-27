@@ -177,34 +177,36 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     }
 
     private fun playMusic(){
-        mediaPlayer.reset()
-        try {
-            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+        if (MyMediaPlayer.currentIndex != -1) {
+            mediaPlayer.reset()
+            try {
+                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                mediaPlayer.setDataSource(currentSong.path)
+                mediaPlayer.prepare()
+                mediaPlayer.start()
 
-            val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
-            val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
-            val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
+                val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
+                val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
+                val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
 
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                if (currentSong.albumCover != null){
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes = currentSong.albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    albumCoverInfo?.setImageBitmap(bitmap)
+                } else {
+                    albumCoverInfo?.setImageResource(R.drawable.ic_saxophone_svg)
                 }
-                albumCoverInfo?.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo?.setImageResource(R.drawable.michael)
-            }
 
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            Log.d("ERROR","")
-            e.printStackTrace()
+                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            } catch (e: IndexOutOfBoundsException) {
+                Log.d("ERROR","")
+                e.printStackTrace()
+            }
         }
     }
 }

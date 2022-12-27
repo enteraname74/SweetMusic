@@ -74,7 +74,7 @@
             android:id="@+id/album_cover_info"
             android:layout_width="60dp"
             android:layout_height="match_parent"
-            android:src="@drawable/icone_musique"
+            android:src="@drawable/ic_saxophone_svg"
             android:layout_marginStart="5dp">
 
         </com.google.android.material.imageview.ShapeableImageView>

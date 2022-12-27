@@ -70,7 +70,7 @@
                 android:scaleType="centerCrop"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/album_art"
-                android:src="@drawable/icone_musique">
+                android:src="@drawable/ic_saxophone_svg">
 
             </com.google.android.material.imageview.ShapeableImageView>
         </LinearLayout>

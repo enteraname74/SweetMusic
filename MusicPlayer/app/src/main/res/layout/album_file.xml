@@ -20,7 +20,7 @@
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:contentDescription="Album Cover"
-        android:src="@drawable/icone_musique" />
+        android:src="@drawable/ic_saxophone_svg" />
 
     <LinearLayout
         android:layout_width="wrap_content"

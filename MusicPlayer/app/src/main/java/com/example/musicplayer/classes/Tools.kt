@@ -86,6 +86,7 @@ open class Tools : AppCompatActivity() {
         }
 
         if (count > 0) {
+            Log.d("delete songs","")
             CoroutineScope(Dispatchers.IO).launch {
                 writeAllDeletedSong()
                 writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
@@ -120,12 +121,12 @@ open class Tools : AppCompatActivity() {
                 }
                 albumCoverInfo.setImageBitmap(bitmap)
             } else {
-                albumCoverInfo.setImageResource(R.drawable.michael)
+                albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
             }
 
             pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
+        } catch (e: IndexOutOfBoundsException) {
             Log.d("ERROR","")
             e.printStackTrace()
         }
@@ -172,26 +173,30 @@ open class Tools : AppCompatActivity() {
     }
 
     open fun playNextSong(adapter : MusicList){
-        if (requestFocus()) {
-            if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
-                MyMediaPlayer.currentIndex = 0
-            } else {
-                MyMediaPlayer.currentIndex +=1
+        if(MyMediaPlayer.currentPlaylist.size != 0) {
+            if (requestFocus()) {
+                if (MyMediaPlayer.currentIndex == (MyMediaPlayer.currentPlaylist.size) - 1) {
+                    MyMediaPlayer.currentIndex = 0
+                } else {
+                    MyMediaPlayer.currentIndex += 1
+                }
+                adapter.notifyDataSetChanged()
+                playMusic()
             }
-            adapter.notifyDataSetChanged()
-            playMusic()
         }
     }
 
     open fun playPreviousSong(adapter : MusicList){
-        if (requestFocus()){
-            if(MyMediaPlayer.currentIndex ==0){
-                MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-            } else {
-                MyMediaPlayer.currentIndex -=1
+        if(MyMediaPlayer.currentPlaylist.size != 0) {
+            if (requestFocus()) {
+                if (MyMediaPlayer.currentIndex == 0) {
+                    MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size) - 1
+                } else {
+                    MyMediaPlayer.currentIndex -= 1
+                }
+                adapter.notifyDataSetChanged()
+                playMusic()
             }
-            adapter.notifyDataSetChanged()
-            playMusic()
         }
     }
 
@@ -283,7 +288,7 @@ open class Tools : AppCompatActivity() {
                     albumCover.setImageBitmap(bitmap)
                 }
             } else {
-                albumCover.setImageResource(R.drawable.michael)
+                albumCover.setImageResource(R.drawable.ic_saxophone_svg)
             }
         }
     }

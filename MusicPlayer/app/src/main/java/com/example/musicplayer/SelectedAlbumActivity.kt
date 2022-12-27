@@ -144,7 +144,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
                     }
                     albumCoverInfo.setImageBitmap(bitmap)
                 } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
+                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
                 }
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
@@ -155,7 +155,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         } else {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
             }
         }
 
@@ -291,10 +290,16 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             }
             playlistCover.setImageBitmap(bitmap)
         } else {
-            playlistCover.setImageResource(R.drawable.michael)
+            playlistCover.setImageResource(R.drawable.ic_saxophone_svg)
             val drawable = playlistCover.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            bitmap = bitmapDrawable.bitmap
+            bitmap = Bitmap.createBitmap(
+                drawable.intrinsicWidth,
+                drawable.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
         }
 
         val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch

@@ -82,7 +82,7 @@ class Playlists (
             }
             holder.playlistCover.setImageBitmap(bitmap)
         } else {
-            holder.playlistCover.setImageResource(R.drawable.michael)
+            holder.playlistCover.setImageResource(R.drawable.ic_saxophone_svg)
         }
     }
 

@@ -459,7 +459,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
             musicIcon.setImageBitmap(bitmap)
         } else {
-            musicIcon.setImageResource(R.drawable.michael)
+            musicIcon.setImageResource(R.drawable.ic_saxophone_svg)
             val drawable = musicIcon.drawable
             val bitmapDrawable = drawable as BitmapDrawable
             bitmap = bitmapDrawable.bitmap

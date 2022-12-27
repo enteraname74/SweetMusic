@@ -69,7 +69,7 @@ class Artists (
             }
             holder.artistsCover.setImageBitmap(bitmap)
         } else {
-            holder.artistsCover.setImageResource(R.drawable.michael)
+            holder.artistsCover.setImageResource(R.drawable.ic_saxophone_svg)
         }
     }
 
