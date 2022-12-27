@@ -81,6 +81,10 @@ class PlaybackService : Service() {
 
         mediaSession.setCallback(object : MediaSessionCompat.Callback() {
 
+            override fun onPause() {
+                Log.d("PAUSE","")
+            }
+
             override fun onSeekTo(pos: Long) {
                 MyMediaPlayer.getInstance.seekTo(pos.toInt())
             }
@@ -239,12 +243,7 @@ class PlaybackService : Service() {
             }
         })
 
-        val state = PlaybackStateCompat.Builder()
-            .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_SEEK_TO)
-            .setState(PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0F)
-            .build()
-
-        mediaSession.setPlaybackState(state)
+        mediaSession.setPlaybackState(updateMediaSessionState(PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN))
         mediaSession.isActive = true
 
         return START_STICKY
@@ -260,5 +259,23 @@ class PlaybackService : Service() {
         lateinit var audioAttributes : AudioAttributes
         lateinit var audioManager : AudioManager
         lateinit var mediaSession : MediaSessionCompat
+
+        fun updateMediaSessionState(musicState: Int, musicPosition: Long): PlaybackStateCompat {
+            return PlaybackStateCompat.Builder()
+                .setActions(
+                    PlaybackStateCompat.ACTION_PLAY
+                            or PlaybackStateCompat.ACTION_SEEK_TO
+                            or PlaybackStateCompat.ACTION_PAUSE
+                            or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                            or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                            or PlaybackStateCompat.ACTION_PLAY_PAUSE
+                )
+                .setState(
+                    musicState,
+                    musicPosition,
+                    1.0F
+                )
+                .build()
+        }
     }
 }

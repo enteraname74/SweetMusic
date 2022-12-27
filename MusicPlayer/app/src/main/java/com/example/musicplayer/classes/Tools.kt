@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Environment
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -182,10 +183,7 @@ open class Tools : AppCompatActivity() {
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
                     mediaPlayer.start()
                     pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", false)
-                    applicationContext.sendBroadcast(intentForNotification)
+                    updateMusicNotification(false)
                 }
                 else -> {
                     Toast.makeText(this,"An unknown error has come up", Toast.LENGTH_SHORT).show()
@@ -196,9 +194,7 @@ open class Tools : AppCompatActivity() {
             PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
             pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
 
-            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-            intentForNotification.putExtra("STOP", true)
-            applicationContext.sendBroadcast(intentForNotification)
+            updateMusicNotification(true)
         }
     }
 
@@ -223,6 +219,12 @@ open class Tools : AppCompatActivity() {
                 albumCover.setImageResource(R.drawable.michael)
             }
         }
+    }
+
+    fun updateMusicNotification(isMusicPaused : Boolean) {
+        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+        intentForNotification.putExtra("STOP", isMusicPaused)
+        applicationContext.sendBroadcast(intentForNotification)
     }
 
     /************************ WRITE OR READ INTO FILES : ***************************/

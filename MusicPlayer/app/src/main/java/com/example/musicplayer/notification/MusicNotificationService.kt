@@ -43,11 +43,11 @@ class MusicNotificationService(private val context : Context) {
                 context.unregisterReceiver(this)
             } else if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                updateNotification(R.drawable.ic_baseline_play_arrow_24)
+                updateNotification(true)
 
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
-                updateNotification(R.drawable.ic_baseline_pause_24)
+                updateNotification(false)
                 val intentForBroadcast = Intent("BROADCAST")
                 intentForBroadcast.putExtra("STOP", false)
                 context.sendBroadcast(intentForBroadcast)
@@ -128,8 +128,17 @@ class MusicNotificationService(private val context : Context) {
         )
     }
 
-    private fun updateNotification(pauseIcon : Int) {
+    private fun updateNotification(isMusicPaused : Boolean) {
         var bitmap : Bitmap? = null
+        val pauseIcon : Int
+        val musicState : Int
+        if (isMusicPaused) {
+            pauseIcon = R.drawable.ic_baseline_play_arrow_24
+            musicState = PlaybackStateCompat.STATE_PAUSED
+        } else {
+            pauseIcon = R.drawable.ic_baseline_pause_24
+            musicState = PlaybackStateCompat.STATE_PLAYING
+        }
 
         if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
             // Passons d'abord notre byteArray en bitmap :
@@ -150,8 +159,14 @@ class MusicNotificationService(private val context : Context) {
             .build())
 
         val state = PlaybackStateCompat.Builder()
-            .setActions(PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_SEEK_TO)
-            .setState(PlaybackStateCompat.STATE_PLAYING, MyMediaPlayer.getInstance.currentPosition.toLong(), 1.0F)
+            .setActions(PlaybackStateCompat.ACTION_PLAY
+                    or PlaybackStateCompat.ACTION_SEEK_TO
+                    or PlaybackStateCompat.ACTION_PAUSE
+                    or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    or PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    or PlaybackStateCompat.ACTION_PLAY_PAUSE
+            )
+            .setState(musicState, MyMediaPlayer.getInstance.currentPosition.toLong(), 1.0F)
             .build()
 
         PlaybackService.mediaSession.setPlaybackState(state)
