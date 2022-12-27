@@ -118,18 +118,28 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/loading_data"
+                    android:text="@string/searching_songs_from_your_device"
                     android:textColor="@color/text_color"
                     android:textSize="15sp" />
 
                 <ProgressBar
-                    android:id="@+id/progressBar"
+                    android:id="@+id/indeterminate_bar"
                     style="?android:attr/progressBarStyleHorizontal"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:indeterminate="true"
                     android:indeterminateTint="@color/text_color"
                     android:indeterminateTintMode="multiply" />
+
+                <ProgressBar
+                    android:layout_marginTop="5dp"
+                    android:visibility="gone"
+                    android:id="@+id/determinate_bar"
+                    android:layout_width="200dp"
+                    android:layout_height="4dp"
+                    android:progress="0"
+                    android:progressTint="@color/text_color"
+                    style="@android:style/Widget.ProgressBar.Horizontal"/>
 
             </LinearLayout>
 

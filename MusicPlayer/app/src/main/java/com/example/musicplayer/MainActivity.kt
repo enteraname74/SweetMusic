@@ -38,6 +38,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
     private lateinit var fetchingSongs : LinearLayout
+    private lateinit var determinateProgressBar : ProgressBar
+    private lateinit var indeterminateProgressBar : ProgressBar
     private lateinit var viewPager : ViewPager2
 
     private lateinit var pausePlayButton : ImageView
@@ -65,6 +67,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         fetchingSongs = findViewById(R.id.fetching_songs)
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
+        determinateProgressBar = findViewById(R.id.determinate_bar)
+        indeterminateProgressBar = findViewById(R.id.indeterminate_bar)
 
         if (SDK_INT >= 30) {
             if (!Environment.isExternalStorageManager()) {
@@ -147,7 +151,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 writePlaylistsToFile()
             }
 
-            //CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
+            CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
         }
 
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
@@ -255,12 +259,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 Toast.makeText(this, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
             }
             else -> {
+                var count = 0
+                withContext(Dispatchers.Main) {
+                    indeterminateProgressBar.visibility = View.GONE
+                    determinateProgressBar.visibility = View.VISIBLE
+                    determinateProgressBar.max = cursor.count
+                }
                 while (cursor.moveToNext()) {
-                    val albumId = cursor.getLong(5)
-                    val albumUri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
-                    )
-
                     val albumCover : ByteArray? = try {
                         val bitmap = ThumbnailUtils.createAudioThumbnail(File(cursor.getString(4)),Size(350,350),null)
                         bitmapToByteArray(bitmap)
@@ -277,6 +282,10 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                     )
                     if (File(music.path).exists()) {
                         MyMediaPlayer.allMusics.add(music)
+                    }
+                    withContext(Dispatchers.Main){
+                        count+=1
+                        determinateProgressBar.setProgress(count,true)
                     }
                 }
                 cursor.close()
