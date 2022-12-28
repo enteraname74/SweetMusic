@@ -10,7 +10,6 @@ class MyMediaPlayer {
     Toutes les valeurs présentes dans companion object sont en static
      */
     companion object {
-
         private var instance : MediaPlayer? = null
 
         val getInstance : MediaPlayer
@@ -37,6 +36,7 @@ class MyMediaPlayer {
         var allMusics = ArrayList<Music>()
         var allPlaylists = ArrayList<Playlist>()
         var allDeletedMusics = ArrayList<Music>()
+        var allFolders = ArrayList<Folder>()
 
         val iconsList = listOf(
             R.drawable.ic_baseline_sync_24,

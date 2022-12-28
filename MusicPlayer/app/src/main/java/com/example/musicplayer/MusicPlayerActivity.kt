@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.VectorDrawable
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -21,7 +22,9 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.toBitmap
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -194,6 +197,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     private fun setResourcesWithMusic(){
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+        Log.d("ressources set","")
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
@@ -251,6 +255,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     override fun onPrepared(p0: MediaPlayer?) {
         mediaPlayer.start()
+        updateMusicNotification(false)
         seekBar.progress = 0
         seekBar.max = mediaPlayer.duration
         pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
@@ -324,7 +329,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         adapter.notifyDataSetChanged()
     }
 
-    private fun playNextSong(){
+    override fun playNextSong(){
         Log.d("MP", "play next func")
         sameMusic = false
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
@@ -460,9 +465,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             musicIcon.setImageBitmap(bitmap)
         } else {
             musicIcon.setImageResource(R.drawable.ic_saxophone_svg)
-            val drawable = musicIcon.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            bitmap = bitmapDrawable.bitmap
+            bitmap = (ResourcesCompat.getDrawable(this.resources, R.drawable.ic_saxophone_svg, null) as VectorDrawable).toBitmap()
         }
         val dominantColor: Palette.Swatch? =
             if (Palette.from(bitmap as Bitmap).generate().lightVibrantSwatch == null) {
@@ -542,10 +545,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                     playNextSong()
                     MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
                 } else {
-                    MyMediaPlayer.currentIndex = -1
-                    mediaPlayer.pause()
-                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    notificationManager.cancel(1)
+                    stopMusic()
                     Toast.makeText(
                         this,
                         resources.getString(R.string.no_songs_left_in_the_current_playlist),

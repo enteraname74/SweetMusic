@@ -149,19 +149,32 @@ class MusicNotificationService(private val context : Context) {
             bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_saxophone_svg)
         }
 
-        PlaybackService.mediaSession.setMetadata(MediaMetadataCompat.Builder()
-            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
-            .putLong(
-                MediaMetadataCompat.METADATA_KEY_DURATION,
-                MyMediaPlayer.getInstance.duration.toLong()
+        if (MyMediaPlayer.getInstance.isPlaying) {
+            PlaybackService.mediaSession.setMetadata(
+                MediaMetadataCompat.Builder()
+                    .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
+                    .putLong(
+                        MediaMetadataCompat.METADATA_KEY_DURATION,
+                        MyMediaPlayer.getInstance.duration.toLong()
+                    )
+                    .putString(
+                        MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                    )
+                    // Pour les vieilles versions d'android
+                    .putString(
+                        MediaMetadata.METADATA_KEY_TITLE,
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                    )
+                    .putString(
+                        MediaMetadata.METADATA_KEY_ARTIST,
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist
+                    )
+                    // A small bitmap for the artwork is also recommended
+                    .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+                    .build()
             )
-            .putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
-            // Pour les vieilles versions d'android
-            .putString(MediaMetadata.METADATA_KEY_TITLE, MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name)
-            .putString(MediaMetadata.METADATA_KEY_ARTIST, MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist)
-            // A small bitmap for the artwork is also recommended
-            .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
-            .build())
+        }
 
         val state = PlaybackStateCompat.Builder()
             .setActions(PlaybackStateCompat.ACTION_PLAY

@@ -15,7 +15,7 @@
     <string name="shuffle_playlist">Shuffle Playlist</string>
     <string name="music_icon">Music Icon</string>
     <string name="pause">Pause</string>
-    <string name="parameters">Parameters</string>
+    <string name="parameters">Settings</string>
     <string name="find_new_songs">Find new songs</string>
     <string name="set_data">Set data</string>
     <string name="download_data">Download data</string>
@@ -90,4 +90,5 @@
     <string name="x_musics_automatically_removed">%1$d musics automatically removed from the app</string>
     <string name="create_playlist">Name of the new playlist :</string>
     <string name="folders_used_by_the_application">Folders used by the application :</string>
+    <string name="folders">Folders used</string>
 </resources>

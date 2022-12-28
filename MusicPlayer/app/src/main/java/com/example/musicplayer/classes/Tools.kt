@@ -27,6 +27,7 @@ open class Tools : AppCompatActivity() {
     val saveAllMusicsFile = "allMusics.musics"
     val savePlaylistsFile = "allPlaylists.playlists"
     val saveAllDeletedFiles = "allDeleted.musics"
+    val saveAllFolders = "allFolders.folders"
 
     var mediaPlayer = MyMediaPlayer.getInstance
 
@@ -186,6 +187,19 @@ open class Tools : AppCompatActivity() {
         }
     }
 
+    open fun playNextSong(){
+        if(MyMediaPlayer.currentPlaylist.size != 0) {
+            if (requestFocus()) {
+                if (MyMediaPlayer.currentIndex == (MyMediaPlayer.currentPlaylist.size) - 1) {
+                    MyMediaPlayer.currentIndex = 0
+                } else {
+                    MyMediaPlayer.currentIndex += 1
+                }
+                playMusic()
+            }
+        }
+    }
+
     open fun playPreviousSong(adapter : MusicList){
         if(MyMediaPlayer.currentPlaylist.size != 0) {
             if (requestFocus()) {
@@ -308,7 +322,7 @@ open class Tools : AppCompatActivity() {
             oos.writeObject(MyMediaPlayer.allMusics)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error retrieving musics",error.toString())
+            Log.e("Error retrieving musics",error.toString())
             Toast.makeText(applicationContext, "Couldn't retrieve musics", Toast.LENGTH_LONG).show()
 
         }
@@ -317,7 +331,7 @@ open class Tools : AppCompatActivity() {
             oos.writeObject(MyMediaPlayer.allPlaylists)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error retrieving musics",error.toString())
+            Log.e("Error retrieving playlists",error.toString())
             Toast.makeText(applicationContext, "Couldn't retrieve playlists", Toast.LENGTH_LONG).show()
         }
         Toast.makeText(applicationContext, "Data retrieved in your Download Folder", Toast.LENGTH_LONG).show()
@@ -331,7 +345,18 @@ open class Tools : AppCompatActivity() {
             oos.writeObject(content)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error write musics",error.toString())
+            Log.e("Error write musics",error.toString())
+        }
+    }
+
+    fun writeAllMusics() {
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllMusicsFile)))
+            oos.writeObject(MyMediaPlayer.allMusics)
+            oos.close()
+        } catch (error : IOException){
+            Log.e("Error write musics",error.toString())
         }
     }
 
@@ -343,7 +368,7 @@ open class Tools : AppCompatActivity() {
             content = ois.readObject() as ArrayList<Music>
             ois.close()
         } catch (error : IOException){
-            Log.d("Error read musics",error.toString())
+            Log.e("Error read musics",error.toString())
         }
         MyMediaPlayer.allMusics = content
         return content
@@ -356,7 +381,7 @@ open class Tools : AppCompatActivity() {
             oos.writeObject(MyMediaPlayer.allPlaylists)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error write playlists",error.toString())
+            Log.e("Error write playlists",error.toString())
         }
     }
 
@@ -368,7 +393,7 @@ open class Tools : AppCompatActivity() {
             content = ois.readObject() as ArrayList<Playlist>
             ois.close()
         } catch (error : IOException){
-            Log.d("Error read playlists",error.toString())
+            Log.e("Error read playlists",error.toString())
         }
         MyMediaPlayer.allPlaylists = content
         return content
@@ -401,7 +426,7 @@ open class Tools : AppCompatActivity() {
             content = ois.readObject() as ArrayList<Music>
             ois.close()
         } catch (error : IOException){
-            Log.d("Error read deleted",error.toString())
+            Log.e("Error read deleted",error.toString())
         }
         MyMediaPlayer.allDeletedMusics = content
     }
@@ -413,7 +438,42 @@ open class Tools : AppCompatActivity() {
             oos.writeObject(MyMediaPlayer.allDeletedMusics)
             oos.close()
         } catch (error : IOException){
-            Log.d("Error write deleted",error.toString())
+            Log.e("Error write deleted",error.toString())
+        }
+    }
+
+    open fun readAllFoldersFromFile() {
+        val path = applicationContext.filesDir
+        var content = ArrayList<Folder>()
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, saveAllFolders)))
+            content = ois.readObject() as ArrayList<Folder>
+            ois.close()
+        } catch (error : IOException){
+            Log.e("Error read folders",error.toString())
+        }
+        MyMediaPlayer.allFolders = content
+        Log.d("FOLDERS", MyMediaPlayer.allFolders.toString())
+    }
+
+    open fun writeAllFolders(){
+        val path = applicationContext.filesDir
+        try {
+            Log.d("FOLDERS", MyMediaPlayer.allFolders.toString())
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllFolders)))
+            oos.writeObject(MyMediaPlayer.allFolders)
+            oos.close()
+        } catch (error : IOException){
+            Log.e("Error write folders",error.toString())
+        }
+    }
+
+    fun retrieveAllFoldersUsed(){
+        for (music in MyMediaPlayer.allMusics) {
+            val musicFolder = File(music.path).parent
+            if (MyMediaPlayer.allFolders.find { it.path == musicFolder } == null) {
+                MyMediaPlayer.allFolders.add(Folder(musicFolder as String))
+            }
         }
     }
 
@@ -467,8 +527,7 @@ open class Tools : AppCompatActivity() {
                         CoroutineScope(Dispatchers.Main).launch {
                             sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                         }
-                        MyMediaPlayer.currentIndex = -1
-                        mediaPlayer.pause()
+                        stopMusic()
                     }
                     MyMediaPlayer.currentPlaylist.remove(musicToRemove)
                 } else {
@@ -619,5 +678,50 @@ open class Tools : AppCompatActivity() {
         val intent = Intent(context, ModifyPlaylistInfoActivity::class.java)
         intent.putExtra("POSITION",position)
         startActivity(intent)
+    }
+
+    fun definitelyRemoveMusicFromApp(musicToRemove : Music) {
+        MyMediaPlayer.allMusics.remove(musicToRemove)
+
+        if (MyMediaPlayer.allDeletedMusics.contains(musicToRemove)){
+            MyMediaPlayer.allDeletedMusics.remove(musicToRemove)
+        }
+
+        // Enlevons la musique de nos playlists :
+        for(playlist in MyMediaPlayer.allPlaylists) {
+            if (playlist.musicList.contains(musicToRemove)){
+                playlist.musicList.remove(musicToRemove)
+            }
+        }
+
+        // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
+        if (MyMediaPlayer.currentIndex != -1) {
+            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
+                MyMediaPlayer.initialPlaylist.remove(musicToRemove)
+            }
+            if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
+                // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
+                Log.d("CONTAINS","")
+                if (musicToRemove.path == currentSong.path) {
+                    Log.d("SAME","")
+                    // Si on peut passer à la musique suivante, on le fait :
+                    if (MyMediaPlayer.currentPlaylist.size > 1) {
+                        Log.d("PLAY NEXT","")
+                        playNextSong()
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                    } else {
+                        // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
+                        stopMusic()
+                    }
+                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                } else {
+                    Log.d("JUST DELETE","")
+                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                }
+            }
+        }
     }
 }

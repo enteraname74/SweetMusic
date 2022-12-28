@@ -36,4 +36,17 @@
             android:singleLine="true"
             android:layout_marginEnd="4dp"/>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:gravity="end|center"
+        android:layout_height="match_parent">
+
+        <CheckBox
+            android:id="@+id/checkbox_folder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false">
+        </CheckBox>
+    </LinearLayout>
 </LinearLayout>

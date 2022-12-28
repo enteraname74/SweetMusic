@@ -35,6 +35,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.354" />
         <entry key="app/src/main/res/drawable/ic_baseline_favorite_24.xml" value="0.3395" />
         <entry key="app/src/main/res/drawable/ic_baseline_favorite_border_24.xml" value="0.3395" />
+        <entry key="app/src/main/res/drawable/ic_baseline_folder_24.xml" value="0.2995" />
         <entry key="app/src/main/res/drawable/ic_baseline_menu_24.xml" value="0.354" />
         <entry key="app/src/main/res/drawable/ic_baseline_pause_24.xml" value="0.182" />
         <entry key="app/src/main/res/drawable/ic_baseline_pause_circle_outline_24.xml" value="0.3395" />
@@ -71,6 +72,7 @@
         <entry key="app/src/main/res/layout/activity_selected_artist.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_playlist.xml" value="0.2497733454215775" />
         <entry key="app/src/main/res/layout/activity_set_data.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_settings.xml" value="0.33" />
         <entry key="app/src/main/res/layout/album_and_artist_layout.xml" value="0.33" />
         <entry key="app/src/main/res/layout/album_file.xml" value="0.3515625" />
         <entry key="app/src/main/res/layout/artist_file.xml" value="0.33" />
@@ -90,6 +92,7 @@
         <entry key="app/src/main/res/layout/fragment_playlists.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_set_musics.xml" value="0.2894399315946986" />
         <entry key="app/src/main/res/layout/fragment_set_playlists.xml" value="0.2894399315946986" />
+        <entry key="app/src/main/res/layout/header_template.xml" value="0.84375" />
         <entry key="app/src/main/res/layout/music_file.xml" value="0.3546875" />
         <entry key="app/src/main/res/layout/music_file_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/playlist_file.xml" value="0.35260416666666666" />

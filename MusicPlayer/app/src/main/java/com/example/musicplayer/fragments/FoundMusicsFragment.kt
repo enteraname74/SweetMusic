@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
 import com.example.musicplayer.Music
 import com.example.musicplayer.adapters.NewMusicsList
+import com.example.musicplayer.classes.Folder
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.*
@@ -124,7 +125,8 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
                 while (cursor.moveToNext()) {
                     // Si la musique n'est pas présente dans notre liste, alors on ajoute la musique dans la liste des musiques trouvées :
                     if ((MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) &&
-                        (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null)) {
+                        (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null) &&
+                            MyMediaPlayer.allFolders.find { it.path == File(cursor.getString(4)).parent }?.isUsedInApp != false) {
                         val albumId = cursor.getLong(5)
                         val albumUri = ContentUris.withAppendedId(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
@@ -155,6 +157,9 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
                         )
                         if (File(music.path).exists()) {
                             musics.add(music)
+                            if (MyMediaPlayer.allFolders.find { it.path == File(music.path).parent } == null) {
+                                MyMediaPlayer.allFolders.add(Folder(File(music.path).parent as String))
+                            }
                         }
                     }
                     withContext(Dispatchers.Main){

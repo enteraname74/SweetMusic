@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.util.Size
 import android.view.MenuItem
 import android.view.View
@@ -26,6 +27,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.VpAdapter
+import com.example.musicplayer.classes.Folder
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
 import com.example.musicplayer.fragments.MusicsFragment
@@ -88,6 +90,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 allMusicsBackup = MyMediaPlayer.allMusics.map{ it.copy() } as ArrayList<Music> /* = java.util.ArrayList<com.example.musicplayer.Music> */
                 fetchingSongs.visibility = View.GONE
                 viewPager.visibility = View.VISIBLE
+                readAllFoldersFromFile()
             }
         }
 
@@ -151,6 +154,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 MyMediaPlayer.allPlaylists = ArrayList<Playlist>()
                 MyMediaPlayer.allPlaylists.add(favoritePlaylist)
                 writePlaylistsToFile()
+                writeAllDeletedSong()
             }
 
             CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
@@ -201,8 +205,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
+            R.id.parameters -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
             R.id.find_new_songs -> {
-                val intent = Intent(this@MainActivity,FindNewSongsActivity::class.java)
+                val intent = Intent(this,FindNewSongsActivity::class.java)
                 startActivity(intent)
                 true
             }
@@ -211,7 +220,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 true
             }
             R.id.set_data -> {
-                val intent = Intent(this@MainActivity,SetDataActivity::class.java)
+                val intent = Intent(this,SetDataActivity::class.java)
                 setDataResult.launch(intent)
                 true
             }
@@ -284,6 +293,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                     )
                     if (File(music.path).exists()) {
                         MyMediaPlayer.allMusics.add(music)
+                        if (MyMediaPlayer.allFolders.find { it.path == File(music.path).parent } == null) {
+                            MyMediaPlayer.allFolders.add(Folder(File(music.path).parent as String))
+                        }
                     }
                     withContext(Dispatchers.Main){
                         count+=1
@@ -294,6 +306,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 MyMediaPlayer.allMusics
 
                 writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writeAllFolders()
 
                 val openMenu = findViewById<ImageView>(R.id.open_menu)
                 withContext(Dispatchers.Main){

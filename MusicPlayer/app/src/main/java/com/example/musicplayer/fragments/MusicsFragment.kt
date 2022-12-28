@@ -73,9 +73,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         super.onResume()
         searchView.clearFocus()
         Log.d("RESUME FRAG","")
-        Log.d("PATH OF A SONG", MyMediaPlayer.allMusics[0].path)
-        Log.d("Folder ?", File(MyMediaPlayer.allMusics[0].path).parent.split("/").toTypedArray().last())
-        Log.d("Name ?", File(MyMediaPlayer.allMusics[0].path).name)
         // Si on est dans la barre e recherche, on ne met pas tout de suite à jour les musiques pour rester dans la barre :
         if(!searchIsOn){
             adapter.musics = MyMediaPlayer.allMusics
