@@ -88,5 +88,6 @@
     <string name="wrong_file">Wrong file !</string>
     <string name="correct_file">Correct file !</string>
     <string name="x_musics_automatically_removed">%1$d musics automatically removed from the app</string>
-
+    <string name="create_playlist">Name of the new playlist :</string>
+    <string name="folders_used_by_the_application">Folders used by the application :</string>
 </resources>

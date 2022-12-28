@@ -102,8 +102,8 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     }
 
     private fun addPlaylist(){
-        val builder = AlertDialog.Builder(context as Context)
-        builder.setTitle("Create playlist")
+        val builder = AlertDialog.Builder(context as Context, R.style.AlertDialogTheme)
+        builder.setTitle(getString(R.string.create_playlist))
         // L'entrée :
         val inputText = EditText(context)
         // Le type d'entrée :

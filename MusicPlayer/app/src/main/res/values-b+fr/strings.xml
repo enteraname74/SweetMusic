@@ -87,4 +87,6 @@
     <string name="wrong_file">Mauvais fichier !</string>
     <string name="correct_file">Fichier correct !</string>
     <string name="x_musics_automatically_removed">%1$d musiques retirées de l\'application automatiquement</string>
+    <string name="create_playlist">Nom de la nouvelle playlist :</string>
+    <string name="folders_used_by_the_application">Dossiers utilisés par l\'application :</string>
 </resources>

@@ -66,6 +66,7 @@
         <entry key="app/src/main/res/layout/activity_music_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_playlists_menu.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_see_music_list.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_select_folders.xml" value="0.25" />
         <entry key="app/src/main/res/layout/activity_selected_album.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_artist.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_playlist.xml" value="0.2497733454215775" />
@@ -79,6 +80,7 @@
         <entry key="app/src/main/res/layout/bottom_sheet_dialog_player.xml" value="0.33" />
         <entry key="app/src/main/res/layout/bottom_sheet_dialog_playlist_menu.xml" value="0.28858486532706284" />
         <entry key="app/src/main/res/layout/bottom_sheet_dialog_song_list.xml" value="0.3515625" />
+        <entry key="app/src/main/res/layout/folder_file_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_album.xml" value="0.20833333333333334" />
         <entry key="app/src/main/res/layout/fragment_albums.xml" value="0.24947916666666667" />
         <entry key="app/src/main/res/layout/fragment_artists.xml" value="0.25" />
