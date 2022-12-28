@@ -21,10 +21,16 @@ import androidx.core.content.ContextCompat
 import androidx.core.widget.ImageViewCompat
 import com.example.musicplayer.Music
 import com.example.musicplayer.R
+import com.example.musicplayer.SetDataActivity
 import com.example.musicplayer.classes.MyMediaPlayer
 import kotlinx.android.synthetic.main.fragment_set_musics.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.ObjectInputStream
+import java.lang.ClassCastException
 
 class SetMusicsFragment : Fragment() {
     private lateinit var infosText : TextView
@@ -45,10 +51,15 @@ class SetMusicsFragment : Fragment() {
         infosImg = view.findViewById(R.id.infos_img)
 
         view.findViewById<Button>(R.id.select_musics_button).setOnClickListener {
-            selectMusicsFile()
+            CoroutineScope(Dispatchers.IO).launch { selectMusicsFile() }
         }
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as SetDataActivity).currentFragmentPos = 0
     }
 
     private fun selectMusicsFile() {
@@ -62,17 +73,28 @@ class SetMusicsFragment : Fragment() {
     private var resultMusicsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.data?.data
-            allMusics = readAllMusicsFromUri(uri as Uri)
+            CoroutineScope(Dispatchers.IO).launch {
+                allMusics = readAllMusicsFromUri(uri as Uri)
+            }
         }
     }
 
-    private fun readAllMusicsFromUri(uri : Uri) : ArrayList<Music> {
+    private suspend fun readAllMusicsFromUri(uri : Uri) : ArrayList<Music> {
         var content = ArrayList<Music>()
         try {
             val ois = ObjectInputStream(requireContext().contentResolver.openInputStream(uri))
             content = ois.readObject() as ArrayList<Music>
+            if (content.size > 0) {
+                try {
+                    content[0].path
+                    setValidationOfInformations(true)
+                } catch (e: ClassCastException) {
+                    setValidationOfInformations(false)
+                }
+            } else {
+                setValidationOfInformations(false)
+            }
             ois.close()
-            setValidationOfInformations(true)
         } catch (error : IOException){
             Log.d("Error read musics",error.toString())
             setValidationOfInformations(false)
@@ -80,30 +102,32 @@ class SetMusicsFragment : Fragment() {
         return content
     }
 
-    private fun setValidationOfInformations(isValid : Boolean) {
-        if (isValid) {
-            correctMusicFileSelected = true
-            infosText.apply {
-                text = getString(R.string.correct_file)
-                setTextColor(ContextCompat.getColor(requireContext(), R.color.valid_color))
-            }
-            infosImg.apply {
-                setImageResource(R.drawable.ic_baseline_check_24)
-                visibility = View.VISIBLE
-            }
-            ImageViewCompat.setImageTintList(infosImg,ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.valid_color)))
-        } else {
-            correctMusicFileSelected = false
-            infosText.apply{
-                text = getString(R.string.wrong_file)
-                setTextColor(ContextCompat.getColor(requireContext(), R.color.error_color))
-            }
+    private suspend fun setValidationOfInformations(isValid : Boolean) {
+        withContext(Dispatchers.Main) {
+            if (isValid) {
+                correctMusicFileSelected = true
+                infosText.apply {
+                    text = getString(R.string.correct_file)
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.valid_color))
+                }
+                infosImg.apply {
+                    setImageResource(R.drawable.ic_baseline_check_24)
+                    visibility = View.VISIBLE
+                }
+                ImageViewCompat.setImageTintList(infosImg,ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.valid_color)))
+            } else {
+                correctMusicFileSelected = false
+                infosText.apply{
+                    text = getString(R.string.wrong_file)
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.error_color))
+                }
 
-            infosImg.apply {
-                setImageResource(R.drawable.ic_baseline_close_24)
-                infosImg.visibility = View.VISIBLE
+                infosImg.apply {
+                    setImageResource(R.drawable.ic_baseline_close_24)
+                    infosImg.visibility = View.VISIBLE
+                }
+                ImageViewCompat.setImageTintList(infosImg,ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.error_color)))
             }
-            ImageViewCompat.setImageTintList(infosImg,ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.error_color)))
         }
     }
 

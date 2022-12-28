@@ -91,4 +91,5 @@
     <string name="create_playlist">Name of the new playlist :</string>
     <string name="folders_used_by_the_application">Folders used by the application :</string>
     <string name="folders">Folders used</string>
+    <string name="missing_correct_files">Missing correct files !</string>
 </resources>

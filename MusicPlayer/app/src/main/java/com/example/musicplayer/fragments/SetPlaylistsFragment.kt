@@ -15,10 +15,16 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import com.example.musicplayer.Playlist
 import com.example.musicplayer.R
+import com.example.musicplayer.SetDataActivity
 import com.example.musicplayer.classes.MyMediaPlayer
 import kotlinx.android.synthetic.main.fragment_set_musics.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.ObjectInputStream
 
@@ -41,9 +47,14 @@ class SetPlaylistsFragment : Fragment() {
         infosImg = view.findViewById(R.id.infos_img)
 
         view.findViewById<Button>(R.id.select_playlists_button).setOnClickListener {
-            selectPlaylistsFile()
+            CoroutineScope(Dispatchers.IO).launch { selectPlaylistsFile() }
         }
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as SetDataActivity).currentFragmentPos = 1
     }
 
     private fun selectPlaylistsFile() {
@@ -55,44 +66,57 @@ class SetPlaylistsFragment : Fragment() {
     private var resultPlaylistsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri : Uri? = result.data?.data
-            readAllPlaylistsFromUri(uri as Uri)
+            CoroutineScope(Dispatchers.IO).launch {
+                allPlaylists = readAllPlaylistsFromUri(uri as Uri)
+            }
         }
     }
 
     @SuppressLint("ResourceAsColor")
-    private fun setValidationOfInformations(isValid : Boolean) {
-        if (isValid) {
-            SetMusicsFragment.correctMusicFileSelected = true
-            infos_text.apply {
-                text = getString(R.string.correct_file)
-                setTextColor(R.color.valid_color)
-            }
-            infosImg.apply {
-                setImageResource(R.drawable.ic_baseline_check_24)
-                setColorFilter(R.color.valid_color, PorterDuff.Mode.MULTIPLY)
-                visibility = View.VISIBLE
-            }
-        } else {
-            SetMusicsFragment.correctMusicFileSelected = false
-            infos_text.apply {
-                text = getString(R.string.wrong_file)
-                setTextColor(R.color.error_color)
-            }
-            infosImg.apply {
-                setImageResource(R.drawable.ic_baseline_close_24)
-                setColorFilter(R.color.valid_color, PorterDuff.Mode.MULTIPLY)
-                visibility = View.VISIBLE
+    private suspend fun setValidationOfInformations(isValid : Boolean) {
+        withContext(Dispatchers.Main) {
+            if (isValid) {
+                correctPlaylistFileSelected = true
+                infos_text.apply {
+                    text = getString(R.string.correct_file)
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.valid_color))
+                }
+                infosImg.apply {
+                    setImageResource(R.drawable.ic_baseline_check_24)
+                    setColorFilter(ContextCompat.getColor(requireContext(), R.color.valid_color), PorterDuff.Mode.MULTIPLY)
+                    visibility = View.VISIBLE
+                }
+            } else {
+                correctPlaylistFileSelected= false
+                infos_text.apply {
+                    text = getString(R.string.wrong_file)
+                    setTextColor(ContextCompat.getColor(requireContext(), R.color.error_color))
+                }
+                infosImg.apply {
+                    setImageResource(R.drawable.ic_baseline_close_24)
+                    setColorFilter(ContextCompat.getColor(requireContext(), R.color.error_color), PorterDuff.Mode.MULTIPLY)
+                    visibility = View.VISIBLE
+                }
             }
         }
     }
 
-    private fun readAllPlaylistsFromUri(uri : Uri) : ArrayList<Playlist> {
+    private suspend fun readAllPlaylistsFromUri(uri : Uri) : ArrayList<Playlist> {
         var content = ArrayList<Playlist>()
         try {
             val ois = ObjectInputStream(requireContext().contentResolver.openInputStream(uri))
             content = ois.readObject() as ArrayList<Playlist>
+            if (content.size > 0) {
+                try {
+                    content[0].listName
+                    setValidationOfInformations(true)
+                } catch (e: ClassCastException) {
+                    setValidationOfInformations(false)
+                }
+            } else {
+                setValidationOfInformations(false)
+            }
             ois.close()
-            setValidationOfInformations(true)
         } catch (error : IOException){
             Log.d("Error read playlists",error.toString())
             setValidationOfInformations(false)

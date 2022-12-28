@@ -24,6 +24,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.io.IOException
 import java.io.ObjectInputStream
 
@@ -82,14 +83,38 @@ class SetDataActivity : Tools() {
 
     private fun onValidateButtonClick(){
         if (SetMusicsFragment.correctMusicFileSelected && SetPlaylistsFragment.correctPlaylistFileSelected){
-            CoroutineScope(Dispatchers.IO).launch {
-                //writeAllAsync(allMusics,allPlaylists)
+            // On change d'abord nos musiques :
+            for (music in SetMusicsFragment.allMusics) {
+                MyMediaPlayer.allMusics.find { File(it.path).name == File(music.path).name }?.apply {
+                    name = music.name
+                    albumCover = music.albumCover
+                    album = music.album
+                    artist = music.artist
+                }
             }
+            MyMediaPlayer.allPlaylists = SetPlaylistsFragment.allPlaylists
+            val songsToDelete = ArrayList<Music>()
+            for (playlist in MyMediaPlayer.allPlaylists) {
+                for (music in playlist.musicList) {
+                    val correspondingSong = MyMediaPlayer.allMusics.find { File(it.path).name == File(music.path).name }
+                    if (correspondingSong == null) {
+                        songsToDelete.add(music)
+                    } else {
+                        music.apply {
+                            name = correspondingSong.name
+                            albumCover = correspondingSong.albumCover
+                            album = correspondingSong.album
+                            artist = correspondingSong.artist
+                        }
+                    }
+                }
+            }
+            //writeAllAsync(allMusics,allPlaylists)
             MyMediaPlayer.dataWasChanged = true
             setResult(RESULT_OK)
             finish()
         } else {
-            Toast.makeText(this,"Missing correct files !", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,getString(R.string.missing_correct_files), Toast.LENGTH_SHORT).show()
         }
     }
 }
