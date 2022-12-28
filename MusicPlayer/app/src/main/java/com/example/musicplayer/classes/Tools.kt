@@ -704,19 +704,9 @@ open class Tools : AppCompatActivity() {
                 // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
                 Log.d("CONTAINS","")
                 if (musicToRemove.path == currentSong.path) {
-                    Log.d("SAME","")
-                    // Si on peut passer à la musique suivante, on le fait :
-                    if (MyMediaPlayer.currentPlaylist.size > 1) {
-                        Log.d("PLAY NEXT","")
-                        playNextSong()
-                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
-                    } else {
-                        // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
-                        stopMusic()
-                    }
+                    stopMusic()
                     MyMediaPlayer.currentPlaylist.remove(musicToRemove)
                 } else {
-                    Log.d("JUST DELETE","")
                     MyMediaPlayer.currentPlaylist.remove(musicToRemove)
                     // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
                     MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
