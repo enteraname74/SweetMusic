@@ -91,7 +91,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
                 adapter.notifyDataSetChanged()
             }
         }
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
     }
 
     private fun playNextSong() {

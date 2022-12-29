@@ -74,10 +74,11 @@ data class MusicList(
         val currentMusic = musics[position]
         var currentPlayedMusic: Music? = null
         try {
-            currentPlayedMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            if (MyMediaPlayer.currentPlaylist.size != 0 && MyMediaPlayer.currentIndex != -1) {
+                currentPlayedMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            }
         } catch (error : ArrayIndexOutOfBoundsException){
         }
-
 
         if(currentMusic.albumCover != null){
             // Passons d'abord notre byteArray en bitmap :
@@ -99,6 +100,8 @@ data class MusicList(
         if (backgroundColor != -1) {
             holder.background?.setBackgroundColor(backgroundColor)
         }
+        Log.d("MUSIC LIST", "CURRENT MUSIC" + (currentMusic == currentPlayedMusic).toString())
+        Log.d("MUSIC LIST", "CURRENT PLAYLIST" + (MyMediaPlayer.playlistName == listName).toString())
         if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
             holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
             holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))

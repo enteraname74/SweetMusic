@@ -67,8 +67,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Log.d("MAIN ACTIVITY", "ON CREATE")
-        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentIndex.toString())
-        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentPlaylist.size.toString())
 
         pausePlayButton = findViewById(R.id.pause_play)
         fetchingSongs = findViewById(R.id.fetching_songs)
@@ -215,6 +213,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         val serviceIntent = Intent(this, PlaybackService::class.java)
         startService(serviceIntent)
+
+        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentIndex.toString())
+        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentPlaylist.size.toString())
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

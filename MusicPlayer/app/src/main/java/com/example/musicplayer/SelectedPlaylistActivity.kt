@@ -61,6 +61,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_playlist)
+        Log.d("SELECTED PLAYLIST", MyMediaPlayer.currentIndex.toString())
 
         pausePlayButton = findViewById(R.id.pause_play)
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
@@ -104,6 +105,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
                     this
                 )
             }
+        Log.d("SELECTED PLAYLIST", MyMediaPlayer.currentIndex.toString())
     }
 
     override fun onResume() {
@@ -121,6 +123,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
 
         if (MyMediaPlayer.currentIndex != -1){
+            Log.d("SELECTED PLAYLIST", MyMediaPlayer.currentIndex.toString())
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
                 songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name

@@ -71,8 +71,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
 
         adapter.allPlaylists = MyMediaPlayer.allPlaylists
         adapter.notifyDataSetChanged()
-
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
     }
 
     override fun onPlaylistClick(position: Int) {
@@ -175,7 +174,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     }
 
     private fun playMusic(){
-        if (MyMediaPlayer.currentIndex != -1) {
+        if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
             mediaPlayer.reset()
             try {
                 val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]

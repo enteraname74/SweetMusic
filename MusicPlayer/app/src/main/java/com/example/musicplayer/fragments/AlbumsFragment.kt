@@ -92,7 +92,7 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                 adapter.notifyDataSetChanged()
             }
         }
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
     }
 
     private fun playNextSong(){
