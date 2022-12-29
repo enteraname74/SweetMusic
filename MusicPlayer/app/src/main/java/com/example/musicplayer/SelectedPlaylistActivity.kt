@@ -75,23 +75,14 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         searchView.setOnQueryTextListener(this)
 
         adapter = MusicList(musics, playlist.listName, this, this)
-        menuRecyclerView.layoutManager = LinearLayoutManager(this@SelectedPlaylistActivity)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
 
-        val playlistName = findViewById<TextView>(R.id.playlist_name)
-        playlistName?.text = playlist.listName
-
-        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
-        quitActivity.setOnClickListener{ finish() }
-
-        val modifyPlaylistInfos = findViewById<ImageView>(R.id.modify_playlist)
-        modifyPlaylistInfos.setOnClickListener { modifyPlaylist() }
-
-        val addSongs = findViewById<ImageView>(R.id.add_songs)
-        addSongs.setOnClickListener{ onAddSongsClick() }
-
-        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
-        shuffleButton.setOnClickListener { playRandom(musics, this@SelectedPlaylistActivity) }
+        findViewById<TextView>(R.id.playlist_name).text = playlist.listName
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener{ finish() }
+        findViewById<ImageView>(R.id.modify_playlist).setOnClickListener { modifyPlaylist() }
+        findViewById<ImageView>(R.id.add_songs).setOnClickListener{ onAddSongsClick() }
+        findViewById<ImageView>(R.id.shuffle).setOnClickListener { playRandom(musics, this) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
@@ -128,7 +119,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         val nextBtn = findViewById<ImageView>(R.id.next)
         val previousBtn = findViewById<ImageView>(R.id.previous)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-        Log.d("PLAYLIST ACTIVITY", MyMediaPlayer.currentIndex.toString())
+
         if (MyMediaPlayer.currentIndex != -1){
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED

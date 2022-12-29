@@ -453,13 +453,11 @@ open class Tools : AppCompatActivity() {
             Log.e("Error read folders",error.toString())
         }
         MyMediaPlayer.allFolders = content
-        Log.d("FOLDERS", MyMediaPlayer.allFolders.toString())
     }
 
     open fun writeAllFolders(){
         val path = applicationContext.filesDir
         try {
-            Log.d("FOLDERS", MyMediaPlayer.allFolders.toString())
             val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllFolders)))
             oos.writeObject(MyMediaPlayer.allFolders)
             oos.close()

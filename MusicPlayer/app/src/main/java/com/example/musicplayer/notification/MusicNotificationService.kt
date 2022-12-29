@@ -68,7 +68,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_saxophone_svg)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.saxophone)
         }
 
         val activityIntent = Intent(context, MainActivity::class.java)

@@ -198,6 +198,13 @@ class ModifyMusicInfoActivity : Tools() {
                 )
             }
         }
+        // Si une musique se joue, on vérifie si celle jouée actuellement est celle que l'on modifie :
+        if (MyMediaPlayer.currentIndex != -1) {
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path) {
+                updateMusicNotification(!mediaPlayer.isPlaying)
+            }
+        }
+
         returnIntent.putExtra("modifiedSongPath", path)
         setResult(RESULT_OK, returnIntent)
         finish()

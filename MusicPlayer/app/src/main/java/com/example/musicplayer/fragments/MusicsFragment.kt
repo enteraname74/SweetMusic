@@ -117,6 +117,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             // Si il n'y a pas de notifications, on l'affiche
             if(notificationManager.activeNotifications.isEmpty()) {
                 val service = MusicNotificationService(context?.applicationContext as Context)
+                Log.d("MUSIC FRAGMENT", "BEFORE CALLING PLAYING")
                 if (mediaPlayer.isPlaying){
                     service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
                 } else {

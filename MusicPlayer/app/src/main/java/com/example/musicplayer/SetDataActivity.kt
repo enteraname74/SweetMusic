@@ -1,17 +1,10 @@
 package com.example.musicplayer
 
-import android.app.Activity
-import android.content.Intent
 import android.content.res.Resources
-import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.util.Log
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.SetDataVpAdapter
@@ -25,8 +18,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.IOException
-import java.io.ObjectInputStream
 
 class SetDataActivity : Tools() {
     private lateinit var tabLayout: TabLayout
@@ -109,7 +100,10 @@ class SetDataActivity : Tools() {
                     }
                 }
             }
-            //writeAllAsync(allMusics,allPlaylists)
+            CoroutineScope(Dispatchers.IO).launch {
+                writePlaylistsToFile()
+                writeAllMusics()
+            }
             MyMediaPlayer.dataWasChanged = true
             setResult(RESULT_OK)
             finish()

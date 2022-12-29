@@ -89,6 +89,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
+        Log.d("MPA", "ON CREATE")
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
 
@@ -464,8 +465,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
             musicIcon.setImageBitmap(bitmap)
         } else {
-            musicIcon.setImageResource(R.drawable.ic_saxophone_svg)
-            bitmap = (ResourcesCompat.getDrawable(this.resources, R.drawable.ic_saxophone_svg, null) as VectorDrawable).toBitmap()
+            musicIcon.setImageResource(R.drawable.saxophone)
+            bitmap = (ResourcesCompat.getDrawable(this.resources, R.drawable.saxophone, null) as BitmapDrawable).bitmap
         }
         val dominantColor: Palette.Swatch? =
             if (Palette.from(bitmap as Bitmap).generate().lightVibrantSwatch == null) {
