@@ -152,7 +152,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            (activity as MainActivity).bottomSheetRemoveFromApp(adapter,position,(activity as MainActivity).sheetBehavior)
+            (activity as MainActivity).bottomSheetRemoveFromApp(adapter,position,(activity as MainActivity).sheetBehavior, requireContext())
             bottomSheetDialog.dismiss()
         }
 

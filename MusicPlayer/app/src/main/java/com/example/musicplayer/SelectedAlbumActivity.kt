@@ -222,7 +222,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            bottomSheetRemoveFromApp(adapter,position, sheetBehavior)
+            bottomSheetRemoveFromApp(adapter,position, sheetBehavior, this)
             bottomSheetDialog.dismiss()
         }
 

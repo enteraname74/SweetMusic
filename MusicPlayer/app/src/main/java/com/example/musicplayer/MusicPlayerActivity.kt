@@ -22,6 +22,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toBitmap
@@ -540,33 +541,44 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
-            if (MyMediaPlayer.currentIndex == position) {
-                if (MyMediaPlayer.currentPlaylist.size > 1) {
-                    playNextSong()
-                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-                } else {
-                    stopMusic()
-                    Toast.makeText(
-                        this,
-                        resources.getString(R.string.no_songs_left_in_the_current_playlist),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    finish()
-                }
-                MyMediaPlayer.currentPlaylist.removeAt(position)
-            } else {
-                MyMediaPlayer.currentPlaylist.removeAt(position)
-                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
-            }
-            adapter.notifyItemRemoved(position)
+            val builder = AlertDialog.Builder(this, R.style.AlertDialogTheme)
+            builder.setTitle(getString(R.string.delete_music))
 
-            Toast.makeText(
-                this,
-                resources.getString(R.string.deleted_from_playlist),
-                Toast.LENGTH_SHORT
-            ).show()
+            builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
+                val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                // Si on supprime la musique que l'on joue actuellement, on passe si possible à la suivante :
+                if (MyMediaPlayer.currentIndex == position) {
+                    if (MyMediaPlayer.currentPlaylist.size > 1) {
+                        playNextSong()
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                    } else {
+                        stopMusic()
+                        Toast.makeText(
+                            this,
+                            resources.getString(R.string.no_songs_left_in_the_current_playlist),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        finish()
+                    }
+                    MyMediaPlayer.currentPlaylist.removeAt(position)
+                } else {
+                    MyMediaPlayer.currentPlaylist.removeAt(position)
+                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentMusic)
+                }
+                adapter.notifyItemRemoved(position)
+
+                Toast.makeText(
+                    this,
+                    resources.getString(R.string.deleted_from_playlist),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
+                dialogInterface.cancel()
+            }
+
+            builder.show()
             bottomSheetDialog.dismiss()
         }
 

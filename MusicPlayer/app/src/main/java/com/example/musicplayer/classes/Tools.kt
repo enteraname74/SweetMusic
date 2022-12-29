@@ -9,8 +9,10 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Environment
+import android.text.InputType
 import android.util.Log
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -502,111 +504,138 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         startActivity(intent)
     }
 
-    fun bottomSheetRemoveFromApp(adapter : MusicList, position : Int, sheetBehavior : BottomSheetBehavior<LinearLayout>) {
-        val musicToRemove = adapter.musics[position]
-        adapter.musics.removeAt(position)
-        adapter.notifyItemRemoved(position)
-        MyMediaPlayer.allMusics.remove(musicToRemove)
+    fun bottomSheetRemoveFromApp(adapter : MusicList, position : Int, sheetBehavior : BottomSheetBehavior<LinearLayout>, context : Context) {
 
-        // Enlevons la musique de nos playlists :
-        for(playlist in MyMediaPlayer.allPlaylists) {
-            if (playlist.musicList.contains(musicToRemove)){
-                playlist.musicList.remove(musicToRemove)
-            }
-        }
+        val builder = AlertDialog.Builder(context, R.style.AlertDialogTheme)
+        builder.setTitle(getString(R.string.delete_music))
 
-        // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
-        if (MyMediaPlayer.currentIndex != -1) {
-            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
-                MyMediaPlayer.initialPlaylist.remove(musicToRemove)
-            }
-            if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
-                // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
-                Log.d("CONTAINS","")
-                if (musicToRemove.path == currentSong.path) {
-                    Log.d("SAME","")
-                    // Si on peut passer à la musique suivante, on le fait :
-                    if (MyMediaPlayer.currentPlaylist.size > 1) {
-                        Log.d("PLAY NEXT","")
-                        playNextSong(adapter)
-                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
-                    } else {
-                        // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
-                        CoroutineScope(Dispatchers.Main).launch {
-                            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                        }
-                        stopMusic()
-                    }
-                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
-                } else {
-                    Log.d("JUST DELETE","")
-                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
-                    // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
-                    MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+        builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
+            val musicToRemove = adapter.musics[position]
+            adapter.musics.removeAt(position)
+            adapter.notifyItemRemoved(position)
+            MyMediaPlayer.allMusics.remove(musicToRemove)
+
+            // Enlevons la musique de nos playlists :
+            for(playlist in MyMediaPlayer.allPlaylists) {
+                if (playlist.musicList.contains(musicToRemove)){
+                    playlist.musicList.remove(musicToRemove)
                 }
             }
+
+            // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
+            if (MyMediaPlayer.currentIndex != -1) {
+                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
+                    MyMediaPlayer.initialPlaylist.remove(musicToRemove)
+                }
+                if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
+                    // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
+                    Log.d("CONTAINS","")
+                    if (musicToRemove.path == currentSong.path) {
+                        Log.d("SAME","")
+                        // Si on peut passer à la musique suivante, on le fait :
+                        if (MyMediaPlayer.currentPlaylist.size > 1) {
+                            Log.d("PLAY NEXT","")
+                            playNextSong(adapter)
+                            MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                        } else {
+                            // Sinon on enlève la musique en spécifiant qu'aucune musique ne peut être lancer (playlist avec 0 musiques)
+                            CoroutineScope(Dispatchers.Main).launch {
+                                sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                            }
+                            stopMusic()
+                        }
+                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    } else {
+                        Log.d("JUST DELETE","")
+                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                        // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
+                        MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                    }
+                }
+            }
+
+            // Si la musique était en favoris, on lui enlève ce statut :
+            musicToRemove.favorite = false
+
+            CoroutineScope(Dispatchers.IO).launch {
+                MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
+                writeAllDeletedSong()
+                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writePlaylistsToFile()
+            }
+
+            Toast.makeText(
+                applicationContext,
+                resources.getString(R.string.deleted_from_app),
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        // Si la musique était en favoris, on lui enlève ce statut :
-        musicToRemove.favorite = false
-
-        CoroutineScope(Dispatchers.IO).launch {
-            MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
-            writeAllDeletedSong()
-            writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
-            writePlaylistsToFile()
+        builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
+            dialogInterface.cancel()
         }
 
-        Toast.makeText(
-            applicationContext,
-            resources.getString(R.string.deleted_from_app),
-            Toast.LENGTH_SHORT
-        ).show()
+        builder.show()
     }
 
-    fun bottomSheetRemoveFromPlaylist(adapter : MusicList, position : Int, playlistPosition : Int, playlist : Playlist) {
-        val musicToRemove = adapter.musics[position]
-        adapter.musics.remove(musicToRemove)
-        adapter.notifyItemRemoved(position)
-        MyMediaPlayer.allPlaylists[playlistPosition].musicList.remove(musicToRemove)
+    fun bottomSheetRemoveFromPlaylist(adapter : MusicList, position : Int, playlistPosition : Int, playlist : Playlist, context : Context) {
+        val builder = AlertDialog.Builder(context, R.style.AlertDialogTheme)
+        builder.setTitle(getString(R.string.delete_music))
 
-        // Si on enlève une musique de la playlist des favoris, on enlève son statut de favoris :
-        if (playlist.isFavoriteList){
-            val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
-            val positionInInitialList = MyMediaPlayer.initialPlaylist.indexOf(musicToRemove)
-            val positionInCurrentList = MyMediaPlayer.currentPlaylist.indexOf(musicToRemove)
+        builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
 
-            if(globalPosition != -1)  {
-                MyMediaPlayer.allMusics[globalPosition].favorite = false
-            }
+            val musicToRemove = adapter.musics[position]
+            adapter.musics.remove(musicToRemove)
+            adapter.notifyItemRemoved(position)
+            MyMediaPlayer.allPlaylists[playlistPosition].musicList.remove(musicToRemove)
 
-            if(positionInInitialList != -1)  {
-                MyMediaPlayer.initialPlaylist[positionInInitialList].favorite = false
-            }
+            // Si on enlève une musique de la playlist des favoris, on enlève son statut de favoris :
+            if (playlist.isFavoriteList) {
+                val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
+                val positionInInitialList = MyMediaPlayer.initialPlaylist.indexOf(musicToRemove)
+                val positionInCurrentList = MyMediaPlayer.currentPlaylist.indexOf(musicToRemove)
 
-            if(positionInCurrentList != -1)  {
-                MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
+                if (globalPosition != -1) {
+                    MyMediaPlayer.allMusics[globalPosition].favorite = false
+                }
+
+                if (positionInInitialList != -1) {
+                    MyMediaPlayer.initialPlaylist[positionInInitialList].favorite = false
+                }
+
+                if (positionInCurrentList != -1) {
+                    MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
+                }
+
+                CoroutineScope(Dispatchers.IO).launch {
+                    launch { writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics) }
+                }
+
+                for (playlist in MyMediaPlayer.allPlaylists) {
+                    if (playlist.musicList.contains(musicToRemove)) {
+                        val position = playlist.musicList.indexOf(musicToRemove)
+                        playlist.musicList[position].favorite = false
+                    }
+                }
             }
 
             CoroutineScope(Dispatchers.IO).launch {
-                launch{writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)}
+                launch { writePlaylistsToFile() }
             }
 
-            for (playlist in MyMediaPlayer.allPlaylists){
-                if (playlist.musicList.contains(musicToRemove)){
-                    val position = playlist.musicList.indexOf(musicToRemove)
-                    playlist.musicList[position].favorite = false
-                }
-            }
+            Toast.makeText(
+                applicationContext,
+                resources.getString(R.string.deleted_from_playlist),
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            launch{writePlaylistsToFile()}
+        builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
+            dialogInterface.cancel()
         }
 
-        Toast.makeText(applicationContext,resources.getString(R.string.deleted_from_playlist),Toast.LENGTH_SHORT).show()
-
+        builder.show()
     }
 
     fun bottomSheetModifyMusic(context : Context, position: Int, adapter: MusicList) {

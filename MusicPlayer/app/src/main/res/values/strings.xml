@@ -92,4 +92,5 @@
     <string name="folders_used_by_the_application">Folders used by the application :</string>
     <string name="folders">Folders used</string>
     <string name="missing_correct_files">Missing correct files !</string>
+    <string name="a_title_must_be_set_correctly">A title must be set correctly !</string>
 </resources>

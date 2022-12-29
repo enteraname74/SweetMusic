@@ -111,7 +111,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         builder.setView(inputText)
         // Les boutons :
         // Si on valide la création, on crée notre playlist :
-        builder.setPositiveButton("OK") { _, _ ->
+        builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
             /* Afin de créer une playlist, nous devons vérifier les critères suivants :
                 - Le nom n'est pas vide ou ne commence pas avec un espace (au cas où on a qu'un espace en guise de nom
                 - Le nom n'est pas déjà prit
@@ -132,18 +132,16 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
                 menuRecyclerView.layoutManager = LinearLayoutManager(context)
                 menuRecyclerView.adapter = adapter
             } else {
-                Toast.makeText(context, "A title must be set correctly !", Toast.LENGTH_SHORT)
+                Toast.makeText(context, getString(R.string.a_title_must_be_set_correctly), Toast.LENGTH_SHORT)
                     .show()
             }
         }
         // Si on annule la création de la playlist, on quitte la fenêtre
-        builder.setNegativeButton("CANCEL") { dialogInterface, _ ->
+        builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
             dialogInterface.cancel()
         }
 
         builder.show()
-
-        Log.d("playlist ajouté","")
     }
 
     private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){

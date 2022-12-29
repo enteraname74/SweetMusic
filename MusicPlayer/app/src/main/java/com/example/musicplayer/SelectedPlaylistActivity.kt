@@ -245,7 +245,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            bottomSheetRemoveFromPlaylist(adapter, position, playlistPosition, playlist)
+            bottomSheetRemoveFromPlaylist(adapter, position, playlistPosition, playlist, this)
             bottomSheetDialog.dismiss()
         }
 
