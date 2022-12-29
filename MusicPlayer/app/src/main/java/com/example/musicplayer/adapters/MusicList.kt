@@ -100,9 +100,7 @@ data class MusicList(
         if (backgroundColor != -1) {
             holder.background?.setBackgroundColor(backgroundColor)
         }
-        Log.d("MUSIC LIST", "CURRENT MUSIC" + (currentMusic == currentPlayedMusic).toString())
-        Log.d("MUSIC LIST", "CURRENT PLAYLIST" + (MyMediaPlayer.playlistName == listName).toString())
-        if(currentMusic == currentPlayedMusic && MyMediaPlayer.playlistName == listName){
+        if(currentMusic == currentPlayedMusic && (MyMediaPlayer.playlistName == listName || MyMediaPlayer.currentPlaylist == musics)){
             holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
             holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
             holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))

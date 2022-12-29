@@ -78,7 +78,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 
-        adapter = MusicList(musics, album.albumName, this, this)
+        adapter = MusicList(musics, album.albumName + album.artist, this, this)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
 
@@ -181,16 +181,14 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         if (musics != MyMediaPlayer.initialPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
             MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
             MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.playlistName = "Album"
+            MyMediaPlayer.playlistName = album.albumName + album.artist
             sameMusic = false
         }
 
         MyMediaPlayer.currentIndex = position
         val intent = Intent(this@SelectedAlbumActivity,MusicPlayerActivity::class.java)
-
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("ALBUM POSITION", albumPosition)
-        println("start mp activity")
 
         startActivity(intent)
     }
