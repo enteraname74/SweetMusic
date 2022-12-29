@@ -154,8 +154,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     override fun onNightModeChanged(mode: Int) {
         Log.d("MAIN", "NIGHT MODE")
-        super.onNightModeChanged(mode)
     }
+
+
 
     override fun onResume() {
         super.onResume()

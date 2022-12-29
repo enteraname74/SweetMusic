@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.AudioFocusRequest
 import android.media.AudioManager
+import android.media.MediaPlayer
 import android.os.Environment
 import android.util.Log
 import android.widget.*
@@ -23,7 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.*
 
-open class Tools : AppCompatActivity() {
+open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     val saveAllMusicsFile = "allMusics.musics"
     val savePlaylistsFile = "allPlaylists.playlists"
     val saveAllDeletedFiles = "allDeleted.musics"
@@ -106,31 +107,36 @@ open class Tools : AppCompatActivity() {
         mediaPlayer.reset()
         try {
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            Log.d("TOOLS", currentSong.toString())
             mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-            val pausePlay = findViewById<ImageView>(R.id.pause_play)
-            val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-
-            val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
-            }
-
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            mediaPlayer.prepareAsync()
         } catch (e: IndexOutOfBoundsException) {
             Log.d("ERROR","")
             e.printStackTrace()
         }
+    }
+
+    override fun onPrepared(p0: MediaPlayer?) {
+        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+        mediaPlayer.start()
+        val pausePlay = findViewById<ImageView>(R.id.pause_play)
+        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
+
+        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
+        if (currentSong.albumCover != null){
+            // Passons d'abord notre byteArray en bitmap :
+            val bytes = currentSong.albumCover
+            var bitmap: Bitmap? = null
+            if (bytes != null && bytes.isNotEmpty()) {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+            albumCoverInfo.setImageBitmap(bitmap)
+        } else {
+            albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
+        }
+
+        pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+        songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
     }
 
     fun playRandom(list : ArrayList<Music>, context : Context) {
@@ -289,24 +295,26 @@ open class Tools : AppCompatActivity() {
 
     fun updateBottomPanel(songTitle : TextView, albumCover : ImageView) {
         CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main) {
-                songTitle.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            }
-
-            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes =
-                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
+            try {
                 withContext(Dispatchers.Main) {
-                    albumCover.setImageBitmap(bitmap)
+                    songTitle.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
                 }
-            } else {
-                albumCover.setImageResource(R.drawable.ic_saxophone_svg)
-            }
+
+                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes =
+                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    withContext(Dispatchers.Main) {
+                        albumCover.setImageBitmap(bitmap)
+                    }
+                } else {
+                    albumCover.setImageResource(R.drawable.ic_saxophone_svg)
+                }
+            } catch (e: ArrayIndexOutOfBoundsException) {}
         }
     }
 

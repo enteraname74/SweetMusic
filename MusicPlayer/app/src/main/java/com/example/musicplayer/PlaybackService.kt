@@ -34,41 +34,23 @@ class PlaybackService : Service() {
             Log.d("focusChange", focusChange.toString())
             when (focusChange) {
                 AudioManager.AUDIOFOCUS_GAIN -> {
-                    Log.d("SERVICE", "GAIN FOCUS WHEN OTHER APP WAS PLAYING")
-                    val intentForBroadcast = Intent("BROADCAST")
-                    intentForBroadcast.putExtra("STOP",false)
-                    applicationContext.sendBroadcast(intentForBroadcast)
-
-                    val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                    intentForNotification.putExtra("STOP", false)
-                    applicationContext.sendBroadcast(intentForNotification)
+                    Log.d("PLAYBACK SERVICE", "GAIN FOCUS WHEN OTHER APP WAS PLAYING")
+                    updateUI(false)
                 }
                 AudioManager.AUDIOFOCUS_LOSS -> {
                     if (audioManager.isMusicActive) {
                         if (mediaPlayer.isPlaying) {
-                            Log.d("SERVICE", "LOSS FOCUS WHILE PLAYING")
-                            val intentForBroadcast = Intent("BROADCAST")
-                            intentForBroadcast.putExtra("STOP",true)
-                            applicationContext.sendBroadcast(intentForBroadcast)
-
-                            val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                            intentForNotification.putExtra("STOP", true)
-                            applicationContext.sendBroadcast(intentForNotification)
+                            Log.d("PLAYBACK SERVICE", "LOSS FOCUS WHILE PLAYING")
                             mediaPlayer.pause()
+                            updateUI(true)
                         }
                     }
                 }
                 else -> {
                     if (mediaPlayer.isPlaying) {
-                        Log.d("SERVICE", "LOSS FOCUS ELSE WHILE PLAYING")
-                        val intentForBroadcast = Intent("BROADCAST")
-                        intentForBroadcast.putExtra("STOP",true)
-                        applicationContext.sendBroadcast(intentForBroadcast)
-
-                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                        intentForNotification.putExtra("STOP", true)
-                        applicationContext.sendBroadcast(intentForNotification)
+                        Log.d("PLAYBACK SERVICE", "LOSS FOCUS ELSE WHILE PLAYING")
                         mediaPlayer.pause()
+                        updateUI(true)
                     }
                 }
             }
@@ -80,165 +62,117 @@ class PlaybackService : Service() {
         mediaSession = MediaSessionCompat(applicationContext, packageName+"mediaSessionPlayer")
 
         mediaSession.setCallback(object : MediaSessionCompat.Callback() {
-
-            override fun onPause() {
-                Log.d("PAUSE","")
-            }
-
             override fun onSeekTo(pos: Long) {
                 MyMediaPlayer.getInstance.seekTo(pos.toInt())
             }
 
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
-                Log.d("MediaButtonEvent", mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT).toString())
+                Log.d("PLAYBACK SERVICE", mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT).toString())
+                if (MyMediaPlayer.currentIndex != -1) {
+                    val keyEvent = mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT) as KeyEvent
+                    if (keyEvent.action == KeyEvent.ACTION_DOWN){
+                        when(keyEvent.keyCode){
+                            KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                                    .setAudioAttributes(audioAttributes)
+                                    .setAcceptsDelayedFocusGain(true)
+                                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                                    .build()
 
-                val keyEvent = mediaButtonIntent.extras?.get(Intent.EXTRA_KEY_EVENT) as KeyEvent
-                if (keyEvent.action == KeyEvent.ACTION_DOWN){
-                    when(keyEvent.keyCode){
-                        KeyEvent.KEYCODE_MEDIA_PAUSE -> {
-                            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                                .setAudioAttributes(audioAttributes)
-                                .setAcceptsDelayedFocusGain(true)
-                                .setOnAudioFocusChangeListener(onAudioFocusChange)
-                                .build()
-
-                            when (audioManager.requestAudioFocus(audioFocusRequest)) {
-                                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                                    if (mediaPlayer.isPlaying) {
-                                        mediaPlayer.pause()
-                                        audioManager.abandonAudioFocusRequest(audioFocusRequest)
-                                        val intentForBroadcast = Intent("BROADCAST")
-                                        intentForBroadcast.putExtra("STOP", true)
-                                        applicationContext.sendBroadcast(intentForBroadcast)
-
-                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                                        intentForNotification.putExtra("STOP", true)
-                                        applicationContext.sendBroadcast(intentForNotification)
-                                    } else {
-                                        mediaPlayer.start()
-
-                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                                        intentForNotification.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForNotification)
-
-                                        val intentForBroadcast = Intent("BROADCAST")
-                                        intentForBroadcast.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForBroadcast)
-                                    }
-                                }
-                                else -> {}
-                            }
-                        }
-                        KeyEvent.KEYCODE_MEDIA_PLAY -> {
-                            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                                .setAudioAttributes(audioAttributes)
-                                .setAcceptsDelayedFocusGain(true)
-                                .setOnAudioFocusChangeListener(onAudioFocusChange)
-                                .build()
-
-                            when (audioManager.requestAudioFocus(audioFocusRequest)) {
-                                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                                    if (mediaPlayer.isPlaying) {
-                                        mediaPlayer.pause()
-                                        val intentForBroadcast = Intent("BROADCAST")
-                                        intentForBroadcast.putExtra("STOP", true)
-                                        applicationContext.sendBroadcast(intentForBroadcast)
-
-                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                                        intentForNotification.putExtra("STOP", true)
-                                        applicationContext.sendBroadcast(intentForNotification)
-                                    } else {
-                                        mediaPlayer.start()
-
-                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                                        intentForNotification.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForNotification)
-
-                                        val intentForBroadcast = Intent("BROADCAST")
-                                        intentForBroadcast.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForBroadcast)
-                                    }
-                                }
-                                else -> {}
-                            }
-                        }
-                        KeyEvent.KEYCODE_MEDIA_NEXT -> {
-                            if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
-                                MyMediaPlayer.currentIndex = 0
-                            } else {
-                                MyMediaPlayer.currentIndex +=1
-                            }
-
-                            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-
-
-                            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                                .setAudioAttributes(audioAttributes)
-                                .setAcceptsDelayedFocusGain(true)
-                                .setOnAudioFocusChangeListener(onAudioFocusChange)
-                                .build()
-
-                            try {
                                 when (audioManager.requestAudioFocus(audioFocusRequest)) {
                                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                                        mediaPlayer.reset()
-                                        mediaPlayer.setDataSource(currentSong.path)
-                                        mediaPlayer.prepare()
-                                        mediaPlayer.start()
-
-                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                                        intentForNotification.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForNotification)
-
-                                        val intentForActivity = Intent("BROADCAST")
-                                        intentForActivity.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForActivity)
+                                        if (mediaPlayer.isPlaying) {
+                                            mediaPlayer.pause()
+                                            updateUI(true)
+                                        } else {
+                                            mediaPlayer.start()
+                                            updateUI(false)
+                                        }
                                     }
+                                    else -> {}
                                 }
-                            } catch (error : Error){
-                                Log.d("error","")
                             }
-                        }
-                        KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
-                            if(MyMediaPlayer.currentIndex ==0){
-                                MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-                            } else {
-                                MyMediaPlayer.currentIndex -=1
-                            }
+                            KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                                    .setAudioAttributes(audioAttributes)
+                                    .setAcceptsDelayedFocusGain(true)
+                                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                                    .build()
 
-                            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-
-
-                            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                                .setAudioAttributes(audioAttributes)
-                                .setAcceptsDelayedFocusGain(true)
-                                .setOnAudioFocusChangeListener(onAudioFocusChange)
-                                .build()
-
-                            try {
                                 when (audioManager.requestAudioFocus(audioFocusRequest)) {
                                     AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                                        mediaPlayer.reset()
-                                        mediaPlayer.setDataSource(currentSong.path)
-                                        mediaPlayer.prepare()
-                                        mediaPlayer.start()
+                                        if (mediaPlayer.isPlaying) {
+                                            mediaPlayer.pause()
+                                            updateUI(true)
 
-                                        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                                        intentForNotification.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForNotification)
-
-                                        val intentForActivity = Intent("BROADCAST")
-                                        intentForActivity.putExtra("STOP", false)
-                                        applicationContext.sendBroadcast(intentForActivity)
+                                        } else {
+                                            mediaPlayer.start()
+                                            updateUI(false)
+                                        }
                                     }
+                                    else -> {}
                                 }
-                            } catch (error : Error){
-                                Log.d("error","")
+                            }
+                            KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                                if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
+                                    MyMediaPlayer.currentIndex = 0
+                                } else {
+                                    MyMediaPlayer.currentIndex +=1
+                                }
+
+                                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+                                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                                    .setAudioAttributes(audioAttributes)
+                                    .setAcceptsDelayedFocusGain(true)
+                                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                                    .build()
+
+                                try {
+                                    when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                                        AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                                            mediaPlayer.reset()
+                                            mediaPlayer.setDataSource(currentSong.path)
+                                            mediaPlayer.prepare()
+                                            mediaPlayer.start()
+                                            updateUI(false)
+                                        }
+                                    }
+                                } catch (error : Error){
+                                    Log.d("error","")
+                                }
+                            }
+                            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                                if(MyMediaPlayer.currentIndex ==0){
+                                    MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
+                                } else {
+                                    MyMediaPlayer.currentIndex -=1
+                                }
+                                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
+                                val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                                    .setAudioAttributes(audioAttributes)
+                                    .setAcceptsDelayedFocusGain(true)
+                                    .setOnAudioFocusChangeListener(onAudioFocusChange)
+                                    .build()
+
+                                try {
+                                    when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                                        AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                                            mediaPlayer.reset()
+                                            mediaPlayer.setDataSource(currentSong.path)
+                                            mediaPlayer.prepare()
+                                            mediaPlayer.start()
+                                            updateUI(false)
+                                        }
+                                    }
+                                } catch (error : Error){
+                                    Log.d("error","")
+                                }
                             }
                         }
                     }
                 }
-
                 return super.onMediaButtonEvent(mediaButtonIntent)
             }
         })
@@ -252,6 +186,16 @@ class PlaybackService : Service() {
     override fun onCreate() {
         super.onCreate()
         Log.d("ON CREATE", "")
+    }
+
+    private fun updateUI(isMusicStopped : Boolean) {
+        val intentForBroadcast = Intent("BROADCAST")
+        intentForBroadcast.putExtra("STOP", isMusicStopped)
+        applicationContext.sendBroadcast(intentForBroadcast)
+
+        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+        intentForNotification.putExtra("STOP", isMusicStopped)
+        applicationContext.sendBroadcast(intentForNotification)
     }
 
     companion object {
