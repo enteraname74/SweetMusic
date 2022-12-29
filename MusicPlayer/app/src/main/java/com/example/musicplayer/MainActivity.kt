@@ -66,6 +66,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d("MAIN ACTIVITY", "ON CREATE")
+        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentIndex.toString())
+        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentPlaylist.size.toString())
 
         pausePlayButton = findViewById(R.id.pause_play)
         fetchingSongs = findViewById(R.id.fetching_songs)
@@ -84,7 +87,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             requestPermission()
         }
 
-        if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
+        if (File(applicationContext.filesDir, saveAllMusicsFile).exists() && MyMediaPlayer.allMusics.size == 0){
             CoroutineScope(Dispatchers.Main).launch {
                 MyMediaPlayer.allMusics = readAllMusicsFromFile(saveAllMusicsFile)
                 allMusicsBackup = MyMediaPlayer.allMusics.map{ it.copy() } as ArrayList<Music> /* = java.util.ArrayList<com.example.musicplayer.Music> */
@@ -92,6 +95,9 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 viewPager.visibility = View.VISIBLE
                 readAllFoldersFromFile()
             }
+        } else if (MyMediaPlayer.allMusics.size != 0) {
+            fetchingSongs.visibility = View.GONE
+            viewPager.visibility = View.VISIBLE
         }
 
         viewPager.adapter = VpAdapter(this)
@@ -125,9 +131,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         bottomSheetLayout = findViewById(R.id.bottom_infos)
         sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
 
+        if (MyMediaPlayer.currentIndex != -1) {
+            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN || newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    Log.d("MAIN ACTIVITY", "MUSIC WILL STOP")
                     stopMusic()
                 }
             }
@@ -142,9 +152,13 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         }
     }
 
+    override fun onNightModeChanged(mode: Int) {
+        Log.d("MAIN", "NIGHT MODE")
+        super.onNightModeChanged(mode)
+    }
+
     override fun onResume() {
         super.onResume()
-
         // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
         // Si on a la permission et qu'on a pas encore de fichiers avec des musiques, alors on va chercher nos musiques :
         if (checkPermission() && !File(applicationContext.filesDir, saveAllMusicsFile).exists()){
@@ -162,7 +176,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
         if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED

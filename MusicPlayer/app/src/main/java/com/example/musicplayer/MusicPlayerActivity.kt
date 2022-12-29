@@ -172,6 +172,8 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     override fun onResume() {
         super.onResume()
+        Log.d("MPA", MyMediaPlayer.currentIndex.toString())
+        Log.d("MPA", MyMediaPlayer.currentPlaylist.size.toString())
         // Si on a plus de musiques dans la playlist à jouer, il faut quitter cette activité
         if(MyMediaPlayer.currentIndex == -1) {
             finish()
@@ -504,7 +506,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("MUSIC PLAYER KILL", "")
         unregisterReceiver(broadcastReceiver)
     }
 
