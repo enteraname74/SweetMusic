@@ -249,6 +249,9 @@ open class Tools : AppCompatActivity() {
         MyMediaPlayer.currentPlaylist = ArrayList<Music>()
         MyMediaPlayer.initialPlaylist = ArrayList<Music>()
         PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+        intentForNotification.putExtra("STOP_RECEIVE", true)
+        applicationContext.sendBroadcast(intentForNotification)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(1)
     }
