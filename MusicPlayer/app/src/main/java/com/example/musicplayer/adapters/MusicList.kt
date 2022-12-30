@@ -4,9 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.util.Log
+import android.graphics.Typeface
 import android.view.*
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.palette.graphics.Palette
@@ -100,16 +99,28 @@ data class MusicList(
         if (backgroundColor != -1) {
             holder.background?.setBackgroundColor(backgroundColor)
         }
+        var textStyle = Typeface.DEFAULT
+        var textColor = Color.parseColor(context.resources.getString(R.color.text_color))
+
         if(currentMusic == currentPlayedMusic && (MyMediaPlayer.playlistName == listName || MyMediaPlayer.currentPlaylist == musics)){
-            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.selected_music_color)))
-        } else {
-            holder.songName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-            holder.albumName?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-            holder.separator?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
-            holder.artist?.setTextColor(Color.parseColor(context.resources.getString(R.color.text_color)))
+            textStyle = Typeface.DEFAULT_BOLD
+            textColor = Color.parseColor(context.resources.getString(R.color.selected_music_color))
+        }
+        holder.songName?.apply {
+            setTextColor(textColor)
+            typeface = textStyle
+        }
+        holder.albumName?.apply {
+            setTextColor(textColor)
+            typeface = textStyle
+        }
+        holder.separator?.apply {
+            setTextColor(textColor)
+            typeface = textStyle
+        }
+        holder.artist?.apply {
+            setTextColor(textColor)
+            typeface = textStyle
         }
     }
 
