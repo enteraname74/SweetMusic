@@ -12,6 +12,7 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -326,7 +327,12 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             drawable.draw(canvas)
         }
 
-        val dominantColor: Palette.Swatch? = Palette.from(bitmap as Bitmap).generate().dominantSwatch
+        val dominantColor: Palette.Swatch? =
+            if (Palette.from(bitmap as Bitmap).generate().lightVibrantSwatch == null) {
+                Palette.from(bitmap).generate().dominantSwatch
+            } else {
+                Palette.from(bitmap).generate().lightVibrantSwatch
+            }
         newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
         newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.1f)
         newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
@@ -336,7 +342,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         adapter.backgroundColor = newSecondaryColor
         adapter.notifyDataSetChanged()
 
-
+        findViewById<CoordinatorLayout>(R.id.playlist_activity).setBackgroundColor(newPrimaryColor)
         findViewById<TextView>(R.id.playlist_name).setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
         findViewById<TextView>(R.id.playlist_name).setTextColor(newTextColor)
         findViewById<TextView>(R.id.song_title_info).setTextColor(newTextColor)
