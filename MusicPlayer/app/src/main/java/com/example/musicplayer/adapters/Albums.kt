@@ -63,7 +63,9 @@ class Albums (
             val bytes = currentAlbum.albumCover
             var bitmap: Bitmap? = null
             if ((bytes != null) && bytes.isNotEmpty()) {
-                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                val options = BitmapFactory.Options()
+                options.inSampleSize = 4
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
             }
             holder.albumCover.setImageBitmap(bitmap)
         } else {
