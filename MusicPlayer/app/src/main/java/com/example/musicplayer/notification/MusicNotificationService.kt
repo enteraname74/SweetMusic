@@ -1,6 +1,5 @@
 package com.example.musicplayer.notification
 
-import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -9,18 +8,15 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
 import android.media.MediaMetadata
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.musicplayer.MainActivity
-import com.example.musicplayer.MusicPlayerActivity
 import com.example.musicplayer.PlaybackService
-import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.R
+import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.receivers.DeletedNotificationIntentReceiver
 import com.example.musicplayer.receivers.NextMusicNotificationReceiver
 import com.example.musicplayer.receivers.PausePlayNotificationReceiver
@@ -33,6 +29,7 @@ class MusicNotificationService(private val context : Context) {
     private lateinit var pausePlayIntent : PendingIntent
     private lateinit var previousMusicIntent : PendingIntent
     private lateinit var nextMusicIntent : PendingIntent
+    private lateinit var deleteNotificationIntent : PendingIntent
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -72,6 +69,10 @@ class MusicNotificationService(private val context : Context) {
         }
 
         val activityIntent = Intent(context, MainActivity::class.java)
+        activityIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        activityIntent.action = Intent.ACTION_MAIN
+        activityIntent.addCategory(Intent.CATEGORY_LAUNCHER)
+
         val activityPendingIntent = PendingIntent.getActivity(
             context,
             1,
@@ -100,7 +101,7 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val deleteNotificationIntent = PendingIntent.getBroadcast(
+        deleteNotificationIntent = PendingIntent.getBroadcast(
             context,
             5,
             Intent(context, DeletedNotificationIntentReceiver::class.java),
@@ -194,6 +195,7 @@ class MusicNotificationService(private val context : Context) {
             .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
             .addAction(pauseIcon,"pausePlay",pausePlayIntent)
             .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+            .setDeleteIntent(deleteNotificationIntent)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setMediaSession(PlaybackService.mediaSession.sessionToken)
                 .setShowActionsInCompactView(0, 1, 2)
