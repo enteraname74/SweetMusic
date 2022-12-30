@@ -699,17 +699,35 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    fun bottomSheetRemovePlaylist(position: Int, adapter : Playlists) {
-        if (MyMediaPlayer.allPlaylists[position].isFavoriteList){
-            Toast.makeText(applicationContext,resources.getString(R.string.cannot_delete_favorite_playlist),Toast.LENGTH_SHORT).show()
-        } else {
-            MyMediaPlayer.allPlaylists.removeAt(position)
-            adapter.allPlaylists = MyMediaPlayer.allPlaylists
-            adapter.notifyItemRemoved(position)
+    fun bottomSheetRemovePlaylist(position: Int, adapter : Playlists, context : Context) {
+        val builder = AlertDialog.Builder(context, R.style.AlertDialogTheme)
+        builder.setTitle(getString(R.string.delete_playlist))
 
-            writePlaylistsToFile()
-            Toast.makeText(applicationContext,resources.getString(R.string.playlist_deleted),Toast.LENGTH_SHORT).show()
+        builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
+            if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
+                Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.cannot_delete_favorite_playlist),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                MyMediaPlayer.allPlaylists.removeAt(position)
+                adapter.allPlaylists = MyMediaPlayer.allPlaylists
+                adapter.notifyItemRemoved(position)
+
+                writePlaylistsToFile()
+                Toast.makeText(
+                    applicationContext,
+                    resources.getString(R.string.playlist_deleted),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
+        builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
+            dialogInterface.cancel()
+        }
+
+        builder.show()
     }
 
     fun bottomSheetModifyPlaylist(context : Context, position: Int) {

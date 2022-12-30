@@ -88,9 +88,8 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
         bottomSheetDialog.show()
 
-
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter)
+            (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter, requireContext())
             bottomSheetDialog.dismiss()
         }
 
