@@ -8,11 +8,8 @@
     android:layout_height="wrap_content"
     android:background="@color/secondary_color"
     tools:context=".MainActivity"
-    android:layout_marginLeft="10dp"
-    android:layout_marginRight="10dp"
-    android:layout_marginTop="10dp"
-    android:layout_marginEnd="10dp"
-    android:layout_marginStart="10dp">
+    android:layout_marginTop="7dp"
+    android:layout_marginBottom="7dp">
 
     <LinearLayout
         android:layout_width="250dp"
@@ -26,6 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
+            android:textStyle="bold"
             android:textColor="@color/text_color"/>
 
         <TextView

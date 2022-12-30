@@ -70,7 +70,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="8"
-        android:background="@color/secondary_color"/>
+        android:background="@color/secondary_color"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"

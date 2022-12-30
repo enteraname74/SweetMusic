@@ -132,16 +132,16 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@drawable/recycler_view_shape">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/menu_playlist_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="10dp"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:background="@drawable/recycler_view_shape"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="20dp"
                 android:visibility="visible" />
         </LinearLayout>
     </LinearLayout>
