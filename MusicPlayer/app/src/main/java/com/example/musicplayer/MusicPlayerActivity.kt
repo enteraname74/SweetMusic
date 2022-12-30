@@ -618,4 +618,12 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
         return true
     }
+
+    override fun onBackPressed() {
+        if (sheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
+            sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        } else {
+            super.onBackPressed()
+        }
+    }
 }
