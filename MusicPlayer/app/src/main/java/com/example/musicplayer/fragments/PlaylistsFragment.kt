@@ -23,6 +23,7 @@ import com.example.musicplayer.adapters.Playlists
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.Playlist
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.android.synthetic.main.activity_playlists_menu.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -88,9 +89,13 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
         bottomSheetDialog.show()
 
-        bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter, requireContext())
-            bottomSheetDialog.dismiss()
+        if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.visibility = View.GONE
+        } else {
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+                (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter, requireContext())
+                bottomSheetDialog.dismiss()
+            }
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
