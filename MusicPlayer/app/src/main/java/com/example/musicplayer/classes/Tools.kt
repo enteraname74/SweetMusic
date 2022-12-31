@@ -112,6 +112,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             Log.d("TOOLS", currentSong.toString())
             mediaPlayer.setDataSource(currentSong.path)
             mediaPlayer.prepareAsync()
+            Log.d("TOOLS", "Preparing music")
         } catch (e: IndexOutOfBoundsException) {
             Log.d("ERROR","")
             e.printStackTrace()
@@ -119,6 +120,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     }
 
     override fun onPrepared(p0: MediaPlayer?) {
+        Log.d("TOOLS", "Music prepared")
         val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
         mediaPlayer.start()
         val pausePlay = findViewById<ImageView>(R.id.pause_play)
@@ -183,6 +185,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     }
 
     open fun playNextSong(adapter : MusicList){
+        Log.d("TOOLS", "PLAY NEXT SONG ADAPTER")
         if(MyMediaPlayer.currentPlaylist.size != 0) {
             if (requestFocus()) {
                 if (MyMediaPlayer.currentIndex == (MyMediaPlayer.currentPlaylist.size) - 1) {

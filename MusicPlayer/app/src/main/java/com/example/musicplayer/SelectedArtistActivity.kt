@@ -185,7 +185,6 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         val intent = Intent(this@SelectedArtistActivity,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("ARTIST POSITION", artistPosition)
 
         startActivity(intent)
     }

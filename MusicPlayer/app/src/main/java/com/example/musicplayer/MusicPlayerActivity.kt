@@ -16,6 +16,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.PersistableBundle
 import android.util.Log
 import android.view.ContextMenu
 import android.view.MenuItem
@@ -40,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.lang.RuntimeException
 
 
 // Classe représentant la lecture d'une musique :
@@ -77,6 +79,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
 
+            if (intent.extras?.getInt("SEEK TO") != null) {
+                seekBar.setProgress(intent.extras?.getInt("SEEK TO") as Int, true)
+            }
+            Log.d("MPA POS", "ON RECEIVE: ${MyMediaPlayer.currentIndex}")
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             titleTv.text = currentSong.name
             CoroutineScope(Dispatchers.Main).launch { setColor() }
@@ -87,12 +93,22 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     private var newSecondaryColor = R.color.secondary_color
     private var newTextColor = R.color.text_color
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        Log.d("MP", "SAVE INSTANCE")
+        outState.putBoolean("SAME MUSIC", true)
+        super.onSaveInstanceState(outState)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
         Log.d("MPA", "ON CREATE")
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
+        if (savedInstanceState != null) {
+            sameMusic = savedInstanceState.getBoolean("SAME MUSIC")
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
 
         titleTv = findViewById(R.id.song_title)
         currentTimeTv = findViewById(R.id.current_time)
@@ -133,7 +149,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             ) {
                 if (fromUser) {
                     mediaPlayer.seekTo(progress)
-                    updateMusicNotification(false)
+                    updateMusicNotification(!mediaPlayer.isPlaying)
                 }
             }
 
@@ -169,16 +185,17 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
+
+        Log.d("MPA POS", "ON CREATE : ${MyMediaPlayer.currentIndex}")
     }
 
     override fun onResume() {
         super.onResume()
-        Log.d("MPA", MyMediaPlayer.currentIndex.toString())
-        Log.d("MPA", MyMediaPlayer.currentPlaylist.size.toString())
         // Si on a plus de musiques dans la playlist à jouer, il faut quitter cette activité
         if(MyMediaPlayer.currentIndex == -1) {
             finish()
         } else {
+            Log.d("MPA POS", "ON RESUME START")
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
@@ -197,6 +214,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             songTitleInfo?.text = currentSong.name
             totalTimeTv.text = convertDuration(currentSong.duration)
         }
+        Log.d("MPA POS", "ON RESUME END")
     }
 
     private fun setResourcesWithMusic(){
@@ -506,6 +524,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     }
 
     override fun onDestroy() {
+        Log.d("MP","ON DESTROY CALLED")
         super.onDestroy()
         unregisterReceiver(broadcastReceiver)
     }

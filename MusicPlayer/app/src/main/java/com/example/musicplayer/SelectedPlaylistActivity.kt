@@ -216,7 +216,6 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         val intent = Intent(this,MusicPlayerActivity::class.java)
 
         intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("POSITION", allMusicsBackup.indexOf(musics[position]))
 
         startActivity(intent)
     }

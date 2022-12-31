@@ -189,7 +189,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         MyMediaPlayer.currentIndex = position
         val intent = Intent(this@SelectedAlbumActivity,MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
-        intent.putExtra("ALBUM POSITION", albumPosition)
 
         startActivity(intent)
     }

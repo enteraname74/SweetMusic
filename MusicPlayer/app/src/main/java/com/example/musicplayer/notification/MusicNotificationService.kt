@@ -45,6 +45,7 @@ class MusicNotificationService(private val context : Context) {
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
                 updateNotification(false)
+                Log.d("MUSIC NOTIFICATION", "POS : ${MyMediaPlayer.currentIndex}")
                 val intentForBroadcast = Intent("BROADCAST")
                 intentForBroadcast.putExtra("STOP", false)
                 context.sendBroadcast(intentForBroadcast)

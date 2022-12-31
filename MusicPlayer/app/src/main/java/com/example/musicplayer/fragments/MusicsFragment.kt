@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -88,12 +89,16 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
         nextButton.setOnClickListener { (activity as MainActivity).playNextSong(adapter) }
         previousButton.setOnClickListener { (activity as MainActivity).playPreviousSong(adapter) }
-        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong(adapter) }
+        mediaPlayer.setOnCompletionListener {
+            Log.d("MUSIC FRAGMENT", "WILL PLAY NEXT")
+            (activity as MainActivity).playNextSong(adapter) }
 
         CoroutineScope(Dispatchers.Main).launch { (activity as MainActivity).verifiyAllMusics(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
+        Log.d("MUSIC FRAGMENT", "START CLICK")
+        mediaPlayer.setOnCompletionListener(null)
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
@@ -123,17 +128,9 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
                 }
             }
 
-            if(mediaPlayer.isPlaying){
-                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                intentForNotification.putExtra("STOP", false)
-                context?.applicationContext?.sendBroadcast(intentForNotification)
-            } else {
-                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
-                intentForNotification.putExtra("STOP", true)
-                context?.applicationContext?.sendBroadcast(intentForNotification)
-            }
+            (activity as MainActivity).updateMusicNotification(!mediaPlayer.isPlaying)
         }
-
+        Log.d("MUSIC FRAGMENT", "END CLICK")
         val intent = Intent(context, MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
 
