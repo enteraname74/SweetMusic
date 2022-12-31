@@ -112,7 +112,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-        shuffleButton.setOnClickListener { playRandom(MyMediaPlayer.allMusics, this) }
+        shuffleButton.setOnClickListener { playRandom(MyMediaPlayer.allMusics, this,"Main") }
 
         CoroutineScope(Dispatchers.IO).launch{ readPlaylistsAsync() }
         CoroutineScope(Dispatchers.IO).launch { readAllDeletedMusicsFromFile() }

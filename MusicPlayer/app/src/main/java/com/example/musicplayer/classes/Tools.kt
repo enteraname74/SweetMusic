@@ -141,7 +141,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
     }
 
-    fun playRandom(list : ArrayList<Music>, context : Context) {
+    fun playRandom(list : ArrayList<Music>, context : Context, listName : String) {
         if (list.size > 0) {
             val shuffledList = ArrayList(list.map { it.copy() })
             shuffledList.shuffle()
@@ -150,6 +150,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             val sameMusic = false
 
             MyMediaPlayer.currentIndex = 0
+            MyMediaPlayer.playlistName = listName
 
             val intent = Intent(context, MusicPlayerActivity::class.java)
 

@@ -84,7 +84,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         findViewById<ImageView>(R.id.quit_activity).setOnClickListener{ finish() }
         findViewById<ImageView>(R.id.modify_playlist).setOnClickListener { modifyPlaylist() }
         findViewById<ImageView>(R.id.add_songs).setOnClickListener{ onAddSongsClick() }
-        findViewById<ImageView>(R.id.shuffle).setOnClickListener { playRandom(musics, this) }
+        findViewById<ImageView>(R.id.shuffle).setOnClickListener { playRandom(musics, this,playlist.listName) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 

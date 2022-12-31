@@ -90,7 +90,7 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         quitActivity.setOnClickListener{ finish() }
 
         val shuffleButton = findViewById<ImageView>(R.id.shuffle)
-        shuffleButton.setOnClickListener { playRandom(musics, this) }
+        shuffleButton.setOnClickListener { playRandom(musics, this, album.albumName+album.artist) }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 

@@ -80,7 +80,7 @@
     <string name="remove_from_playlist">Retirer de la playlist</string>
     <string name="delete_playlist">Supprimer la playlist</string>
     <string name="delete_music">Supprimer la musique</string>
-    <string name="your_playlists">Vos playlists</string>
+    <string name="your_playlists">Playlists où cette musique n\'est pas :</string>
     <string name="validate_selection">Valider la sélection</string>
     <string name="number_of_songs">Nombre de musiques</string>
     <string name="songs_number">%1d songs</string>
