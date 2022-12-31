@@ -65,7 +65,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.saxophone)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.notification_default)
         }
 
         val activityIntent = Intent(context, MainActivity::class.java)
@@ -147,7 +147,7 @@ class MusicNotificationService(private val context : Context) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
         } else {
-            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_saxophone_svg)
+            bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.notification_default)
         }
 
         if (MyMediaPlayer.getInstance.isPlaying) {
