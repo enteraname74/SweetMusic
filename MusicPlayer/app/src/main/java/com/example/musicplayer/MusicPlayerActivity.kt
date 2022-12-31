@@ -527,7 +527,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)?.setBackgroundColor(newPrimaryColor)
         bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         bottomSheetDialog.findViewById<TextView>(R.id.add_to_a_playlist_text)?.setTextColor(newTextColor)
-        bottomSheetDialog.findViewById<TextView>(R.id.delete_music)?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<TextView>(R.id.delete_music)?.apply {
+            setTextColor(newTextColor)
+            text = getString(R.string.remove_from_played_list)
+        }
         bottomSheetDialog.findViewById<ImageView>(R.id.remove_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         bottomSheetDialog.findViewById<ImageView>(R.id.modify_music_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         bottomSheetDialog.findViewById<TextView>(R.id.modify_music_text)?.setTextColor(newTextColor)
@@ -542,7 +545,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
             val builder = AlertDialog.Builder(this, R.style.AlertDialogTheme)
-            builder.setTitle(getString(R.string.delete_music))
+            builder.setTitle(getString(R.string.remove_from_played_list))
 
             builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
                 val currentMusic = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
@@ -569,7 +572,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
                 Toast.makeText(
                     this,
-                    resources.getString(R.string.deleted_from_playlist),
+                    resources.getString(R.string.removed_from_played_list),
                     Toast.LENGTH_SHORT
                 ).show()
             }

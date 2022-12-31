@@ -92,4 +92,6 @@
     <string name="folders">Dossiers utilisées</string>
     <string name="missing_correct_files">Il manques des fichiers corrects !</string>
     <string name="a_title_must_be_set_correctly">Le titre doit être valable !</string>
+    <string name="remove_from_played_list">Retirer de la liste de lecture</string>
+    <string name="removed_from_played_list">Retirée de la liste de lecture</string>
 </resources>

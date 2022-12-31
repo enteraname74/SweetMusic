@@ -93,4 +93,6 @@
     <string name="folders">Folders used</string>
     <string name="missing_correct_files">Missing correct files !</string>
     <string name="a_title_must_be_set_correctly">A title must be set correctly !</string>
+    <string name="remove_from_played_list">Remove from the played list</string>
+    <string name="removed_from_played_list">Removed from played list</string>
 </resources>
