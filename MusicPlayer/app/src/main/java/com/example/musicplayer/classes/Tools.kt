@@ -377,7 +377,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             Log.e("Error retrieving playlists",error.toString())
             Toast.makeText(applicationContext, "Couldn't retrieve playlists", Toast.LENGTH_LONG).show()
         }
-        Toast.makeText(applicationContext, "Data retrieved in your Download Folder", Toast.LENGTH_LONG).show()
+        Toast.makeText(applicationContext, getString(R.string.data_retrieved_in_download_folder), Toast.LENGTH_LONG).show()
     }
 
     fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){

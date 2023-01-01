@@ -154,12 +154,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         }
     }
 
-    override fun onNightModeChanged(mode: Int) {
-        Log.d("MAIN", "NIGHT MODE")
-    }
-
-
-
     override fun onResume() {
         super.onResume()
         // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
@@ -217,9 +211,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
         val serviceIntent = Intent(this, PlaybackService::class.java)
         startService(serviceIntent)
-
-        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentIndex.toString())
-        Log.d("MAIN ACTIVITY", MyMediaPlayer.currentPlaylist.size.toString())
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -240,7 +231,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             }
             R.id.set_data -> {
                 val intent = Intent(this,SetDataActivity::class.java)
-                setDataResult.launch(intent)
+                startActivity(intent)
                 true
             }
             else -> {
@@ -248,8 +239,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             }
         }
     }
-
-    private var setDataResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     private suspend fun fetchMusics() {
         // Pour éviter de potentiels crash de l'app :

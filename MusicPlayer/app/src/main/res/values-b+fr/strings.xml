@@ -94,4 +94,5 @@
     <string name="a_title_must_be_set_correctly">Le titre doit être valable !</string>
     <string name="remove_from_played_list">Retirer de la liste de lecture</string>
     <string name="removed_from_played_list">Retirée de la liste de lecture</string>
+    <string name="data_retrieved_in_download_folder">Données téléchargées dans votre dossier de téléchargement</string>
 </resources>

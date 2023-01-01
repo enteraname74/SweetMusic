@@ -143,6 +143,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                 if (fromUser) {
                     mediaPlayer.seekTo(progress)
                     updateMusicNotification(!mediaPlayer.isPlaying)
+                    currentTimeTv.text = convertDuration(mediaPlayer.currentPosition.toLong())
                 }
             }
 
