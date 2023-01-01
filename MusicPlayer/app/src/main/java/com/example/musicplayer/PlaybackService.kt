@@ -64,7 +64,10 @@ class PlaybackService : Service() {
 
         mediaSession.setCallback(object : MediaSessionCompat.Callback() {
             override fun onSeekTo(pos: Long) {
-                MyMediaPlayer.getInstance.seekTo(pos.toInt())
+                mediaPlayer.seekTo(pos.toInt())
+                val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+                intentForNotification.putExtra("STOP", !mediaPlayer.isPlaying)
+                applicationContext.sendBroadcast(intentForNotification)
             }
 
             override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -189,9 +192,18 @@ class PlaybackService : Service() {
         Log.d("ON CREATE", "")
     }
 
+    /*
     override fun onDestroy() {
         super.onDestroy()
         Log.d("PLAYBACK SERVICE", "DESTROYED")
+        stopMusic()
+    }
+
+     */
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        super.onTaskRemoved(rootIntent)
+        Log.d("PLAYBACK SERVICE", "REMOVED")
         stopMusic()
     }
 
