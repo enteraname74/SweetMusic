@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
@@ -19,25 +18,21 @@ import android.util.Size
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.TypedArrayUtils
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.VpAdapter
 import com.example.musicplayer.classes.Folder
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Tools
-import com.example.musicplayer.fragments.MusicsFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import java.io.*
 
-class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, AudioManager.OnAudioFocusChangeListener {
+class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
@@ -316,7 +311,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                 writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
                 writeAllFolders()
 
-                val openMenu = findViewById<ImageView>(R.id.open_menu)
                 withContext(Dispatchers.Main){
                     fetchingSongs.visibility = View.GONE
                     viewPager.visibility = View.VISIBLE
@@ -358,10 +352,5 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
     override fun onPause() {
         super.onPause()
         unregisterReceiver(broadcastReceiver)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        //stopMusic()
     }
 }

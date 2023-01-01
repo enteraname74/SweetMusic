@@ -232,5 +232,4 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         super.onDestroy()
         fetchingJob.cancel()
     }
-
 }

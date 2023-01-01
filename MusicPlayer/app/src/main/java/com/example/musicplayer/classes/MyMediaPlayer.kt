@@ -21,8 +21,6 @@ class MyMediaPlayer {
             return instance as MediaPlayer
         }
 
-        var mediaSession : MediaSession? = null
-
         var currentIndex : Int = -1
         var initialPlaylist = ArrayList<Music>()
         var currentPlaylist = ArrayList<Music>()
@@ -51,6 +49,4 @@ class MyMediaPlayer {
         var allAlbums = ArrayList<Album>()
         var allArtists = ArrayList<Artist>()
     }
-
-
 }

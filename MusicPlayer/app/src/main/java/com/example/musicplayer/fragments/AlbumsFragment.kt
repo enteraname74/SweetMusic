@@ -1,6 +1,5 @@
 package com.example.musicplayer.fragments
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -49,8 +48,8 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
         val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
         val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
 
-        nextButton.setOnClickListener { playNextSong() }
-        previousButton.setOnClickListener { playPreviousSong() }
+        nextButton.setOnClickListener { (activity as MainActivity).playNextSong() }
+        previousButton.setOnClickListener { (activity as MainActivity).playPreviousSong() }
 
         return view
     }
@@ -93,64 +92,6 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
             }
         }
         mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
-    }
-
-    private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex +=1
-        }
-        CoroutineScope(Dispatchers.Default).launch {
-            val service = MusicNotificationService(context?.applicationContext as Context)
-            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
-        playMusic()
-    }
-
-    private fun playPreviousSong(){
-        if(MyMediaPlayer.currentIndex ==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex -=1
-        }
-        CoroutineScope(Dispatchers.Default).launch {
-            val service = MusicNotificationService(context?.applicationContext as Context)
-            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
-        playMusic()
-    }
-
-    private fun playMusic(){
-        mediaPlayer.reset()
-        try {
-            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
-
-            val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
-            val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
-            val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
-
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo?.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo?.setImageResource(R.drawable.ic_saxophone_svg)
-            }
-
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            Log.d("ERROR",e.toString())
-            e.printStackTrace()
-        }
     }
 
     override fun onAlbumClick(position: Int) {

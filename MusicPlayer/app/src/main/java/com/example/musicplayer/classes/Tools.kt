@@ -252,6 +252,19 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
+    open fun playPreviousSong(){
+        if(MyMediaPlayer.currentPlaylist.size != 0) {
+            if (requestFocus()) {
+                if (MyMediaPlayer.currentIndex == 0) {
+                    MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size) - 1
+                } else {
+                    MyMediaPlayer.currentIndex -= 1
+                }
+                playMusic()
+            }
+        }
+    }
+
     open fun requestFocus() : Boolean{
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(PlaybackService.audioAttributes)

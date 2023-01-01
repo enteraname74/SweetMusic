@@ -1,31 +1,27 @@
 package com.example.musicplayer.fragments
 
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
-import android.view.*
 import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
 import com.example.musicplayer.Music
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.classes.MyMediaPlayer
-import com.example.musicplayer.notification.MusicNotificationService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.*
 import java.io.*
 
 class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
-
-    private val saveAllMusicsFile = "allMusics.musics"
     private val saveAllDeletedFiles = "allDeleted.musics"
     private val savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var adapter : MusicList
@@ -121,18 +117,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
             (activity as MainActivity).bottomSheetPlayNext(adapter,position)
             bottomSheetDialog.dismiss()
-        }
-    }
-
-    private fun writeAllMusicsToFile(content : ArrayList<Music>){
-        MyMediaPlayer.allMusics = content
-        val path = context?.applicationContext?.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllMusicsFile)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error write musics",error.toString())
         }
     }
 
