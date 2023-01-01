@@ -199,25 +199,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     }
 
     override fun onMusicClick(position: Int) {
-        var sameMusic = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            sameMusic = false
-        }
-        // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
-        if (musics != MyMediaPlayer.initialPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
-            MyMediaPlayer.currentPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.initialPlaylist = ArrayList(musics.map { it.copy() })
-            MyMediaPlayer.playlistName = playlist.listName
-            sameMusic = false
-        }
-
-        MyMediaPlayer.currentIndex = position
-        val intent = Intent(this,MusicPlayerActivity::class.java)
-
-        intent.putExtra("SAME MUSIC", sameMusic)
-
-        startActivity(intent)
+        musicClicked(this, adapter, position, playlist.listName)
     }
 
 

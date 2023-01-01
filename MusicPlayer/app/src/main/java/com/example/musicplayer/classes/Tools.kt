@@ -19,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.adapters.Playlists
+import com.example.musicplayer.notification.MusicNotificationService
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -160,6 +161,31 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
             startActivity(intent)
         }
+    }
+
+    fun musicClicked(context : Context, adapter: MusicList, position: Int, listname : String) {
+        mediaPlayer.setOnCompletionListener(null)
+        var sameMusic = true
+
+        if (position != MyMediaPlayer.currentIndex) {
+            sameMusic = false
+        }
+        // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
+        if (adapter.musics != MyMediaPlayer.currentPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
+            CoroutineScope(Dispatchers.Main).launch {
+                MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
+            }
+            MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
+            MyMediaPlayer.playlistName = listname
+            sameMusic = false
+        }
+
+        MyMediaPlayer.currentIndex = position
+
+        updateMusicNotification(!mediaPlayer.isPlaying)
+        val intent = Intent(context, MusicPlayerActivity::class.java)
+        intent.putExtra("SAME MUSIC", sameMusic)
+        startActivity(intent)
     }
 
     fun onBottomMenuClick(position : Int, context : Context){

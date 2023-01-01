@@ -98,43 +98,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     override fun onMusicClick(position: Int) {
         Log.d("MUSIC FRAGMENT", "START CLICK")
-        mediaPlayer.setOnCompletionListener(null)
-        var sameMusic = true
-
-        if (position != MyMediaPlayer.currentIndex) {
-            sameMusic = false
-        }
-        // Vérifions si on change de playlist : (on le fait aussi obligatoirement si la playlist jouée est vide)
-        if (adapter.musics != MyMediaPlayer.currentPlaylist || MyMediaPlayer.currentPlaylist.size == 0) {
-            CoroutineScope(Dispatchers.Main).launch {
-                MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
-            }
-            MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
-            MyMediaPlayer.playlistName = "Main"
-            sameMusic = false
-        }
-
-        MyMediaPlayer.currentIndex = position
-
-        CoroutineScope(Dispatchers.Default).launch {
-            val notificationManager = context?.applicationContext?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            // Si il n'y a pas de notifications, on l'affiche
-            if(notificationManager.activeNotifications.isEmpty()) {
-                val service = MusicNotificationService(context?.applicationContext as Context)
-                if (mediaPlayer.isPlaying){
-                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-                } else {
-                    service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
-                }
-            }
-
-            (activity as MainActivity).updateMusicNotification(!mediaPlayer.isPlaying)
-        }
-        Log.d("MUSIC FRAGMENT", "END CLICK")
-        val intent = Intent(context, MusicPlayerActivity::class.java)
-        intent.putExtra("SAME MUSIC", sameMusic)
-
-        startActivity(intent)
+        (activity as MainActivity).musicClicked(requireContext(), adapter, position, "Main")
     }
 
     override fun onLongMusicClick(position: Int) {

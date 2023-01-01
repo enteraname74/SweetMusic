@@ -78,11 +78,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-
-            if (intent.extras?.getInt("SEEK TO") != null) {
-                seekBar.setProgress(intent.extras?.getInt("SEEK TO") as Int, true)
-            }
-            Log.d("MPA POS", "ON RECEIVE: ${MyMediaPlayer.currentIndex}")
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             titleTv.text = currentSong.name
             CoroutineScope(Dispatchers.Main).launch { setColor() }
