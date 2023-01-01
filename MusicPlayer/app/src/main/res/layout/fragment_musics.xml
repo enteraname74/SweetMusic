@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.MusicsFragment">
+    tools:context=".fragments.MusicsFragment"
+    android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
 
 
     <LinearLayout
@@ -25,7 +26,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/secondary_color"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp" />
 
     </LinearLayout>
 

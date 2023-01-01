@@ -1,16 +1,10 @@
 <resources>
-    <string name="app_name">Music Player</string>
+    <string name="app_name">Sweet Music</string>
     <string name="title_activity_playlists_menu">PlaylistsMenuActivity</string>
-    <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Suivant</string>
     <string name="previous">Précédent</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_song_is_playing">AUCUN SON N\'EST JOUÉ</string>
     <string name="name_of_the_song">Nom de la musique</string>
     <string name="playlist_s_cover">Image de la playlist</string>
@@ -37,23 +31,25 @@
     <string name="cancel">Annuler</string>
     <string name="ok">Ok</string>
     <string name="modify_playlist_informations">Modifier les informations de la playlist</string>
+    <string name="modify_album_informations">Modifier les informations de l\'album</string>
     <string name="playlist_image">Couverture de la playlist :</string>
     <string name="name_of_the_playlist">Nom de la playlist :</string>
-    <string name="title_of_the_song">Titre de la chanson</string>
+    <string name="name_of_the_album">Nom de l\'album :</string>
+    <string name="title_of_the_song">Titre de la musique</string>
     <string name="timer">0:00</string>
     <string name="sort">mélanger</string>
     <string name="pause_play">pause et jeu</string>
     <string name="favorite">favoris</string>
-    <string name="add_songs">Ajouter des chansons</string>
+    <string name="add_songs">Ajouter des musiques</string>
     <string name="list_type">Playlist jouée</string>
     <string name="select_the_saved_files">Selectionnez les fichiers de sauvegardes</string>
-    <string name="music_file_musics">Fichier de musiques (.musics) :</string>
+    <string name="music_file_musics">Fichier de musiques (.musics)</string>
     <string name="select">Choisir</string>
-    <string name="playlist_file_playlists">Fichier de playlists (.playlists) :</string>
+    <string name="playlist_file_playlists">Fichier de playlists (.playlists)</string>
     <string name="add_to">AJOUTER</string>
-    <string name="remove">SUPPRIMER</string>
-    <string name="modify">MODIFIER</string>
-    <string name="play_next">JOUER ENSUITE</string>
+    <string name="remove">Supprimer</string>
+    <string name="modify">Modifier la musique</string>
+    <string name="play_next">Jouer ensuite</string>
     <string name="added_in_the_playlist">Ajout dans une playlist</string>
     <string name="cannot_retrieve_files">Impossible de récupérer les musiques</string>
     <string name="permission">CETTE PERMISSION EST REQUISE POUR LE BON FONCTIONNEMENT DE L\'APPLICATION. VEUILLEZ L\'ACTIVER DANS LES PARAMÈTRES DE CETTE DERNIÈRE</string>
@@ -69,11 +65,34 @@
     <string name="loading_data">Chargement des données</string>
     <string name="new_songs">Nouvelles Musiques</string>
     <string name="deleted_songs">Musiques Supprimées</string>
-    <string name="searching_new_songs">Recherche de nouvelles chansons</string>
+    <string name="searching_new_songs">Recherche de nouvelles musiques</string>
+    <string name="fetching_found_songs">Récupérations des musiques trouvées</string>
+    <string name="searching_songs_from_your_device">Recherche de musiques sur votre appareil</string>
     <string name="retrieve_music">Récupérer</string>
     <string name="retrieved_music">Musique récupérée</string>
-    <string name="add_new_songs">Ajouter ces nouvelles chansons</string>
+    <string name="add_new_songs">Ajouter ces nouvelles musiques</string>
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
     <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
-
+    <string name="back_button">back button</string>
+    <string name="add_music_to_favourites">Musique ajoutée aux favoris</string>
+    <string name="remove_music_from_favourites">Musique retirée des favoris</string>
+    <string name="add_to_a_playlist">Ajouter à une playlist</string>
+    <string name="remove_from_playlist">Retirer de la playlist</string>
+    <string name="delete_playlist">Supprimer la playlist</string>
+    <string name="delete_music">Supprimer la musique</string>
+    <string name="your_playlists">Playlists où cette musique n\'est pas :</string>
+    <string name="validate_selection">Valider la sélection</string>
+    <string name="number_of_songs">Nombre de musiques</string>
+    <string name="songs_number">%1d songs</string>
+    <string name="wrong_file">Mauvais fichier !</string>
+    <string name="correct_file">Fichier correct !</string>
+    <string name="x_musics_automatically_removed">%1$d musiques retirées de l\'application automatiquement</string>
+    <string name="create_playlist">Nom de la nouvelle playlist :</string>
+    <string name="folders_used_by_the_application">Dossiers utilisés par l\'application :</string>
+    <string name="folders">Dossiers utilisées</string>
+    <string name="missing_correct_files">Il manques des fichiers corrects !</string>
+    <string name="a_title_must_be_set_correctly">Le titre doit être valable !</string>
+    <string name="remove_from_played_list">Retirer de la liste de lecture</string>
+    <string name="removed_from_played_list">Retirée de la liste de lecture</string>
+    <string name="data_retrieved_in_download_folder">Données téléchargées dans votre dossier de téléchargement</string>
 </resources>

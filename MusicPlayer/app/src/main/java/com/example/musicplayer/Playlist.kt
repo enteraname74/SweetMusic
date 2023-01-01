@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import com.example.musicplayer.Music
 import java.io.Serializable
 
 data class Playlist (

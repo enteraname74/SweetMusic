@@ -1,16 +1,12 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.content.ContentUris
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.AudioAttributes
-import android.media.AudioFocusRequest
-import android.media.AudioManager
+import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
@@ -22,36 +18,61 @@ import android.util.Size
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.viewbinding.BuildConfig
 import androidx.viewpager2.widget.ViewPager2
+import com.example.musicplayer.adapters.VpAdapter
+import com.example.musicplayer.classes.Folder
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import java.io.*
 
-class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, AudioManager.OnAudioFocusChangeListener {
+class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
-    private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
     private lateinit var fetchingSongs : LinearLayout
+    private lateinit var determinateProgressBar : ProgressBar
+    private lateinit var indeterminateProgressBar : ProgressBar
     private lateinit var viewPager : ViewPager2
+
     private lateinit var pausePlayButton : ImageView
 
-    private lateinit var audioManager : AudioManager
+    private lateinit var bottomSheetLayout: LinearLayout
+    lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+
+            if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+            } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
+                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Log.d("MAIN ACTIVITY", "ON CREATE")
+
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
 
         pausePlayButton = findViewById(R.id.pause_play)
         fetchingSongs = findViewById(R.id.fetching_songs)
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
+        determinateProgressBar = findViewById(R.id.determinate_bar)
+        indeterminateProgressBar = findViewById(R.id.indeterminate_bar)
 
         if (SDK_INT >= 30) {
             if (!Environment.isExternalStorageManager()) {
@@ -63,13 +84,17 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
             requestPermission()
         }
 
-        if (File(applicationContext.filesDir, saveAllMusicsFile).exists()){
+        if (File(applicationContext.filesDir, saveAllMusicsFile).exists() && MyMediaPlayer.allMusics.size == 0){
             CoroutineScope(Dispatchers.Main).launch {
-                musics = readAllMusicsFromFile(saveAllMusicsFile)
-                allMusicsBackup = ArrayList(musics.map { it.copy() })
+                MyMediaPlayer.allMusics = readAllMusicsFromFile(saveAllMusicsFile)
+                allMusicsBackup = MyMediaPlayer.allMusics.map{ it.copy() } as ArrayList<Music> /* = java.util.ArrayList<com.example.musicplayer.Music> */
                 fetchingSongs.visibility = View.GONE
                 viewPager.visibility = View.VISIBLE
+                readAllFoldersFromFile()
             }
+        } else if (MyMediaPlayer.allMusics.size != 0) {
+            fetchingSongs.visibility = View.GONE
+            viewPager.visibility = View.VISIBLE
         }
 
         viewPager.adapter = VpAdapter(this)
@@ -86,7 +111,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
 
 
         val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-        shuffleButton.setOnClickListener { playRandom(musics, this) }
+        shuffleButton.setOnClickListener { playRandom(MyMediaPlayer.allMusics, this,"Main") }
 
         CoroutineScope(Dispatchers.IO).launch{ readPlaylistsAsync() }
         CoroutineScope(Dispatchers.IO).launch { readAllDeletedMusicsFromFile() }
@@ -99,40 +124,54 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
 
         openMenu.setOnClickListener { openNavigationMenu(drawerLayout) }
+
+        bottomSheetLayout = findViewById(R.id.bottom_infos)
+        sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+
+        if (MyMediaPlayer.currentIndex != -1) {
+            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        }
+        sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onStateChanged(bottomSheet: View, newState: Int) {
+                if (newState == BottomSheetBehavior.STATE_HIDDEN || newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    Log.d("MAIN ACTIVITY", "MUSIC WILL STOP")
+                    stopMusic()
+                }
+            }
+            override fun onSlide(bottomSheet: View, slideOffset: Float) {}
+        })
+
+        findViewById<LinearLayout>(R.id.bottom_infos).setOnClickListener {
+            onBottomMenuClick(
+                MyMediaPlayer.currentIndex,
+                this@MainActivity
+            )
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        audioManager = this.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-
         // Si nous rentrons dans cette condition, c'est que l'utilisateur ouvre l'application pour la première fois
         // Si on a la permission et qu'on a pas encore de fichiers avec des musiques, alors on va chercher nos musiques :
         if (checkPermission() && !File(applicationContext.filesDir, saveAllMusicsFile).exists()){
             // Créons d'abord la playlist des favoris :
             CoroutineScope(Dispatchers.IO).launch {
                 val favoritePlaylist = Playlist("Favorites",ArrayList(),null, true)
-                val playlists = ArrayList<Playlist>()
-                playlists.add(favoritePlaylist)
-                writePlaylistsToFile(savePlaylistsFile,playlists)
+                MyMediaPlayer.allPlaylists = ArrayList<Playlist>()
+                MyMediaPlayer.allPlaylists.add(favoritePlaylist)
+                writePlaylistsToFile()
+                writeAllDeletedSong()
             }
 
             CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
         }
 
-        val noSongPlaying = findViewById<TextView>(R.id.no_song_playing)
-        val infoSongPlaying = findViewById<RelativeLayout>(R.id.info_song_playing)
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val bottomInfos = findViewById<LinearLayout>(R.id.bottom_infos)
         val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
-        noSongPlaying.visibility = View.VISIBLE
-
-        if (MyMediaPlayer.currentIndex != -1) {
+        if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
             CoroutineScope(Dispatchers.Main).launch {
-                noSongPlaying.visibility = View.GONE
-                infoSongPlaying.visibility = View.VISIBLE
-                songTitleInfo.text =
-                    MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
                 if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
                     // Passons d'abord notre byteArray en bitmap :
                     val bytes =
@@ -145,24 +184,15 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                         albumCoverInfo.setImageBitmap(bitmap)
                     }
                 } else {
-                    albumCoverInfo.setImageResource(R.drawable.michael)
+                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
                 }
 
-                pausePlayButton.setOnClickListener { pausePlay() }
-                bottomInfos.setOnClickListener {
-                    onBottomMenuClick(
-                        MyMediaPlayer.currentIndex,
-                        this@MainActivity
-                    )
-                }
+                pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
                 songTitleInfo?.isSelected = true
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {
-                noSongPlaying?.visibility = View.VISIBLE
-                infoSongPlaying?.visibility = View.GONE
-                albumCoverInfo?.setImageResource(R.drawable.icone_musique)
-                bottomInfos?.setOnClickListener(null)
+                sheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
 
@@ -171,71 +201,22 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
         } else {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
         }
-    }
 
-    private fun pausePlay() {
-        var buttonStyle = R.drawable.ic_baseline_play_circle_outline_24
+        registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
-        if(audioManager.isMusicActive) {
-            val audioAttributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build()
-
-            val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAudioAttributes(audioAttributes)
-                .setAcceptsDelayedFocusGain(true)
-                .setOnAudioFocusChangeListener(this)
-                .build()
-
-            when (audioManager.requestAudioFocus(audioFocusRequest)) {
-                AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
-                    Toast.makeText(
-                        this,
-                        resources.getString(R.string.cannot_launch_song),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-                AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                    if (mediaPlayer.isPlaying) {
-                        mediaPlayer.pause()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    } else {
-                        mediaPlayer.start()
-                        pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                        buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
-                    }
-                }
-                else -> {
-                    Toast.makeText(
-                        this,
-                        resources.getString(R.string.unknown_error),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
-            }
-        } else {
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else {
-                mediaPlayer.start()
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                buttonStyle = R.drawable.ic_baseline_pause_circle_outline_24
-            }
-        }
-        CoroutineScope(Dispatchers.Default).launch {
-            val service = MusicNotificationService(applicationContext)
-            service.showNotification(buttonStyle)
-        }
+        val serviceIntent = Intent(this, PlaybackService::class.java)
+        startService(serviceIntent)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
+            R.id.parameters -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
             R.id.find_new_songs -> {
-                val intent = Intent(this@MainActivity,FindNewSongsActivity::class.java)
+                val intent = Intent(this,FindNewSongsActivity::class.java)
                 startActivity(intent)
                 true
             }
@@ -244,8 +225,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                 true
             }
             R.id.set_data -> {
-                val intent = Intent(this@MainActivity,SetDataActivity::class.java)
-                setDataResult.launch(intent)
+                val intent = Intent(this,SetDataActivity::class.java)
+                startActivity(intent)
                 true
             }
             else -> {
@@ -253,8 +234,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
             }
         }
     }
-
-    private var setDataResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
 
     private suspend fun fetchMusics() {
         // Pour éviter de potentiels crash de l'app :
@@ -294,20 +273,17 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                 Toast.makeText(this, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
             }
             else -> {
+                var count = 0
+                withContext(Dispatchers.Main) {
+                    indeterminateProgressBar.visibility = View.GONE
+                    determinateProgressBar.visibility = View.VISIBLE
+                    determinateProgressBar.max = cursor.count
+                }
                 while (cursor.moveToNext()) {
-                    val albumId = cursor.getLong(5)
-                    val albumUri = ContentUris.withAppendedId(
-                        MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
-                    )
-
                     val albumCover : ByteArray? = try {
-                        val bitmap = contentResolver.loadThumbnail(
-                            albumUri,
-                            Size(400, 400),
-                            null
-                        )
+                        val bitmap = ThumbnailUtils.createAudioThumbnail(File(cursor.getString(4)),Size(350,350),null)
                         bitmapToByteArray(bitmap)
-                    } catch (error : FileNotFoundException){
+                    } catch (error : IOException){
                         null
                     }
                     val music = Music(
@@ -319,15 +295,22 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
                         cursor.getString(4)
                     )
                     if (File(music.path).exists()) {
-                        musics.add(music)
+                        MyMediaPlayer.allMusics.add(music)
+                        if (MyMediaPlayer.allFolders.find { it.path == File(music.path).parent } == null) {
+                            MyMediaPlayer.allFolders.add(Folder(File(music.path).parent as String))
+                        }
+                    }
+                    withContext(Dispatchers.Main){
+                        count+=1
+                        determinateProgressBar.setProgress(count,true)
                     }
                 }
                 cursor.close()
-                musics.reverse()
+                MyMediaPlayer.allMusics
 
-                writeAllMusicsToFile(saveAllMusicsFile, musics)
+                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writeAllFolders()
 
-                val openMenu = findViewById<ImageView>(R.id.open_menu)
                 withContext(Dispatchers.Main){
                     fetchingSongs.visibility = View.GONE
                     viewPager.visibility = View.VISIBLE
@@ -354,8 +337,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
     }
 
     private fun requestPermissionToWrite(){
-        val uri = Uri.parse("package:${BuildConfig.LIBRARY_PACKAGE_NAME}")
-        Log.d("uri", uri.toString())
+        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
 
         if (SDK_INT >= 30) {
             startActivity(
@@ -367,45 +349,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, A
         }
     }
 
-    override fun onAudioFocusChange(audioFocusChange: Int) {
-        Log.d("testMAIN", "test")
-        if(audioFocusChange == -1){
-            CoroutineScope(Dispatchers.Default).launch {
-                val service = MusicNotificationService(applicationContext as Context)
-                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-            }
-            return
-        }
-        when (audioFocusChange) {
-            AudioManager.AUDIOFOCUS_GAIN -> {
-                println("test")
-                mediaPlayer.start()
-                pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                CoroutineScope(Dispatchers.Default).launch {
-                    val service = MusicNotificationService(applicationContext as Context)
-                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-                }
-            }
-            AudioManager.AUDIOFOCUS_LOSS -> {
-                if (mediaPlayer.isPlaying) {
-                    mediaPlayer.pause()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val service = MusicNotificationService(applicationContext as Context)
-                        service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                }
-            }
-            else -> {
-                if (mediaPlayer.isPlaying) {
-                    mediaPlayer.pause()
-                    pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-                    CoroutineScope(Dispatchers.Default).launch {
-                        val service = MusicNotificationService(applicationContext as Context)
-                        service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
-                    }
-                }
-            }
-        }
+    override fun onPause() {
+        super.onPause()
+        unregisterReceiver(broadcastReceiver)
     }
 }

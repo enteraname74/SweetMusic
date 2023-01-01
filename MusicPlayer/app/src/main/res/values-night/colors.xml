@@ -8,8 +8,11 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="primary_color">#161925</color>
-    <color name="secondary_color">#17325b</color>
-    <color name="third_color">#cccccc</color>
-    <color name="selected_music_color">#FFFFFF</color>
+    <color name="primary_color">#100E2C</color>
+    <color name="secondary_color">#1D1A48</color>
+    <color name="third_color">#27244d</color>
+    <color name="text_color">#B4B9C7</color>
+    <color name="selected_music_color">#CFD2DD</color>
+    <color name="error_color">#af1b26</color>
+    <color name="valid_color">#177426</color>
 </resources>

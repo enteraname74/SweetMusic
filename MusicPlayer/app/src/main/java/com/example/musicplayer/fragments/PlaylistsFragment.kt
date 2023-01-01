@@ -1,6 +1,5 @@
 package com.example.musicplayer.fragments
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -10,19 +9,17 @@ import android.text.InputType
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
+import com.example.musicplayer.adapters.Playlists
+import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.Playlist
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,7 +42,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_playlists, container, false)
         adapter = Playlists(
-            MyMediaPlayer.allPlaylists,context as Context,this,
+            MyMediaPlayer.allPlaylists,requireContext(),this,
             R.layout.playlist_file_linear
         )
 
@@ -71,8 +68,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
 
         adapter.allPlaylists = MyMediaPlayer.allPlaylists
         adapter.notifyDataSetChanged()
-
-        mediaPlayer.setOnCompletionListener { playNextSong() }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
     }
 
     override fun onPlaylistClick(position: Int) {
@@ -84,9 +80,29 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         startActivity(intent)
     }
 
+    override fun onPlayListLongClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
+        bottomSheetDialog.show()
+
+        if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.visibility = View.GONE
+        } else {
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+                (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter, requireContext())
+                bottomSheetDialog.dismiss()
+            }
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetModifyPlaylist(requireContext(),position)
+            bottomSheetDialog.dismiss()
+        }
+    }
+
     private fun addPlaylist(){
-        val builder = AlertDialog.Builder(context as Context)
-        builder.setTitle("Create playlist")
+        val builder = AlertDialog.Builder(context as Context, R.style.AlertDialogTheme)
+        builder.setTitle(getString(R.string.create_playlist))
         // L'entrée :
         val inputText = EditText(context)
         // Le type d'entrée :
@@ -94,7 +110,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         builder.setView(inputText)
         // Les boutons :
         // Si on valide la création, on crée notre playlist :
-        builder.setPositiveButton("OK") { _, _ ->
+        builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
             /* Afin de créer une playlist, nous devons vérifier les critères suivants :
                 - Le nom n'est pas vide ou ne commence pas avec un espace (au cas où on a qu'un espace en guise de nom
                 - Le nom n'est pas déjà prit
@@ -115,18 +131,16 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
                 menuRecyclerView.layoutManager = LinearLayoutManager(context)
                 menuRecyclerView.adapter = adapter
             } else {
-                Toast.makeText(context, "A title must be set correctly !", Toast.LENGTH_SHORT)
+                Toast.makeText(context, getString(R.string.a_title_must_be_set_correctly), Toast.LENGTH_SHORT)
                     .show()
             }
         }
         // Si on annule la création de la playlist, on quitte la fenêtre
-        builder.setNegativeButton("CANCEL") { dialogInterface, _ ->
+        builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
             dialogInterface.cancel()
         }
 
         builder.show()
-
-        Log.d("playlist ajouté","")
     }
 
     private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
@@ -147,10 +161,6 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         } else {
             MyMediaPlayer.currentIndex +=1
         }
-        CoroutineScope(Dispatchers.Default).launch {
-            val service = MusicNotificationService(context?.applicationContext as Context)
-            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
         playMusic()
     }
 
@@ -160,74 +170,40 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         } else {
             MyMediaPlayer.currentIndex -=1
         }
-        CoroutineScope(Dispatchers.Default).launch {
-            val service = MusicNotificationService(context?.applicationContext as Context)
-            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
-        }
         playMusic()
     }
 
     private fun playMusic(){
-        mediaPlayer.reset()
-        try {
-            val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            mediaPlayer.setDataSource(currentSong.path)
-            mediaPlayer.prepare()
-            mediaPlayer.start()
+        if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
+            mediaPlayer.reset()
+            try {
+                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+                mediaPlayer.setDataSource(currentSong.path)
+                mediaPlayer.prepare()
+                mediaPlayer.start()
 
-            val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
-            val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
-            val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
+                val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
+                val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
+                val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
 
-            if (currentSong.albumCover != null){
-                // Passons d'abord notre byteArray en bitmap :
-                val bytes = currentSong.albumCover
-                var bitmap: Bitmap? = null
-                if (bytes != null && bytes.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                }
-                albumCoverInfo?.setImageBitmap(bitmap)
-            } else {
-                albumCoverInfo?.setImageResource(R.drawable.michael)
-            }
-
-            pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-            songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-        } catch (e: IOException) {
-            Log.d("ERROR","")
-            e.printStackTrace()
-        }
-    }
-
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        return when(item.itemId){
-            10 -> {
-                if (MyMediaPlayer.allPlaylists[item.groupId].isFavoriteList){
-                    Toast.makeText(context,resources.getString(R.string.cannot_delete_favorite_playlist),Toast.LENGTH_SHORT).show()
+                if (currentSong.albumCover != null){
+                    // Passons d'abord notre byteArray en bitmap :
+                    val bytes = currentSong.albumCover
+                    var bitmap: Bitmap? = null
+                    if (bytes != null && bytes.isNotEmpty()) {
+                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    }
+                    albumCoverInfo?.setImageBitmap(bitmap)
                 } else {
-                    MyMediaPlayer.allPlaylists.removeAt(item.groupId)
-                    adapter.allPlaylists = MyMediaPlayer.allPlaylists
-                    adapter.notifyItemRemoved(item.groupId)
-
-                    writePlaylistsToFile(savePlaylistsFile, MyMediaPlayer.allPlaylists)
-                    Toast.makeText(context,resources.getString(R.string.playlist_deleted),Toast.LENGTH_SHORT).show()
+                    albumCoverInfo?.setImageResource(R.drawable.ic_saxophone_svg)
                 }
-                true
+
+                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+            } catch (e: IndexOutOfBoundsException) {
+                Log.d("ERROR","")
+                e.printStackTrace()
             }
-            11 -> {
-                val intent = Intent(context, ModifyPlaylistInfoActivity::class.java)
-                intent.putExtra("POSITION",item.groupId)
-                resultLauncher.launch(intent)
-                true
-            }
-            else -> {
-                super.onContextItemSelected(item)
-            }
-        }
-    }
-    private var resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            adapter.allPlaylists = MyMediaPlayer.allPlaylists
         }
     }
 }

@@ -1,147 +1,118 @@
 package com.example.musicplayer
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
+import android.content.res.Resources
 import android.os.Bundle
-import android.text.Editable
-import android.util.Log
 import android.widget.Button
-import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.widget.ViewPager2
+import com.example.musicplayer.adapters.SetDataVpAdapter
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
+import com.example.musicplayer.fragments.SetMusicsFragment
+import com.example.musicplayer.fragments.SetPlaylistsFragment
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.IOException
-import java.io.ObjectInputStream
+import java.io.File
 
 class SetDataActivity : Tools() {
-    private lateinit var editTextMusics: EditText
-    private lateinit var editTextPlaylists: EditText
-    private lateinit var filePathMusics : Uri
-    private lateinit var filePathPlaylists : Uri
-    private var validMusicsFile = false
-    private var validPlaylistsFile = false
+    private lateinit var tabLayout: TabLayout
+
+    private val fragmentList = ArrayList<Fragment>(
+        arrayListOf(
+            SetMusicsFragment(),
+            SetPlaylistsFragment(),
+        )
+    )
+
+    var currentFragmentPos = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_set_data)
 
-        editTextMusics = findViewById(R.id.infos_selected_musics_file)
-        editTextPlaylists = findViewById(R.id.infos_selected_playlists_file)
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
 
-        val musicsButton = findViewById<Button>(R.id.select_musics_button)
-        musicsButton.setOnClickListener { selectMusicsFile() }
+        val viewPager = findViewById<ViewPager2>(R.id.view_pager)
+        tabLayout = findViewById(R.id.tab_layout)
+        viewPager.adapter = SetDataVpAdapter(this)
 
-        val playlistsButton = findViewById<Button>(R.id.select_playlists_button)
-        playlistsButton.setOnClickListener { selectPlaylistsFile() }
-
-        val validateButton = findViewById<Button>(R.id.validate_button)
-        validateButton.setOnClickListener { onValidateButtonClick() }
-
-        val cancelButton = findViewById<Button>(R.id.cancel_button)
-        cancelButton.setOnClickListener { onCancelButtonClick() }
-
-    }
-
-    private fun selectMusicsFile() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        resultMusicsLauncher.launch(intent)
-    }
-
-    private fun String.toEditable(): Editable =  Editable.Factory.getInstance().newEditable(this)
-
-    private var resultMusicsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri : Uri? = result.data?.data
-            val path = uri?.path as String
-            val pathName = path.substring(path.lastIndexOf("/")+1)
-            Log.d("path", uri.toString())
-            Log.d("pathName", pathName.toString())
-
-            if (pathName == "allMusics.musics"){
-                validMusicsFile = true
-                filePathMusics = uri
-                editTextMusics.text = pathName.toEditable()
-            } else {
-                val wrongFile = "Wrong file !"
-                editTextMusics.text = wrongFile.toEditable()
+        TabLayoutMediator(tabLayout, viewPager) { tab, index ->
+            tab.text = when (index) {
+                0 -> {
+                    resources.getString(R.string.musics)
+                }
+                1 -> {
+                    resources.getString(R.string.playlists)
+                }
+                else -> {
+                    throw Resources.NotFoundException("Position not found")
+                }
             }
+        }.attach()
+
+        findViewById<ImageView>(R.id.back_arrow).setOnClickListener { goToPreviousStep() }
+        findViewById<ImageView>(R.id.forward_arrow).setOnClickListener { goToNextStep() }
+
+        findViewById<Button>(R.id.validate_selection).setOnClickListener { onValidateButtonClick() }
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener { finish() }
+    }
+
+    private fun goToPreviousStep() {
+        if (currentFragmentPos != 0) {
+            tabLayout.selectTab(tabLayout.getTabAt(currentFragmentPos - 1))
         }
     }
 
-    private fun selectPlaylistsFile() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        resultPlaylistsLauncher.launch(intent)
-    }
-
-    private var resultPlaylistsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri : Uri? = result.data?.data
-            val path = uri?.path as String
-            val pathName = path.substring(path.lastIndexOf("/")+1)
-
-            if (pathName == "allPlaylists.playlists"){
-                validPlaylistsFile = true
-                filePathPlaylists = uri
-                editTextPlaylists.text = pathName.toEditable()
-
-            } else {
-                val wrongFile = "Wrong file !"
-                editTextPlaylists.text = wrongFile.toEditable()
-            }
+    private fun goToNextStep() {
+        if (currentFragmentPos != (fragmentList.size - 1)) {
+            tabLayout.selectTab(tabLayout.getTabAt(currentFragmentPos + 1))
         }
     }
 
     private fun onValidateButtonClick(){
-        if (validMusicsFile && validPlaylistsFile){
-            val allMusics = readAllMusicsFromUri(filePathMusics)
-            val allPlaylists = readAllPlaylistsFromUri(filePathPlaylists)
-
-            CoroutineScope(Dispatchers.IO).launch {
-                writeAllAsync(allMusics,allPlaylists)
+        if (SetMusicsFragment.correctMusicFileSelected && SetPlaylistsFragment.correctPlaylistFileSelected){
+            // On change d'abord nos musiques :
+            for (music in SetMusicsFragment.allMusics) {
+                MyMediaPlayer.allMusics.find { File(it.path).name == File(music.path).name }?.apply {
+                    name = music.name
+                    albumCover = music.albumCover
+                    album = music.album
+                    artist = music.artist
+                }
             }
-            Log.d("after","")
+            MyMediaPlayer.allPlaylists = SetPlaylistsFragment.allPlaylists
+            val songsToDelete = ArrayList<Music>()
+            for (playlist in MyMediaPlayer.allPlaylists) {
+                for (music in playlist.musicList) {
+                    val correspondingSong = MyMediaPlayer.allMusics.find { File(it.path).name == File(music.path).name }
+                    if (correspondingSong == null) {
+                        songsToDelete.add(music)
+                    } else {
+                        music.apply {
+                            name = correspondingSong.name
+                            albumCover = correspondingSong.albumCover
+                            album = correspondingSong.album
+                            artist = correspondingSong.artist
+                        }
+                    }
+                }
+            }
+            CoroutineScope(Dispatchers.IO).launch {
+                writePlaylistsToFile()
+                writeAllMusics()
+            }
             MyMediaPlayer.dataWasChanged = true
-
             setResult(RESULT_OK)
             finish()
         } else {
-            Toast.makeText(this,"Missing correct files !", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,getString(R.string.missing_correct_files), Toast.LENGTH_SHORT).show()
         }
-    }
-
-    private fun onCancelButtonClick(){
-        setResult(RESULT_CANCELED)
-        finish()
-    }
-
-    private fun readAllMusicsFromUri(uri : Uri) : ArrayList<Music> {
-        var content = ArrayList<Music>()
-        try {
-            val ois = ObjectInputStream(contentResolver.openInputStream(uri))
-            content = ois.readObject() as ArrayList<Music>
-            ois.close()
-        } catch (error : IOException){
-            Log.d("Error read musics",error.toString())
-        }
-        MyMediaPlayer.allMusics = content
-        return content
-    }
-
-    private fun readAllPlaylistsFromUri(uri : Uri) : ArrayList<Playlist> {
-        var content = ArrayList<Playlist>()
-        try {
-            val ois = ObjectInputStream(contentResolver.openInputStream(uri))
-            content = ois.readObject() as ArrayList<Playlist>
-            ois.close()
-        } catch (error : IOException){
-            Log.d("Error read playlists",error.toString())
-        }
-        MyMediaPlayer.allPlaylists = content
-        return content
     }
 }

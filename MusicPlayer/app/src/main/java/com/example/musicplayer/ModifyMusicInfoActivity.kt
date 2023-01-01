@@ -13,6 +13,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,12 +33,20 @@ class ModifyMusicInfoActivity : Tools() {
     private var artistPosition = -1
     private var positionInArtist = -1
 
+    private lateinit var path : String
+
+    private var hasAlbumCoverChanged = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         // On récupère notre musique à modifier :
-        val path = intent.getSerializableExtra("PATH") as String
+        path = intent.getSerializableExtra("PATH") as String
         musicFile = MyMediaPlayer.allMusics.first{it.path == path}
 
         // On récupère la position de notre musique dans les playlists utilisés par le lecteur :
@@ -63,8 +73,6 @@ class ModifyMusicInfoActivity : Tools() {
                 }
             }
         }
-        Log.d("position Artist", artistPosition.toString())
-        Log.d("position in Artist", positionInArtist.toString())
 
         // On récupère les différents champs modifiable :
         albumCoverField = findViewById(R.id.album_image)
@@ -82,7 +90,7 @@ class ModifyMusicInfoActivity : Tools() {
             }
             albumCoverField.setImageBitmap(bitmap)
         } else {
-            albumCoverField.setImageResource(R.drawable.michael)
+            albumCoverField.setImageResource(R.drawable.ic_saxophone_svg)
         }
 
         musicNameField.setText(musicFile.name)
@@ -111,6 +119,7 @@ class ModifyMusicInfoActivity : Tools() {
                 null
             )
             albumCoverField.setImageBitmap(bitmap)
+            hasAlbumCoverChanged = true
         }
     }
 
@@ -123,13 +132,17 @@ class ModifyMusicInfoActivity : Tools() {
         musicFile.album = albumNameField.text.toString().trim()
         musicFile.artist = artistNameField.text.toString().trim()
 
-        val drawable = albumCoverField.drawable
-        val bitmapDrawable = drawable as BitmapDrawable
-        val bitmap = bitmapDrawable.bitmap
+        if (hasAlbumCoverChanged) {
+            val drawable = albumCoverField.drawable
+            val bitmapDrawable = drawable as BitmapDrawable
+            val bitmap = bitmapDrawable.bitmap
 
-        val byteArray = bitmapToByteArray(bitmap)
+            val byteArray = bitmapToByteArray(bitmap)
 
-        musicFile.albumCover = byteArray
+            musicFile.albumCover = byteArray
+        } else {
+            musicFile.albumCover = MyMediaPlayer.allMusics.find { it.album == musicFile.album && it.artist == musicFile.artist && it.albumCover != null }?.albumCover
+        }
 
         // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
         val allMusics = MyMediaPlayer.allMusics
@@ -152,7 +165,7 @@ class ModifyMusicInfoActivity : Tools() {
         MyMediaPlayer.allPlaylists = playlists
 
         // Modifions les infos de la musique dans nos deux autres playlists :
-        Log.d("index",MyMediaPlayer.currentPlaylist.indexOf(musicFile).toString())
+        Log.d("index", MyMediaPlayer.currentPlaylist.indexOf(musicFile).toString())
         if (MyMediaPlayer.currentPlaylist.size != 0 && indexCurrentPlaylist != -1){
             MyMediaPlayer.currentPlaylist[indexCurrentPlaylist] = musicFile
         }
@@ -189,6 +202,15 @@ class ModifyMusicInfoActivity : Tools() {
                 )
             }
         }
+        // Si une musique se joue, on vérifie si celle jouée actuellement est celle que l'on modifie :
+        if (MyMediaPlayer.currentIndex != -1) {
+            if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path) {
+                updateMusicNotification(!mediaPlayer.isPlaying)
+            }
+        }
+
+        returnIntent.putExtra("modifiedSongPath", path)
+        setResult(RESULT_OK, returnIntent)
         finish()
     }
 

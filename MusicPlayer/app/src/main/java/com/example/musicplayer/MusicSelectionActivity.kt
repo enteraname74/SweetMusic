@@ -6,33 +6,41 @@ import android.util.Log
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.musicplayer.adapters.MusicListSelection
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, SearchView.OnQueryTextListener {
     private lateinit var adapter : MusicListSelection
     private lateinit var searchView : SearchView
     private var searchIsOn = false
-    private var selectedMusicsPositions = ArrayList<Int>()
+    private var selectedMusicsInfos= HashMap<Int, String>()
     private lateinit var menuRecyclerView : RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_selection)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 
         menuRecyclerView = findViewById(R.id.all_songs_list)
 
-        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsPositions,applicationContext,this)
-
+        adapter = MusicListSelection(MyMediaPlayer.allMusics,selectedMusicsInfos,this,this)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuRecyclerView.adapter = adapter
 
         val validateButton = findViewById<Button>(R.id.validate)
-        val cancelButton = findViewById<Button>(R.id.cancel)
         validateButton.setOnClickListener{ onValidateButtonClick() }
-        cancelButton.setOnClickListener{ onCancelButtonClick() }
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener { finish() }
     }
 
     override fun onMusicClick(position: Int) {
@@ -40,26 +48,26 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
         val selectedMusic = adapter.musics[position]
         val globalPosition = MyMediaPlayer.allMusics.indexOf(selectedMusic)
 
-        if (globalPosition in selectedMusicsPositions){
-            selectedMusicsPositions.remove(globalPosition)
+        if (globalPosition in selectedMusicsInfos.keys){
+            selectedMusicsInfos.remove(globalPosition)
         } else {
-            selectedMusicsPositions.add(globalPosition)
+            selectedMusicsInfos[globalPosition] = selectedMusic.path
         }
 
-        adapter.notifyDataSetChanged()
+        adapter.notifyItemChanged(position)
     }
 
     private fun onValidateButtonClick(){
         val returnIntent = Intent()
-        returnIntent.putExtra("addedSongs", selectedMusicsPositions)
-        setResult(RESULT_OK, returnIntent)
-        finish()
-    }
-
-    private fun onCancelButtonClick(){
-        val returnIntent = Intent()
-        setResult(RESULT_CANCELED, returnIntent)
-        finish()
+        CoroutineScope(Dispatchers.Default).launch {
+            val keysList : ArrayList<Int> = ArrayList()
+            for (key in selectedMusicsInfos.keys) {
+                keysList.add(key)
+            }
+            returnIntent.putExtra("addedSongs", keysList)
+            setResult(RESULT_OK, returnIntent)
+            finish()
+        }
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
@@ -89,7 +97,7 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
                     if (list.size > 0) {
                         adapter.musics = list
                     } else {
-                        adapter.musics = ArrayList<Music>()
+                        adapter.musics = ArrayList()
                     }
                 }
                 adapter.notifyDataSetChanged()

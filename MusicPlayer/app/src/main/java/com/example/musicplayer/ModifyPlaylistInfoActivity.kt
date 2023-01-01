@@ -14,9 +14,12 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ModifyPlaylistInfoActivity : Tools() {
     private lateinit var playlist : Playlist
@@ -28,6 +31,10 @@ class ModifyPlaylistInfoActivity : Tools() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_playlist_info)
+
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
 
         // On récupère notre playlist à modifier :
         position = intent.getSerializableExtra("POSITION") as Int
@@ -57,7 +64,7 @@ class ModifyPlaylistInfoActivity : Tools() {
             }
             playlistCoverField.setImageBitmap(bitmap)
         } else {
-            playlistCoverField.setImageResource(R.drawable.michael)
+            playlistCoverField.setImageResource(R.drawable.ic_saxophone_svg)
         }
 
         playlistNameField.setText(playlist.listName)
@@ -68,6 +75,7 @@ class ModifyPlaylistInfoActivity : Tools() {
 
         validateButton.setOnClickListener{ onValidateButtonClick() }
         cancelButton.setOnClickListener{ onCancelButtonClick() }
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener { finish() }
     }
 
     private fun selectImage() {
@@ -90,32 +98,34 @@ class ModifyPlaylistInfoActivity : Tools() {
     private fun onValidateButtonClick(){
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
-        val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
-        if (verification == null || verification == playlist ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
 
-            playlist.listName = playlistNameField.text.toString()
-            val drawable = playlistCoverField.drawable
-            val bitmapDrawable = drawable as BitmapDrawable
-            val bitmap = bitmapDrawable.bitmap
+            if (verification == null || verification == playlist ) {
+                playlist.listName = playlistNameField.text.toString()
+                val drawable = playlistCoverField.drawable
+                val bitmapDrawable = drawable as BitmapDrawable
+                val bitmap = bitmapDrawable.bitmap
 
-            val byteArray = bitmapToByteArray(bitmap)
+                val byteArray = bitmapToByteArray(bitmap)
 
-            playlist.playlistCover = byteArray
+                playlist.playlistCover = byteArray
 
-            // On ne peut pas renvoyer le fichier car l'image de l'album est trop lourde. On écrase donc directement la musique dans le fichier de sauvegarde :
+                // Mettons à jour nos playlists :
+                allPlaylists[position] = playlist
+                MyMediaPlayer.allPlaylists = allPlaylists
 
-            // Mettons à jour nos playlists :
-            allPlaylists[position] = playlist
-            MyMediaPlayer.allPlaylists = allPlaylists
+                CoroutineScope(Dispatchers.IO).launch {
+                    writePlaylistsToFile()
+                }
 
-            CoroutineScope(Dispatchers.IO).launch {
-                writePlaylistsToFile(savePlaylistsFile, allPlaylists)
+                setResult(RESULT_OK)
+                finish()
+            } else {
+                withContext(Dispatchers.Main){
+                    Toast.makeText(this@ModifyPlaylistInfoActivity, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
+                }
             }
-
-            setResult(RESULT_OK)
-            finish()
-        } else {
-            Toast.makeText(this, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
         }
     }
 

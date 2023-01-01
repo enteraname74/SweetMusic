@@ -3,6 +3,7 @@ package com.example.musicplayer.fragments
 import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.ThumbnailUtils
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -12,29 +13,32 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
 import com.example.musicplayer.Music
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.musicplayer.adapters.NewMusicsList
+import com.example.musicplayer.classes.Folder
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.*
 import java.io.*
 
-class FoundMusicsFragment : Fragment() {
+class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
     private lateinit var adapter : NewMusicsList
     private lateinit  var menuRecyclerView : RecyclerView
     private lateinit var fetchingSongs : LinearLayout
     private val saveAllMusicsFile = "allMusics.musics"
     private val saveAllDeletedFiles = "allDeleted.musics"
+    private lateinit var fetchingState : TextView
+    private lateinit var determinateProgressBar : ProgressBar
+    private lateinit var indeterminateProgressBar : ProgressBar
+    private lateinit var fetchingJob : Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        adapter = NewMusicsList(ArrayList<Music>(), "Main",activity?.applicationContext as Context)
+        adapter = NewMusicsList(ArrayList<Music>(), this, requireContext())
     }
 
     override fun onCreateView(
@@ -43,7 +47,6 @@ class FoundMusicsFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_found_musics, container, false)
-
 
         menuRecyclerView = view.findViewById(R.id.menu_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(view.context)
@@ -54,12 +57,16 @@ class FoundMusicsFragment : Fragment() {
         val addNewSongs = view.findViewById<Button>(R.id.add_songs)
         addNewSongs.setOnClickListener { addSongsToAllMusics() }
 
+        fetchingState = view.findViewById(R.id.fetching_state)
+        determinateProgressBar = view.findViewById(R.id.determinate_bar)
+        indeterminateProgressBar = view.findViewById(R.id.indeterminate_bar)
+
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
+        fetchingJob = CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
     }
 
     private fun bitmapToByteArray(bitmap: Bitmap) : ByteArray {
@@ -108,9 +115,18 @@ class FoundMusicsFragment : Fragment() {
                 Toast.makeText(activity, resources.getString(R.string.cannot_retrieve_files), Toast.LENGTH_SHORT).show()
             }
             else -> {
+                var count = 0
+                withContext(Dispatchers.Main) {
+                    fetchingState.text = getString(R.string.fetching_found_songs)
+                    indeterminateProgressBar.visibility = View.GONE
+                    determinateProgressBar.visibility = View.VISIBLE
+                    determinateProgressBar.max = cursor.count
+                }
                 while (cursor.moveToNext()) {
                     // Si la musique n'est pas présente dans notre liste, alors on ajoute la musique dans la liste des musiques trouvées :
-                    if ((MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) && (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null)) {
+                    if ((MyMediaPlayer.allMusics.find { it.path == cursor.getString(4) } == null) &&
+                        (MyMediaPlayer.allDeletedMusics.find { it.path == cursor.getString(4) } == null) &&
+                            MyMediaPlayer.allFolders.find { it.path == File(cursor.getString(4)).parent }?.isUsedInApp != false) {
                         val albumId = cursor.getLong(5)
                         val albumUri = ContentUris.withAppendedId(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI, albumId
@@ -118,14 +134,17 @@ class FoundMusicsFragment : Fragment() {
 
                         val albumCover: ByteArray? = try {
                             withContext(Dispatchers.IO) {
+                                /*
                                 val bitmap = activity?.contentResolver?.loadThumbnail(
                                     albumUri,
                                     Size(400, 400),
                                     null
                                 )
-                                bitmapToByteArray(bitmap as Bitmap)
+                                 */
+                                val bitmap = ThumbnailUtils.createAudioThumbnail(File(cursor.getString(4)),Size(350,350),null)
+                                bitmapToByteArray(bitmap)
                             }
-                        } catch (error: FileNotFoundException) {
+                        } catch (error: IOException) {
                             null
                         }
                         val music = Music(
@@ -138,11 +157,17 @@ class FoundMusicsFragment : Fragment() {
                         )
                         if (File(music.path).exists()) {
                             musics.add(music)
+                            if (MyMediaPlayer.allFolders.find { it.path == File(music.path).parent } == null) {
+                                MyMediaPlayer.allFolders.add(Folder(File(music.path).parent as String))
+                            }
                         }
+                    }
+                    withContext(Dispatchers.Main){
+                        count+=1
+                        determinateProgressBar.setProgress(count,true)
                     }
                 }
                 cursor.close()
-                musics.reverse()
 
                 withContext(Dispatchers.Main){
                     adapter.musics = musics
@@ -154,33 +179,9 @@ class FoundMusicsFragment : Fragment() {
         }
     }
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        Log.d("new songs fragment",item.itemId.toString())
-
-        return when (item.itemId) {
-            30 -> {
-                val musicToRemove = adapter.musics[item.groupId]
-                adapter.musics.removeAt(item.groupId)
-                adapter.notifyItemRemoved(item.groupId)
-
-                MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
-                CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
-
-                Toast.makeText(
-                    context,
-                    resources.getString(R.string.retrieved_music),
-                    Toast.LENGTH_SHORT
-                ).show()
-                true
-            }
-            else -> super.onContextItemSelected(item)
-        }
-    }
-
     private fun addSongsToAllMusics(){
-        adapter.musics.reverse()
-        for (music in adapter.musics){
-            MyMediaPlayer.allMusics.add(0,music)
+        for (music in adapter.musics.asReversed()){
+            MyMediaPlayer.allMusics.add(0, music)
         }
         CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile() }
         Toast.makeText(
@@ -202,4 +203,33 @@ class FoundMusicsFragment : Fragment() {
         }
     }
 
+    override fun onMusicClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_find_new_songs)
+        bottomSheetDialog.show()
+
+        bottomSheetDialog.findViewById<ImageView>(R.id.action_img)?.setImageResource(R.drawable.ic_baseline_delete_24)
+        bottomSheetDialog.findViewById<TextView>(R.id.action_text)?.text = getString(R.string.delete_music)
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.action)?.setOnClickListener {
+            val musicToRemove = adapter.musics[position]
+            adapter.musics.removeAt(position)
+            adapter.notifyItemRemoved(position)
+
+            MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
+            CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
+
+            Toast.makeText(
+                context,
+                resources.getString(R.string.retrieved_music),
+                Toast.LENGTH_SHORT
+            ).show()
+            bottomSheetDialog.dismiss()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fetchingJob.cancel()
+    }
 }
