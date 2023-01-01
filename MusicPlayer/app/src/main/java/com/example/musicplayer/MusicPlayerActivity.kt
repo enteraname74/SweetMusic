@@ -89,7 +89,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     private var newTextColor = R.color.text_color
 
     override fun onSaveInstanceState(outState: Bundle) {
-        Log.d("MP", "SAVE INSTANCE")
         outState.putBoolean("SAME MUSIC", true)
         super.onSaveInstanceState(outState)
     }
@@ -97,7 +96,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     override fun onCreate(savedInstanceState: Bundle?){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_player)
-        Log.d("MPA", "ON CREATE")
 
         sameMusic = intent.getSerializableExtra("SAME MUSIC") as Boolean
         if (savedInstanceState != null) {
@@ -168,6 +166,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             adapter = MusicList(MyMediaPlayer.currentPlaylist, "currentList",this@MusicPlayerActivity,this@MusicPlayerActivity)
             currentListRecyclerView.layoutManager = LinearLayoutManager(this@MusicPlayerActivity)
             currentListRecyclerView.adapter = adapter
+            setSorting()
         }
 
         CoroutineScope(Dispatchers.Main).launch { headerCurrentListButton.setOnClickListener { openCloseBottomSheet() }}
@@ -180,8 +179,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
-
-        Log.d("MPA POS", "ON CREATE : ${MyMediaPlayer.currentIndex}")
     }
 
     override fun onResume() {
@@ -190,7 +187,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         if(MyMediaPlayer.currentIndex == -1) {
             finish()
         } else {
-            Log.d("MPA POS", "ON RESUME START")
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
             currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
@@ -209,12 +205,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             songTitleInfo?.text = currentSong.name
             totalTimeTv.text = convertDuration(currentSong.duration)
         }
-        Log.d("MPA POS", "ON RESUME END")
     }
 
     private fun setResourcesWithMusic(){
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        Log.d("ressources set","")
 
         currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
 
