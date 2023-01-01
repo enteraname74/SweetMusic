@@ -1,35 +1,53 @@
-# MusicPlayer
+# Sweet Music (previously named MusicPlayer)
 
-## Current functionalities :
+A simple offline music player.
 
-Currently, with this app, you can :
+## Functionalities :
+### Music related functionalities :
+With this app, you can listen to all the songs on your device.
+You can also create playlists and manage them.
 
-- Fetch all the music files in your device
-- Create playlists and add songs to it
-- Add your favourites songs in the dedicated Favorites playlist
-- Modify the infos of your songs (Album cover, songs's name, artist's name, album's name)
-- Listen to your albums and artists
-- Search a specific music, album or artist
-- shuffle your current playlist or just listen to the current song that is played constantly
-- Add or remove songs from the song queue
-- Download the current state of your songs (more details below)
-- Set data for your songs (more details below)
-    
-## Downloading / Setting data :
+Songs can be modified, added to the played queue or deleted from the app.
 
-### Downloading :
+<img title="" src="Screenshots/Screenshot_20230101-223825.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230101-224217.png" alt="" data-align="center" width="293">
 
-With this app you can download the current state of your data (in the main menu, swiping left to right from the border of the screen shows a sliding menu).
-Downloading the data of the app will save two files :
+You can manage the played queue directly in the music player page :
 
-- allMusics.musics : a file that contains all the infos about your musics
-- allPlaylists.playlists : a file that contains all the infos about your playlists
+<img title="" src="Screenshots/Screenshot_20230101-223849.png" alt="" data-align="center" width="293">
 
-It's an interesting tool when you want to be sure that you have a backup of your infos (not the songs themselves but the infos about them (album, name, artist, album)) 
-Those files will be downloaded inside your Download folder.
+A music notification gives you the possibility to manage the played queue.
+Finally, multiple search bars let you find what you want in the app.
 
-### Setting :
-If you have already downloaded your data, you can set it in the sliding menu.
-It will write over the songs and playlists infos that is currently used in the app by using the infos given by your files.
+### Settings :
+The settings of this app let you manage the folders used by the application.
 
-Those functionalities will be developed in the future to give the user the possibility to retrieve the infos of his songs and apply them in an other device (example : when you change your phone for a new one and you don't want to set your song's infos manually)
+<img title="" src="Screenshots/Screenshot_20230101-224144.png" alt="" data-align="center" width="293">
+
+### Saving your data :
+All your music data (musics and playlists) can be retrieved in your Download folder.
+These can be useful when you need a backup of your files (when you change your device for example).
+You can retrieve your data and set it.
+
+<img title="" src="Screenshots/Screenshot_20230101-224254.png" alt="" data-align="center" width="293">
+
+### Color theme :
+Principal Color theme depending of your device theme :
+
+Light theme :
+
+<img title="" src="Screenshots/Screenshot_20230101-223513.png" alt="" data-align="center" width="293">
+
+Dark theme :
+
+<img title="" src="Screenshots/Screenshot_20230101-223449.png" alt="" data-align="center" width="293">
+
+The music player theme depends of the color of the album art of the played music :
+
+<img title="" src="Screenshots/Screenshot_20230101-223536.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230101-223552.png" alt="" data-align="center" width="293">
+
+Finally, the playlists, albums and artists color theme depend of the cover :
+
+<img title="" src="Screenshots/Screenshot_20230101-223631.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230101-225900.png" alt="" data-align="center" width="293">
