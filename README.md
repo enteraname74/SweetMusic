@@ -8,6 +8,8 @@ With this app, you can listen to all the songs on your device.
 You can also create playlists and manage them.
 
 Songs can be modified, added to the played queue or deleted from the app.
+Modifying a song without setting an album cover will let the app search for an album cover used in the app that matches the correct album.
+Modifying an album will modify all the songs inside it.
 
 <img title="" src="Screenshots/Screenshot_20230101-223825.png" alt="" data-align="center" width="293">
 <img title="" src="Screenshots/Screenshot_20230101-224217.png" alt="" data-align="center" width="293">
