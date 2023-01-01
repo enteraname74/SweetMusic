@@ -1,5 +1,6 @@
 package com.example.musicplayer.classes
 
+import android.content.Context
 import android.media.MediaPlayer
 import com.example.musicplayer.Music
 import com.example.musicplayer.Playlist
@@ -19,6 +20,8 @@ class MyMediaPlayer {
             }
             return instance as MediaPlayer
         }
+
+        var mediaSession : MediaSession? = null
 
         var currentIndex : Int = -1
         var initialPlaylist = ArrayList<Music>()

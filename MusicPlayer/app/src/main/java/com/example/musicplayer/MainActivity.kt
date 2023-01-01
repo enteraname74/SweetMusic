@@ -37,7 +37,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import java.io.*
 
-class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
+class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, AudioManager.OnAudioFocusChangeListener {
 
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout

@@ -19,6 +19,7 @@ import android.os.Looper
 import android.os.PersistableBundle
 import android.util.Log
 import android.view.ContextMenu
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
@@ -44,6 +45,7 @@ import java.io.IOException
 import java.lang.RuntimeException
 
 
+
 // Classe représentant la lecture d'une musique :
 class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.OnMusicListener {
 
@@ -67,6 +69,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     private var changingFavouriteState = false
 
     private var myThread = Thread(FunctionalSeekBar(this))
+
+    private lateinit var mediaSession : MediaSession
+    private lateinit var mediaSessionToken : MediaSession.Token
 
     private var sameMusic = false
 
@@ -217,6 +222,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         // Vérifions si la musique est en favoris :
         getFavoriteState()
 
+        Log.d("MAJ",currentSong.toString())
         titleTv.text = currentSong.name
         songTitleInfo?.text = currentSong.name
         totalTimeTv.text = convertDuration(currentSong.duration)
@@ -228,7 +234,9 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         /*
         Si la musique est la même, alors on ne met à jour que la seekBar (elle se remettra au bon niveau automatiquement)
          */
+
         if (!sameMusic) {
+            Log.d("here","")
             mediaPlayer.reset()
             try {
                 val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
@@ -242,18 +250,34 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                         Toast.makeText(this,"Cannot launch the music", Toast.LENGTH_SHORT).show()
                     }
 
-                    AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
-                        mediaPlayer.setDataSource(currentSong.path)
-                        mediaPlayer.setOnPreparedListener(this)
-                        mediaPlayer.prepareAsync()
+                    when (audioManager.requestAudioFocus(audioFocusRequest)) {
+                        AudioManager.AUDIOFOCUS_REQUEST_FAILED -> {
+                            Toast.makeText(this, "Cannot launch the music", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+
+                        AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                            mediaPlayer.setDataSource(currentSong.path)
+                            mediaPlayer.setOnPreparedListener(this)
+                            mediaPlayer.prepareAsync()
+                        }
+                        else -> {
+                            Toast.makeText(this, "AN unknown error has come up", Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
-                    else -> {
-                        Toast.makeText(this,"AN unknown error has come up", Toast.LENGTH_SHORT).show()
-                    }
+                } else {
+                    mediaPlayer.setDataSource(currentSong.path)
+                    mediaPlayer.setOnPreparedListener(this)
+                    mediaPlayer.prepareAsync()
                 }
             } catch (e: IOException) {
                 Log.e("ERROR MEDIA PLAYER", e.toString())
                 e.printStackTrace()
+            }
+            CoroutineScope(Dispatchers.Default).launch {
+                val service = MusicNotificationService(applicationContext as Context)
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
             }
         } else {
             seekBar.progress = 0
@@ -350,6 +374,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             MyMediaPlayer.currentIndex+=1
         }
         mediaPlayer.reset()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         setResourcesWithMusic()
     }
 
@@ -361,12 +389,15 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             MyMediaPlayer.currentIndex-=1
         }
         mediaPlayer.reset()
+        CoroutineScope(Dispatchers.Default).launch {
+            val service = MusicNotificationService(applicationContext as Context)
+            service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+        }
         setResourcesWithMusic()
     }
 
     // Permet de savoir si une chanson est en favoris :
     private fun getFavoriteState(){
-        Log.d("favorite ?", currentSong.favorite.toString())
         if(currentSong.favorite){
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {
@@ -637,5 +668,52 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         } else {
             super.onBackPressed()
         }
+    }
+
+    override fun onAudioFocusChange(audioFocusChange: Int) {
+        Log.d("testMUSIC", "test")
+        if(audioFocusChange == -1){
+            CoroutineScope(Dispatchers.Default).launch {
+                val service = MusicNotificationService(applicationContext as Context)
+                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+            }
+            return
+        }
+        when (audioFocusChange) {
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                println("test")
+                mediaPlayer.start()
+                pausePlay.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
+                CoroutineScope(Dispatchers.Default).launch {
+                    val service = MusicNotificationService(applicationContext as Context)
+                    service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                }
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> {
+                Log.d("testMUSIC", "LOSS")
+                if (mediaPlayer.isPlaying) {
+                    mediaPlayer.pause()
+                    pausePlay.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
+                    CoroutineScope(Dispatchers.Default).launch {
+                        val service = MusicNotificationService(applicationContext as Context)
+                        service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                    }
+                } else {
+                    Log.d("testMUSIC", "ELSE")
+                    if(mediaPlayer.isPlaying){
+                        mediaPlayer.pause()
+                        CoroutineScope(Dispatchers.Default).launch {
+                            val service = MusicNotificationService(applicationContext as Context)
+                            service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaSession.release()
     }
 }

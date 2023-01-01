@@ -115,6 +115,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".PausePlayNotificationReceiver"/>
+        <receiver android:name=".NextMusicNotificationReceiver"/>
+        <receiver android:name=".PreviousMusicNotificationReceiver"/>
+        <receiver android:name=".DeletedNotificationIntentReceiver"/>
+
     </application>
 
 </manifest>
