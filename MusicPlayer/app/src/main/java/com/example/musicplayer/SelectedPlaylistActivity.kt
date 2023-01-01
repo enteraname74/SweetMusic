@@ -62,7 +62,10 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_playlist)
-        Log.d("SELECTED PLAYLIST", MyMediaPlayer.currentIndex.toString())
+
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
 
         pausePlayButton = findViewById(R.id.pause_play)
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)

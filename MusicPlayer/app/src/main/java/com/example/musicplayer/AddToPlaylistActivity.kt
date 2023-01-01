@@ -25,6 +25,10 @@ class AddToPlaylistActivity : Tools(), PlaylistsSelection.OnPlaylistListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_to_playlist)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         val position = intent.getSerializableExtra("POSITION") as Int
         selectedMusic = MyMediaPlayer.allMusics[position]
 

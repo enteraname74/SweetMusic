@@ -22,6 +22,10 @@ class SelectFoldersActivity : Tools(), FolderListSelection.OnFolderListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_select_folders)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         val recyclerView = findViewById<RecyclerView>(R.id.menu_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = FolderListSelection(MyMediaPlayer.allFolders, this, this)

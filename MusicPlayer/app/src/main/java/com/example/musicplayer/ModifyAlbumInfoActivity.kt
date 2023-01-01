@@ -28,6 +28,10 @@ class ModifyAlbumInfoActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_playlist_info)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         albumPos = intent.getSerializableExtra("POS") as Int
         selectedAlbum = MyMediaPlayer.allAlbums[albumPos]
 

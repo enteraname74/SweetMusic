@@ -68,6 +68,10 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         setContentView(R.layout.activity_main)
         Log.d("MAIN ACTIVITY", "ON CREATE")
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         pausePlayButton = findViewById(R.id.pause_play)
         fetchingSongs = findViewById(R.id.fetching_songs)
         tabLayout = findViewById(R.id.tab_layout)
@@ -369,6 +373,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopMusic()
+        //stopMusic()
     }
 }

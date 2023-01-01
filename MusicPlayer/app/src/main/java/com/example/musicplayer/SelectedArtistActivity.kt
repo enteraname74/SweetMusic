@@ -65,6 +65,10 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_playlist)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         pausePlayButton = findViewById(R.id.pause_play)
         menuRecyclerView = findViewById(R.id.menu_playlist_recycler_view)
         artistPosition = intent.getSerializableExtra("POSITION") as Int

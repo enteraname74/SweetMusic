@@ -25,6 +25,10 @@ class MusicSelectionActivity : Tools(), MusicListSelection.OnMusicListener, Sear
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_music_selection)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         searchView = findViewById(R.id.search_view)
         searchView.setOnQueryTextListener(this)
 

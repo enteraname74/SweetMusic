@@ -35,6 +35,10 @@ class SetDataActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_set_data)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         val viewPager = findViewById<ViewPager2>(R.id.view_pager)
         tabLayout = findViewById(R.id.tab_layout)
         viewPager.adapter = SetDataVpAdapter(this)

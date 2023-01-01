@@ -32,6 +32,10 @@ class ModifyPlaylistInfoActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_playlist_info)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         // On récupère notre playlist à modifier :
         position = intent.getSerializableExtra("POSITION") as Int
 

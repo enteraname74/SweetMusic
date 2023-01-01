@@ -16,6 +16,10 @@ class FindNewSongsActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_find_new_songs)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         tabLayout = findViewById(R.id.tab_layout)
         viewPager = findViewById(R.id.view_pager)
 

@@ -1,5 +1,6 @@
 package com.example.musicplayer
 
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -188,6 +189,12 @@ class PlaybackService : Service() {
         Log.d("ON CREATE", "")
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("PLAYBACK SERVICE", "DESTROYED")
+        stopMusic()
+    }
+
     private fun updateUI(isMusicStopped : Boolean) {
         val intentForBroadcast = Intent("BROADCAST")
         intentForBroadcast.putExtra("STOP", isMusicStopped)
@@ -196,6 +203,18 @@ class PlaybackService : Service() {
         val intentForNotification = Intent("BROADCAST_NOTIFICATION")
         intentForNotification.putExtra("STOP", isMusicStopped)
         applicationContext.sendBroadcast(intentForNotification)
+    }
+
+    private fun stopMusic(){
+        MyMediaPlayer.currentIndex = -1
+        MyMediaPlayer.currentPlaylist = ArrayList<Music>()
+        MyMediaPlayer.initialPlaylist = ArrayList<Music>()
+
+        val intentForNotification = Intent("BROADCAST_NOTIFICATION")
+        intentForNotification.putExtra("STOP_RECEIVE", true)
+        applicationContext.sendBroadcast(intentForNotification)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(1)
     }
 
     companion object {

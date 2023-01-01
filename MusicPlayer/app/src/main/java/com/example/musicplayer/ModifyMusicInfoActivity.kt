@@ -41,6 +41,10 @@ class ModifyMusicInfoActivity : Tools() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_modify_music_info)
 
+        if(savedInstanceState != null) {
+            updateMusicNotification(!mediaPlayer.isPlaying)
+        }
+
         // On récupère notre musique à modifier :
         path = intent.getSerializableExtra("PATH") as String
         musicFile = MyMediaPlayer.allMusics.first{it.path == path}
