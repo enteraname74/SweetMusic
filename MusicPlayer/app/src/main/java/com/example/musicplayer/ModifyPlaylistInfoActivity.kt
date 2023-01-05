@@ -27,6 +27,7 @@ class ModifyPlaylistInfoActivity : Tools() {
     private lateinit var allPlaylists : ArrayList<Playlist>
     private lateinit var playlistCoverField : ImageView
     private lateinit var playlistNameField : EditText
+    private var playlistCoverHasChanged = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +93,7 @@ class ModifyPlaylistInfoActivity : Tools() {
                 null
             )
             playlistCoverField.setImageBitmap(bitmap)
+            playlistCoverHasChanged = true
         }
     }
 
@@ -102,14 +104,16 @@ class ModifyPlaylistInfoActivity : Tools() {
             val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
 
             if (verification == null || verification == playlist ) {
-                playlist.listName = playlistNameField.text.toString()
-                val drawable = playlistCoverField.drawable
-                val bitmapDrawable = drawable as BitmapDrawable
-                val bitmap = bitmapDrawable.bitmap
+                if (playlistCoverHasChanged) {
+                    playlist.listName = playlistNameField.text.toString()
+                    val drawable = playlistCoverField.drawable
+                    val bitmapDrawable = drawable as BitmapDrawable
+                    val bitmap = bitmapDrawable.bitmap
 
-                val byteArray = bitmapToByteArray(bitmap)
+                    val byteArray = bitmapToByteArray(bitmap)
 
-                playlist.playlistCover = byteArray
+                    playlist.playlistCover = byteArray
+                }
 
                 // Mettons à jour nos playlists :
                 allPlaylists[position] = playlist
@@ -123,7 +127,7 @@ class ModifyPlaylistInfoActivity : Tools() {
                 finish()
             } else {
                 withContext(Dispatchers.Main){
-                    Toast.makeText(this@ModifyPlaylistInfoActivity, "A playlist already possess the same name !", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@ModifyPlaylistInfoActivity, getString(R.string.a_playlist_already_possess_the_same_name), Toast.LENGTH_SHORT).show()
                 }
             }
         }
