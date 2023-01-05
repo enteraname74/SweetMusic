@@ -97,4 +97,6 @@
     <string name="removed_from_played_list">Removed from played list</string>
     <string name="data_retrieved_in_download_folder">Data retrieved in your download folder</string>
     <string name="a_playlist_already_possess_the_same_name">A playlist already possess the same name !</string>
+    <string name="x_musics">%1$d songs</string>
+    <string name="one_music">1 song</string>
 </resources>

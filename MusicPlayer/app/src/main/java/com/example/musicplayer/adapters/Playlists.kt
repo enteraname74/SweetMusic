@@ -69,7 +69,11 @@ class Playlists (
 
         holder.playlistName.text = currentPlaylist.listName
         if (resourceName == R.layout.playlist_file_linear){
-            val text = currentPlaylist.musicList.size.toString() + " songs"
+            val text = if (currentPlaylist.musicList.size > 1) {
+                context.getString(R.string.x_musics, currentPlaylist.musicList.size)
+            } else {
+                context.getString(R.string.one_music)
+            }
             holder.songNumber?.text = text
         }
 

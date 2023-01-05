@@ -96,4 +96,6 @@
     <string name="removed_from_played_list">Retirée de la liste de lecture</string>
     <string name="data_retrieved_in_download_folder">Données téléchargées dans votre dossier de téléchargement</string>
     <string name="a_playlist_already_possess_the_same_name">Une playlist possède déjà le même nom !</string>
+    <string name="x_musics">%1$d musiques</string>
+    <string name="one_music">1 musique</string>
 </resources>

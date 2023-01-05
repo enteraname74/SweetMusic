@@ -57,7 +57,11 @@ class Artists (
 
 
         holder.artistName.text = currentArtist.artistName
-        val numberText = currentArtist.musicList.size.toString() + " songs"
+        val numberText = if (currentArtist.musicList.size > 1) {
+            context.getString(R.string.x_musics, currentArtist.musicList.size)
+        } else {
+            context.getString(R.string.one_music)
+        }
         holder.songsNumber.text = numberText
 
         if (currentArtist.artistCover != null) {
