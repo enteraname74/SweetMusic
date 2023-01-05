@@ -44,33 +44,50 @@
         android:layout_margin="10dp"
         android:textColor="@color/text_color"/>
 
-    <ImageView
-        android:contentDescription="@string/previous"
-        android:id="@+id/previous"
+    <LinearLayout
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="match_parent"
-        android:src="@drawable/ic_baseline_skip_previous_24"
-        android:layout_gravity="center"
-        app:tint="@color/text_color"/>
+        android:layout_weight="1.2"
+        android:orientation="horizontal">
 
-    <ImageView
-        android:contentDescription="@string/pause"
-        android:id="@+id/pause_play"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_baseline_pause_circle_outline_24"
-        app:tint="@color/text_color"/>
+        <ImageView
+            android:contentDescription="@string/previous"
+            android:id="@+id/previous"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:src="@drawable/ic_baseline_skip_previous_24"
+            android:layout_gravity="center"
+            app:tint="@color/text_color"/>
 
-    <ImageView
-        android:contentDescription="@string/next"
-        android:id="@+id/next"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:src="@drawable/ic_baseline_skip_next_24"
-        app:tint="@color/text_color"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1"/>
+
+        <ImageView
+            android:contentDescription="@string/pause"
+            android:id="@+id/pause_play"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_pause_circle_outline_24"
+            app:tint="@color/text_color"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.1"/>
+
+        <ImageView
+            android:contentDescription="@string/next"
+            android:id="@+id/next"
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_baseline_skip_next_24"
+            app:tint="@color/text_color"/>
+    </LinearLayout>
 </LinearLayout>
