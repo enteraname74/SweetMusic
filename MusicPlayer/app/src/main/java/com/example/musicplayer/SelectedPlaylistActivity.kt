@@ -332,6 +332,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         findViewById<TextView>(R.id.song_title_info).setTextColor(newTextColor)
 
         findViewById<ImageView>(R.id.quit_activity).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.quit_activity).background.colorFilter = BlendModeColorFilter(newPrimaryColor, BlendMode.SRC_ATOP)
         findViewById<ImageView>(R.id.add_songs).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.shuffle).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         findViewById<ImageView>(R.id.previous).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
