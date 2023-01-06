@@ -17,7 +17,7 @@
             android:layout_height="30dp"
             android:layout_margin="10dp"
             android:background="@drawable/search_view_shape"
-            android:queryHint="Search a specific artist"/>
+            android:queryHint="@string/search_a_specific_artist"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/menu_artist_recycler_view"

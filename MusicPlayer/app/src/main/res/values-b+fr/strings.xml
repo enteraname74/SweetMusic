@@ -69,7 +69,6 @@
     <string name="fetching_found_songs">Récupérations des musiques trouvées</string>
     <string name="searching_songs_from_your_device">Recherche de musiques sur votre appareil</string>
     <string name="retrieve_music">Récupérer</string>
-    <string name="retrieved_music">Musique récupérée</string>
     <string name="add_new_songs">Ajouter ces nouvelles musiques</string>
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
     <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
@@ -89,7 +88,7 @@
     <string name="x_musics_automatically_removed">%1$d musiques retirées de l\'application automatiquement</string>
     <string name="create_playlist">Nom de la nouvelle playlist :</string>
     <string name="folders_used_by_the_application">Dossiers utilisés par l\'application :</string>
-    <string name="folders">Dossiers utilisées</string>
+    <string name="folders">Dossiers utilisés</string>
     <string name="missing_correct_files">Il manques des fichiers corrects !</string>
     <string name="a_title_must_be_set_correctly">Le titre doit être valable !</string>
     <string name="remove_from_played_list">Retirer de la liste de lecture</string>
@@ -98,4 +97,8 @@
     <string name="a_playlist_already_possess_the_same_name">Une playlist possède déjà le même nom !</string>
     <string name="x_musics">%1$d musiques</string>
     <string name="one_music">1 musique</string>
+    <string name="search_a_specific_music">Chercher une musique</string>
+    <string name="search_a_specific_album">Chercher un album</string>
+    <string name="search_a_specific_artist">Chercher un artiste</string>
+    <string name="music_retrieved">Musique récupéréé</string>
 </resources>
