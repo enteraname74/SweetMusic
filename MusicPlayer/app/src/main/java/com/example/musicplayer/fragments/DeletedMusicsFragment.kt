@@ -1,5 +1,6 @@
 package com.example.musicplayer.fragments
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -77,12 +78,12 @@ class DeletedMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
     override fun onMusicClick(position: Int) {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_find_new_songs)
-        bottomSheetDialog.show()
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.delete_music)?.visibility = View.GONE
 
-        bottomSheetDialog.findViewById<ImageView>(R.id.action_img)?.setImageResource(R.drawable.ic_baseline_add_24)
-        bottomSheetDialog.findViewById<TextView>(R.id.action_text)?.text = getString(R.string.retrieve_music)
+        bottomSheetDialog.findViewById<ImageView>(R.id.retrieve_img)?.setImageResource(R.drawable.ic_baseline_add_24)
+        bottomSheetDialog.findViewById<TextView>(R.id.retrieve_text)?.text = getString(R.string.retrieve_music)
 
-        bottomSheetDialog.findViewById<LinearLayout>(R.id.action)?.setOnClickListener {
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.retrieve_music)?.setOnClickListener {
             val musicToRetrieve = adapter.musics[position]
             adapter.musics.removeAt(position)
             adapter.notifyItemRemoved(position)
@@ -93,10 +94,12 @@ class DeletedMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
 
             Toast.makeText(
                 context,
-                resources.getString(R.string.retrieved_music),
+                resources.getString(R.string.music_retrieved),
                 Toast.LENGTH_SHORT
             ).show()
             bottomSheetDialog.dismiss()
         }
+
+        bottomSheetDialog.show()
     }
 }

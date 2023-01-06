@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
@@ -192,6 +193,18 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         activity?.finish()
     }
 
+    private fun addOneSongToAllMusics(position: Int){
+        MyMediaPlayer.allMusics.add(0, adapter.musics[position])
+        CoroutineScope(Dispatchers.IO).launch { writeAllMusicsToFile() }
+        Toast.makeText(
+            context,
+            resources.getString(R.string.music_retrieved),
+            Toast.LENGTH_SHORT
+        ).show()
+        adapter.musics.remove(adapter.musics[position])
+        adapter.notifyItemRemoved(position)
+    }
+
     private fun writeAllDeletedSong(){
         val path = context?.applicationContext?.filesDir
         try {
@@ -206,26 +219,45 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
     override fun onMusicClick(position: Int) {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_find_new_songs)
-        bottomSheetDialog.show()
 
-        bottomSheetDialog.findViewById<ImageView>(R.id.action_img)?.setImageResource(R.drawable.ic_baseline_delete_24)
-        bottomSheetDialog.findViewById<TextView>(R.id.action_text)?.text = getString(R.string.delete_music)
+        bottomSheetDialog.findViewById<ImageView>(R.id.delete_img)?.setImageResource(R.drawable.ic_baseline_delete_24)
+        bottomSheetDialog.findViewById<TextView>(R.id.delete_text)?.text = getString(R.string.delete_music)
 
-        bottomSheetDialog.findViewById<LinearLayout>(R.id.action)?.setOnClickListener {
-            val musicToRemove = adapter.musics[position]
-            adapter.musics.removeAt(position)
-            adapter.notifyItemRemoved(position)
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.delete_music)?.setOnClickListener {
+            val builder = AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
+            builder.setTitle(getString(R.string.delete_music))
 
-            MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
-            CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
+            builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
+                val musicToRemove = adapter.musics[position]
+                adapter.musics.removeAt(position)
+                adapter.notifyItemRemoved(position)
 
-            Toast.makeText(
-                context,
-                resources.getString(R.string.retrieved_music),
-                Toast.LENGTH_SHORT
-            ).show()
+                MyMediaPlayer.allDeletedMusics.add(0, musicToRemove)
+                CoroutineScope(Dispatchers.IO).launch { writeAllDeletedSong() }
+
+                Toast.makeText(
+                    context,
+                    resources.getString(R.string.deleted_from_app),
+                    Toast.LENGTH_SHORT
+                ).show()
+                bottomSheetDialog.dismiss()
+            }
+
+            builder.setNegativeButton(getString(R.string.cancel)) { dialogInterface, _ ->
+                dialogInterface.cancel()
+            }
+
+            builder.show()
+        }
+
+        bottomSheetDialog.findViewById<ImageView>(R.id.retrieve_img)?.setImageResource(R.drawable.ic_baseline_add_24)
+        bottomSheetDialog.findViewById<TextView>(R.id.retrieve_text)?.text = getString(R.string.retrieve_music)
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.retrieve_music)?.setOnClickListener {
+            addOneSongToAllMusics(position)
             bottomSheetDialog.dismiss()
         }
+
+        bottomSheetDialog.show()
     }
 
     override fun onDestroy() {

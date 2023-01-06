@@ -65,6 +65,7 @@
         <entry key="app/src/main/res/layout/activity_music_selection.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_playlists_menu.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_see_music_list.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/activity_select_folders.xml" value="0.2456935630099728" />
         <entry key="app/src/main/res/layout/activity_selected_album.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_artist.xml" value="0.33" />
         <entry key="app/src/main/res/layout/activity_selected_playlist.xml" value="0.2497733454215775" />
