@@ -9,7 +9,6 @@ import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Environment
-import android.text.InputType
 import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -19,7 +18,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.adapters.Playlists
-import com.example.musicplayer.notification.MusicNotificationService
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -163,7 +161,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    fun musicClicked(context : Context, adapter: MusicList, position: Int, listname : String) {
+    fun musicClicked(context : Context, adapter: MusicList, position: Int, listName : String) {
         mediaPlayer.setOnCompletionListener(null)
         var sameMusic = true
 
@@ -176,7 +174,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                 MyMediaPlayer.initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
             }
             MyMediaPlayer.currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
-            MyMediaPlayer.playlistName = listname
+            MyMediaPlayer.playlistName = listName
             sameMusic = false
         }
 

@@ -21,10 +21,14 @@ import android.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
+import com.example.musicplayer.adapters.ShortcutList
 import com.example.musicplayer.adapters.VpAdapter
 import com.example.musicplayer.classes.Folder
 import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Shortcuts
 import com.example.musicplayer.classes.Tools
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.navigation.NavigationView
@@ -109,9 +113,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             }
         }.attach()
 
-
-        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
-        shuffleButton.setOnClickListener { playRandom(MyMediaPlayer.allMusics, this,"Main") }
+        findViewById<ImageView>(R.id.shuffle_button).setOnClickListener { playRandom(MyMediaPlayer.allMusics, this,"Main") }
 
         CoroutineScope(Dispatchers.IO).launch{ readPlaylistsAsync() }
         CoroutineScope(Dispatchers.IO).launch { readAllDeletedMusicsFromFile() }
@@ -146,6 +148,18 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 MyMediaPlayer.currentIndex,
                 this@MainActivity
             )
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            val shortcutRecyclerView = findViewById<RecyclerView>(R.id.shortcut_recycler_view)
+            shortcutRecyclerView.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL,false)
+            val list = ArrayList<Any>()
+            for (i in 0..10) {
+                list.add(MyMediaPlayer.allMusics[i])
+            }
+            val shortcuts = Shortcuts(list)
+            val adapter = ShortcutList(shortcuts, this@MainActivity)
+            shortcutRecyclerView.adapter = adapter
         }
     }
 
@@ -237,7 +251,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     private suspend fun fetchMusics() {
         // Pour éviter de potentiels crash de l'app :
-        val shuffleButton = findViewById<Button>(R.id.shuffle_button)
+        val shuffleButton = findViewById<ImageView>(R.id.shuffle_button)
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val openMenu = findViewById<ImageView>(R.id.open_menu)
 
