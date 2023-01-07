@@ -28,12 +28,15 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.ObjectOutputStream
 
-class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
+private const val SHORTCUT_PARA = "shortcut"
 
+class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     private val savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Playlists
     private val mediaPlayer = MyMediaPlayer.getInstance
+
+    private var shortcutUsage: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,17 +51,15 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
 
         // Mise en place du bouton de création de playlist :
         val addPlaylist = view.findViewById<ImageView>(R.id.add_playlist)
-        addPlaylist?.setOnClickListener{ addPlaylist() }
+        if (shortcutUsage == false) {
+            addPlaylist?.setOnClickListener{ addPlaylist() }
+        } else {
+            addPlaylist.visibility = View.GONE
+        }
 
         menuRecyclerView = view.findViewById(R.id.menu_playlist_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
         menuRecyclerView.adapter = adapter
-
-        val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
-        val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
-
-        nextButton.setOnClickListener { playNextSong() }
-        previousButton.setOnClickListener { playPreviousSong() }
 
         return view
     }
@@ -68,35 +69,46 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
 
         adapter.allPlaylists = MyMediaPlayer.allPlaylists
         adapter.notifyDataSetChanged()
-        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+        if (shortcutUsage == false) {
+            mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+            (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
+            (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
+        }
     }
 
     override fun onPlaylistClick(position: Int) {
-        Log.d("PLAYLIST POSITION", position.toString())
-
-        val intent = Intent(context, SelectedPlaylistActivity::class.java)
-        intent.putExtra("POSITION", position)
-
-        startActivity(intent)
+        if (shortcutUsage == false) {
+            val intent = Intent(context, SelectedPlaylistActivity::class.java)
+            intent.putExtra("POSITION", position)
+            startActivity(intent)
+        } else {
+            (activity as CreateShortcutActivity).addSelectedShortcut(adapter.allPlaylists[position])
+        }
     }
 
     override fun onPlayListLongClick(position: Int) {
-        val bottomSheetDialog = BottomSheetDialog(requireContext())
-        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
-        bottomSheetDialog.show()
+        if (shortcutUsage == false) {
+            val bottomSheetDialog = BottomSheetDialog(requireContext())
+            bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
+            bottomSheetDialog.show()
 
-        if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.visibility = View.GONE
-        } else {
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-                (activity as MainActivity).bottomSheetRemovePlaylist(position,adapter, requireContext())
+            if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
+                bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.visibility = View.GONE
+            } else {
+                bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+                    (activity as MainActivity).bottomSheetRemovePlaylist(
+                        position,
+                        adapter,
+                        requireContext()
+                    )
+                    bottomSheetDialog.dismiss()
+                }
+            }
+
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
+                (activity as MainActivity).bottomSheetModifyPlaylist(requireContext(), position)
                 bottomSheetDialog.dismiss()
             }
-        }
-
-        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
-            (activity as MainActivity).bottomSheetModifyPlaylist(requireContext(),position)
-            bottomSheetDialog.dismiss()
         }
     }
 
@@ -122,10 +134,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
                 MyMediaPlayer.allPlaylists.add(newPlaylist)
                 adapter.allPlaylists = MyMediaPlayer.allPlaylists
                 CoroutineScope(Dispatchers.IO).launch {
-                    writePlaylistsToFile(
-                        savePlaylistsFile,
-                        MyMediaPlayer.allPlaylists
-                    )
+                    (activity as MainActivity).writePlaylistsToFile()
                 }
 
                 menuRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -143,67 +152,13 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         builder.show()
     }
 
-    private fun writePlaylistsToFile(filename : String, content : ArrayList<Playlist>){
-        MyMediaPlayer.allPlaylists = content
-        val path = context?.applicationContext?.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.d("Error write playlists",error.toString())
-        }
-    }
-
-    private fun playNextSong(){
-        if(MyMediaPlayer.currentIndex ==(MyMediaPlayer.currentPlaylist.size)-1){
-            MyMediaPlayer.currentIndex = 0
-        } else {
-            MyMediaPlayer.currentIndex +=1
-        }
-        playMusic()
-    }
-
-    private fun playPreviousSong(){
-        if(MyMediaPlayer.currentIndex ==0){
-            MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
-        } else {
-            MyMediaPlayer.currentIndex -=1
-        }
-        playMusic()
-    }
-
-    private fun playMusic(){
-        if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
-            mediaPlayer.reset()
-            try {
-                val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                mediaPlayer.setDataSource(currentSong.path)
-                mediaPlayer.prepare()
-                mediaPlayer.start()
-
-                val pausePlay = activity?.findViewById<ImageView>(R.id.pause_play)
-                val songTitleInfo = activity?.findViewById<TextView>(R.id.song_title_info)
-                val albumCoverInfo = activity?.findViewById<ImageView>(R.id.album_cover_info)
-
-                if (currentSong.albumCover != null){
-                    // Passons d'abord notre byteArray en bitmap :
-                    val bytes = currentSong.albumCover
-                    var bitmap: Bitmap? = null
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    }
-                    albumCoverInfo?.setImageBitmap(bitmap)
-                } else {
-                    albumCoverInfo?.setImageResource(R.drawable.ic_saxophone_svg)
+    companion object {
+        @JvmStatic
+        fun newInstance(isForShortcut: Boolean) =
+            PlaylistsFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean(SHORTCUT_PARA, isForShortcut)
                 }
-
-                pausePlay?.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                songTitleInfo?.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-            } catch (e: IndexOutOfBoundsException) {
-                Log.d("ERROR","")
-                e.printStackTrace()
             }
-        }
     }
 }

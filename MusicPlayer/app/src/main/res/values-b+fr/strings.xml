@@ -101,4 +101,8 @@
     <string name="search_a_specific_album">Chercher un album</string>
     <string name="search_a_specific_artist">Chercher un artiste</string>
     <string name="music_retrieved">Musique récupéréé</string>
+    <string name="shortcuts">Raccourcis</string>
+    <string name="activate_shortcuts">Activer/Désactiver les raccourcis :</string>
+    <string name="your_shortcuts">Vos raccourcis :</string>
+    <string name="add_a_shortcut">Ajouter un raccourci</string>
 </resources>

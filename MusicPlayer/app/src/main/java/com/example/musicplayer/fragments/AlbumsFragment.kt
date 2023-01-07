@@ -24,11 +24,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 
+private const val SHORTCUT_PARA = "shortcut"
+
 class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTextListener {
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Albums
     private lateinit var searchView : SearchView
     private val mediaPlayer = MyMediaPlayer.getInstance
+
+    private var shortcutUsage: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,12 +48,6 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
         menuRecyclerView = view.findViewById(R.id.menu_album_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
         menuRecyclerView.adapter = adapter
-
-        val nextButton : ImageView = activity?.findViewById(R.id.next) as ImageView
-        val previousButton : ImageView = activity?.findViewById(R.id.previous) as ImageView
-
-        nextButton.setOnClickListener { (activity as MainActivity).playNextSong() }
-        previousButton.setOnClickListener { (activity as MainActivity).playPreviousSong() }
 
         return view
     }
@@ -91,17 +89,25 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                 adapter.notifyDataSetChanged()
             }
         }
-        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+        if (shortcutUsage == false) {
+            mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+            (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
+            (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
+        }
     }
 
     override fun onAlbumClick(position: Int) {
-        val intent = Intent(context, SelectedAlbumActivity::class.java)
-        val album = adapter.allAlbums[position]
-        val globalPosition = MyMediaPlayer.allAlbums.indexOf(album)
+        if (shortcutUsage == false) {
+            val intent = Intent(context, SelectedAlbumActivity::class.java)
+            val album = adapter.allAlbums[position]
+            val globalPosition = MyMediaPlayer.allAlbums.indexOf(album)
 
-        intent.putExtra("POSITION", globalPosition)
+            intent.putExtra("POSITION", globalPosition)
 
-        startActivity(intent)
+            startActivity(intent)
+        } else {
+            (activity as CreateShortcutActivity).addSelectedShortcut(adapter.allAlbums[position])
+        }
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
@@ -137,5 +143,15 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
             Log.d("ERROR",error.toString())
         }
         return true
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(isForShortcut: Boolean) =
+            AlbumsFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean(SHORTCUT_PARA, isForShortcut)
+                }
+            }
     }
 }

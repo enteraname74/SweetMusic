@@ -38,6 +38,7 @@ class MyMediaPlayer {
         var allPlaylists = ArrayList<Playlist>()
         var allDeletedMusics = ArrayList<Music>()
         var allFolders = ArrayList<Folder>()
+        var allShortcuts = Shortcuts(ArrayList())
 
         val iconsList = listOf(
             R.drawable.ic_baseline_sync_24,

@@ -101,7 +101,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             viewPager.visibility = View.VISIBLE
         }
 
-        viewPager.adapter = VpAdapter(this)
+        viewPager.adapter = VpAdapter(this, false)
 
         TabLayoutMediator(tabLayout, viewPager){tab, index ->
             tab.text = when(index){

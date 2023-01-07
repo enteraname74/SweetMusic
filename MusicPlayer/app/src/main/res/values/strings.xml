@@ -102,4 +102,10 @@
     <string name="search_a_specific_album">Search an album</string>
     <string name="search_a_specific_artist">Search an artist</string>
     <string name="music_retrieved">Music retrieved</string>
+    <string name="shortcuts">Shortcuts</string>
+    <string name="activate_shortcuts">Enable/disable shortcuts :</string>
+    <string name="your_shortcuts">Your shortcuts :</string>
+    <string name="add_a_shortcut">Add a shortcut</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
