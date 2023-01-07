@@ -23,6 +23,7 @@ class ModifyAlbumInfoActivity : Tools() {
     private lateinit var selectedAlbum : Album
     private lateinit var playlistCoverField : ImageView
     private lateinit var playlistNameField : EditText
+    private var positionInShortcuts = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +35,8 @@ class ModifyAlbumInfoActivity : Tools() {
 
         albumPos = intent.getSerializableExtra("POS") as Int
         selectedAlbum = MyMediaPlayer.allAlbums[albumPos]
+
+        positionInShortcuts = MyMediaPlayer.allShortcuts.positionInList(selectedAlbum)
 
         playlistCoverField = findViewById(R.id.playlist_cover)
         playlistNameField = findViewById(R.id.edit_playlist_name)
@@ -133,6 +136,13 @@ class ModifyAlbumInfoActivity : Tools() {
             CoroutineScope(Dispatchers.IO).launch {
                 writePlaylistsToFile()
                 writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+            }
+
+            CoroutineScope(Dispatchers.IO).launch {
+                if (positionInShortcuts != -1) {
+                    MyMediaPlayer.allShortcuts.shortcutsList[positionInShortcuts] = selectedAlbum
+                    writeAllShortcuts()
+                }
             }
 
             setResult(RESULT_OK)

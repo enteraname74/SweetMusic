@@ -26,10 +26,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.ShortcutList
 import com.example.musicplayer.adapters.VpAdapter
-import com.example.musicplayer.classes.Folder
-import com.example.musicplayer.classes.MyMediaPlayer
-import com.example.musicplayer.classes.Shortcuts
-import com.example.musicplayer.classes.Tools
+import com.example.musicplayer.classes.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
@@ -98,6 +95,67 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
                 fetchingSongs.visibility = View.GONE
                 viewPager.visibility = View.VISIBLE
                 readAllFoldersFromFile()
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (MyMediaPlayer.allMusics.size > 0) {
+                        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+                        var currentAlbum: Album
+                        // Trions d'abord notre liste par album et artiste :
+                        copiedMusics.sortWith(compareBy<Music> { it.album }.thenBy { it.artist })
+                        currentAlbum = Album(
+                            copiedMusics[0].album,
+                            ArrayList<Music>(),
+                            copiedMusics[0].albumCover,
+                            copiedMusics[0].artist
+                        )
+                        // On vide nos albums pour mettre à jour ensuite ces derniers :
+                        MyMediaPlayer.allAlbums.clear()
+                        for (music in copiedMusics) {
+                            if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist) {
+                                currentAlbum.albumList.add(music)
+                            } else {
+                                // On passe à un autre album :
+                                // On ajoute d'abord notre album à notre liste :
+                                MyMediaPlayer.allAlbums.add(currentAlbum)
+                                // On change ensuite l'album actuelle
+                                currentAlbum = Album(music.album, ArrayList<Music>(), music.albumCover, music.artist)
+                                currentAlbum.albumList.add(music)
+                            }
+                        }
+                        // Il faut prendre le dernier cas en compte :
+                        MyMediaPlayer.allAlbums.add(currentAlbum)
+                    }
+                }
+
+                CoroutineScope(Dispatchers.Main).launch {
+                    if (MyMediaPlayer.allMusics.size > 0) {
+                        val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+                        var currentArtist: Artist
+                        // Trions d'abord notre liste artiste :
+                        copiedMusics.sortWith(compareBy<Music> { it.artist })
+                        currentArtist = Artist(
+                            copiedMusics[0].artist,
+                            ArrayList<Music>(),
+                            copiedMusics[0].albumCover
+                        )
+
+                        MyMediaPlayer.allArtists.clear()
+                        for (music in copiedMusics) {
+                            if (music.artist == currentArtist.artistName) {
+                                currentArtist.musicList.add(music)
+                            } else {
+                                // On passe à un autre album :
+                                // On ajoute d'abord notre album à notre liste :
+                                MyMediaPlayer.allArtists.add(currentArtist)
+                                // On change ensuite l'album actuelle
+                                currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
+                                currentArtist.musicList.add(music)
+                            }
+                        }
+                        // Il faut prendre le dernier cas en compte :
+                        MyMediaPlayer.allArtists.add(currentArtist)
+                    }
+                }
             }
         } else if (MyMediaPlayer.allMusics.size != 0) {
             fetchingSongs.visibility = View.GONE

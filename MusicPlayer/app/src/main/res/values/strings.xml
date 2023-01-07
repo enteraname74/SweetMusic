@@ -104,4 +104,5 @@
     <string name="add_to_shortcuts">Add to shortcuts</string>
     <string name="already_a_shortcut">The selected element is already in the shortcuts !</string>
     <string name="delete_shortcut">Delete shortcut</string>
+    <string name="added_to_shortcuts">Element added to shortcuts</string>
 </resources>

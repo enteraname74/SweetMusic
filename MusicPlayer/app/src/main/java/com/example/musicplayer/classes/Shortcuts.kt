@@ -36,10 +36,15 @@ class Shortcuts(
                 ))
             }
             is Album -> Intent(context, SelectedAlbumActivity::class.java).apply {
-                putExtra("POSITION", MyMediaPlayer.allAlbums.indexOf(elementInfos))
+                Log.d("ELEMENT", elementInfos.albumName)
+                putExtra("POSITION", MyMediaPlayer.allAlbums.indexOf(
+                    MyMediaPlayer.allAlbums.find { it.albumName == elementInfos.albumName && it.artist == elementInfos.artist }
+                ))
             }
             is Artist -> Intent(context, SelectedArtistActivity::class.java).apply {
-                putExtra("POSITION", MyMediaPlayer.allArtists.indexOf(elementInfos))
+                putExtra("POSITION", MyMediaPlayer.allArtists.indexOf(
+                    MyMediaPlayer.allArtists.find { it.artistName == elementInfos.artistName }
+                ))
             }
             else -> null
         }

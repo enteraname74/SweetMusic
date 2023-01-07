@@ -103,4 +103,5 @@
     <string name="add_to_shortcuts">Ajouter aux raccourcis</string>
     <string name="already_a_shortcut">L\'élément sélectionné est déjà dans les raccourics !</string>
     <string name="delete_shortcut">Supprimer le raccourci</string>
+    <string name="added_to_shortcuts">Élément ajouté aux raccourcis</string>
 </resources>

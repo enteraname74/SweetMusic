@@ -557,19 +557,11 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    fun addSelectedShortcut(element : Any, adapter : ShortcutList) {
+    fun addSelectedShortcut(element : Any, adapter : ShortcutList? = null) {
         if (MyMediaPlayer.allShortcuts.positionInList(element) == -1) {
             MyMediaPlayer.allShortcuts.shortcutsList.add(element)
-            adapter.notifyDataSetChanged()
-            CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
-        } else {
-            Toast.makeText(this, getString(R.string.already_a_shortcut), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    fun addSelectedShortcut(element : Any) {
-        if (MyMediaPlayer.allShortcuts.positionInList(element) == -1) {
-            MyMediaPlayer.allShortcuts.shortcutsList.add(element)
+            Toast.makeText(this, getString(R.string.added_to_shortcuts), Toast.LENGTH_SHORT).show()
+            adapter?.notifyItemInserted(MyMediaPlayer.allShortcuts.shortcutsList.size - 1)
             CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
         } else {
             Toast.makeText(this, getString(R.string.already_a_shortcut), Toast.LENGTH_SHORT).show()
