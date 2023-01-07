@@ -19,21 +19,13 @@ import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.classes.MyMediaPlayer
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.*
-import java.io.*
-
-
-private const val SHORTCUT_PARA = "shortcut"
 
 class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
-    private val saveAllDeletedFiles = "allDeleted.musics"
-    private val savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var adapter : MusicList
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var searchView : SearchView
     private var searchIsOn = false
     private val mediaPlayer = MyMediaPlayer.getInstance
-
-    private var shortcutUsage: Boolean? = null
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -45,11 +37,6 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            shortcutUsage = it.getBoolean(SHORTCUT_PARA)
-        }
-
         adapter = MusicList(ArrayList<Music>(), "",requireContext(), this)
     }
 
@@ -80,71 +67,67 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
         if(!searchIsOn){
             adapter.musics = MyMediaPlayer.allMusics
         }
-        if (shortcutUsage == false) {
-            if (MyMediaPlayer.dataWasChanged) {
-                // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
-                adapter.musics = MyMediaPlayer.allMusics
-                MyMediaPlayer.dataWasChanged = false
-            }
-            adapter.notifyDataSetChanged()
-
-            (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
-
-            mediaPlayer.setOnCompletionListener {
-                Log.d("MUSIC FRAGMENT", "WILL PLAY NEXT")
-                (activity as MainActivity).playNextSong(adapter)
-            }
-
-            CoroutineScope(Dispatchers.Main).launch { (activity as MainActivity).verifiyAllMusics(adapter) }
-        } else {
-            CoroutineScope(Dispatchers.Main).launch { (activity as CreateShortcutActivity).verifiyAllMusics(adapter) }
+        if (MyMediaPlayer.dataWasChanged) {
+            // Si on a mis à jour toutes nos données, il faut qu'on change nos musiques :
+            adapter.musics = MyMediaPlayer.allMusics
+            MyMediaPlayer.dataWasChanged = false
         }
+        adapter.notifyDataSetChanged()
+
+        (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
+
+        mediaPlayer.setOnCompletionListener {
+            Log.d("MUSIC FRAGMENT", "WILL PLAY NEXT")
+            (activity as MainActivity).playNextSong(adapter)
+        }
+
+        CoroutineScope(Dispatchers.Main).launch { (activity as MainActivity).verifiyAllMusics(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
-        if (shortcutUsage == false) {
-            (activity as MainActivity).musicClicked(requireContext(), adapter, position, "Main")
-        } else {
-            (activity as CreateShortcutActivity).addSelectedShortcut(adapter.musics[position])
-        }
+        (activity as MainActivity).musicClicked(requireContext(), adapter, position, "Main")
     }
 
     override fun onLongMusicClick(position: Int) {
-        if (shortcutUsage == false) {
-            val bottomSheetDialog = BottomSheetDialog(requireContext())
-            bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
-            bottomSheetDialog.show()
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
+        bottomSheetDialog.show()
 
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)
-                ?.setOnClickListener {
-                    (activity as MainActivity).bottomSheetAddTo(position, requireContext(), adapter)
-                    bottomSheetDialog.dismiss()
-                }
-
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-                (activity as MainActivity).bottomSheetRemoveFromApp(
-                    adapter,
-                    position,
-                    (activity as MainActivity).sheetBehavior,
-                    requireContext()
-                )
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)
+            ?.setOnClickListener {
+                (activity as MainActivity).bottomSheetAddTo(position, requireContext(), adapter)
                 bottomSheetDialog.dismiss()
             }
 
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
-                (activity as MainActivity).bottomSheetModifyMusic(
-                    requireContext(),
-                    position,
-                    adapter
-                )
-                bottomSheetDialog.dismiss()
-            }
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            (activity as MainActivity).addSelectedShortcut(adapter.musics[position], (activity as MainActivity).shortcutAdapter)
+            bottomSheetDialog.dismiss()
+        }
 
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
-                (activity as MainActivity).bottomSheetPlayNext(adapter, position)
-                bottomSheetDialog.dismiss()
-            }
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetRemoveFromApp(
+                adapter,
+                position,
+                (activity as MainActivity).sheetBehavior,
+                requireContext(),
+                (activity as MainActivity).shortcutAdapter
+            )
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetModifyMusic(
+                requireContext(),
+                position,
+                adapter
+            )
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetPlayNext(adapter, position)
+            bottomSheetDialog.dismiss()
         }
     }
 
@@ -184,15 +167,5 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             Log.d("ERROR",error.toString())
         }
         return true
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(isForShortcut: Boolean) =
-            MusicsFragment().apply {
-                arguments = Bundle().apply {
-                    putBoolean(SHORTCUT_PARA, isForShortcut)
-                }
-            }
     }
 }

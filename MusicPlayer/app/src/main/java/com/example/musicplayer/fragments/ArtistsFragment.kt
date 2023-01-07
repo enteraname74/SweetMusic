@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,19 +17,16 @@ import com.example.musicplayer.classes.Artist
 import com.example.musicplayer.adapters.Artists
 import com.example.musicplayer.Music
 import com.example.musicplayer.classes.MyMediaPlayer
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-private const val SHORTCUT_PARA = "shortcut"
 
 class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQueryTextListener {
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var adapter: Artists
     private val mediaPlayer = MyMediaPlayer.getInstance
     private lateinit var searchView : SearchView
-
-    private var shortcutUsage: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -84,25 +82,31 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
                 adapter.notifyDataSetChanged()
             }
         }
-        if (shortcutUsage == false) {
-            mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
-        }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
     }
 
     override fun onArtistClick(position: Int) {
-        if (shortcutUsage == false) {
-            val intent = Intent(context, SelectedArtistActivity::class.java)
-            val artist = adapter.allArtists[position]
-            val globalPosition = MyMediaPlayer.allArtists.indexOf(artist)
+        val intent = Intent(context, SelectedArtistActivity::class.java)
+        val artist = adapter.allArtists[position]
+        val globalPosition = MyMediaPlayer.allArtists.indexOf(artist)
 
-            intent.putExtra("POSITION", globalPosition)
+        intent.putExtra("POSITION", globalPosition)
 
-            startActivity(intent)
-        } else {
-            (activity as CreateShortcutActivity).addSelectedShortcut(adapter.allArtists[position])
+        startActivity(intent)
+    }
+
+    override fun onArtistLongClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_artist_menu)
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            (activity as MainActivity).addSelectedShortcut(adapter.allArtists[position], (activity as MainActivity).shortcutAdapter)
+            bottomSheetDialog.dismiss()
         }
+
+        bottomSheetDialog.show()
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
@@ -138,15 +142,5 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
             Log.d("ERROR",error.toString())
         }
         return true
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(isForShortcut: Boolean) =
-            ArtistsFragment().apply {
-                arguments = Bundle().apply {
-                    putBoolean(SHORTCUT_PARA, isForShortcut)
-                }
-            }
     }
 }

@@ -34,6 +34,27 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/add_to_shortcuts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="30dp">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@string/add_to_shortcuts"
+            android:src="@drawable/ic_baseline_double_arrow_24"/>
+
+        <TextView
+            android:layout_marginStart="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/add_to_shortcuts"
+            android:gravity="center_vertical"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/remove"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

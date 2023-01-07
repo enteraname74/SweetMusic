@@ -30,8 +30,7 @@
     <string name="artist">Artiste :</string>
     <string name="cancel">Annuler</string>
     <string name="ok">Ok</string>
-    <string name="modify_playlist_informations">Modifier les informations de la playlist</string>
-    <string name="modify_album_informations">Modifier les informations de l\'album</string>
+    <string name="modify_album">Modifier l\'album</string>
     <string name="playlist_image">Couverture de la playlist :</string>
     <string name="name_of_the_playlist">Nom de la playlist :</string>
     <string name="name_of_the_album">Nom de l\'album :</string>
@@ -68,7 +67,7 @@
     <string name="searching_new_songs">Recherche de nouvelles musiques</string>
     <string name="fetching_found_songs">Récupérations des musiques trouvées</string>
     <string name="searching_songs_from_your_device">Recherche de musiques sur votre appareil</string>
-    <string name="retrieve_music">Récupérer</string>
+    <string name="retrieve_music">Récupérer la musique</string>
     <string name="add_new_songs">Ajouter ces nouvelles musiques</string>
     <string name="retrieved_all_new_musics">Nouvelles musiques récupérées</string>
     <string name="no_songs_left_in_the_current_playlist">Aucune musique n\'est dans la liste de lecture</string>
@@ -101,8 +100,7 @@
     <string name="search_a_specific_album">Chercher un album</string>
     <string name="search_a_specific_artist">Chercher un artiste</string>
     <string name="music_retrieved">Musique récupéréé</string>
-    <string name="shortcuts">Raccourcis</string>
-    <string name="activate_shortcuts">Activer/Désactiver les raccourcis :</string>
-    <string name="your_shortcuts">Vos raccourcis :</string>
-    <string name="add_a_shortcut">Ajouter un raccourci</string>
+    <string name="add_to_shortcuts">Ajouter aux raccourcis</string>
+    <string name="already_a_shortcut">L\'élément sélectionné est déjà dans les raccourics !</string>
+    <string name="delete_shortcut">Supprimer le raccourci</string>
 </resources>

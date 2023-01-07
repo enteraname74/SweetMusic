@@ -35,7 +35,7 @@
             android:scrollHorizontally="true"
             android:singleLine="true"
             android:layout_height="match_parent"
-            android:text="@string/modify_playlist_informations"
+            android:text="@string/modify_playlist"
             android:textColor="@color/text_color"
             android:layout_gravity="center"
             android:gravity="center"

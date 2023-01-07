@@ -31,12 +31,13 @@ import com.example.musicplayer.classes.MyMediaPlayer
 import com.example.musicplayer.classes.Shortcuts
 import com.example.musicplayer.classes.Tools
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.*
 import java.io.*
 
-class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
+class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, ShortcutList.OnShortcutListener  {
 
     private var allMusicsBackup = ArrayList<Music>()
     private lateinit var tabLayout : com.google.android.material.tabs.TabLayout
@@ -49,6 +50,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
 
     private lateinit var bottomSheetLayout: LinearLayout
     lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
+
+    lateinit var shortcutAdapter : ShortcutList
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -101,7 +104,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
             viewPager.visibility = View.VISIBLE
         }
 
-        viewPager.adapter = VpAdapter(this, false)
+        viewPager.adapter = VpAdapter(this)
 
         TabLayoutMediator(tabLayout, viewPager){tab, index ->
             tab.text = when(index){
@@ -151,15 +154,25 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
         }
 
         CoroutineScope(Dispatchers.Main).launch {
-            val shortcutRecyclerView = findViewById<RecyclerView>(R.id.shortcut_recycler_view)
-            shortcutRecyclerView.layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL,false)
-            val list = ArrayList<Any>()
-            for (i in 0..10) {
-                list.add(MyMediaPlayer.allMusics[i])
+            if (File(applicationContext.filesDir, saveAllShortcuts).exists()) {
+                readAllShortcutsFromFile()
+            } else {
+                writeAllShortcuts()
             }
-            val shortcuts = Shortcuts(list)
-            val adapter = ShortcutList(shortcuts, this@MainActivity)
-            shortcutRecyclerView.adapter = adapter
+            val shortcutRecyclerView = findViewById<RecyclerView>(R.id.shortcut_recycler_view)
+
+            shortcutRecyclerView.layoutManager =
+                LinearLayoutManager(
+                    this@MainActivity,
+                    LinearLayoutManager.HORIZONTAL,
+                    false)
+            shortcutAdapter =
+                ShortcutList(
+                    MyMediaPlayer.allShortcuts,
+                    this@MainActivity,
+                    this@MainActivity)
+
+            shortcutRecyclerView.adapter = shortcutAdapter
         }
     }
 
@@ -175,9 +188,15 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
                 MyMediaPlayer.allPlaylists.add(favoritePlaylist)
                 writePlaylistsToFile()
                 writeAllDeletedSong()
+                retrieveAllFoldersUsed()
+                writeAllFolders()
             }
 
             CoroutineScope(Dispatchers.IO).launch { fetchMusics() }
+        }
+
+        CoroutineScope(Dispatchers.Main).launch {
+            shortcutAdapter.notifyDataSetChanged()
         }
 
         val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
@@ -366,5 +385,19 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener  {
     override fun onPause() {
         super.onPause()
         unregisterReceiver(broadcastReceiver)
+    }
+
+    override fun onLongShortcutClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_shortcuts)
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.delete_shortcut)?.setOnClickListener {
+            MyMediaPlayer.allShortcuts.shortcutsList.remove(shortcutAdapter.shortcuts.shortcutsList[position])
+            shortcutAdapter.notifyItemRemoved(position)
+            CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
     }
 }

@@ -543,6 +543,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             bottomSheetDialog.dismiss()
         }
 
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            addSelectedShortcut(adapter.musics[position])
+            bottomSheetDialog.dismiss()
+        }
+
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
             val builder = AlertDialog.Builder(this, R.style.AlertDialogTheme)
             builder.setTitle(getString(R.string.remove_from_played_list))
@@ -611,6 +616,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_a_playlist)?.setOnClickListener {
             bottomSheetAddTo(MyMediaPlayer.currentIndex, this, adapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            addSelectedShortcut(currentSong)
             bottomSheetDialog.dismiss()
         }
 

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_sheet"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary_color"
+    android:paddingTop="30dp"
+    android:paddingBottom="30dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp">
+
+    <LinearLayout
+        android:id="@+id/delete_shortcut"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/delete_img"
+            android:src="@drawable/ic_baseline_delete_24"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:contentDescription="@string/remove" />
+
+        <TextView
+            android:id="@+id/delete_text"
+            android:layout_marginStart="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:textColor="@color/text_color"
+            android:text="@string/delete_shortcut"/>
+    </LinearLayout>
+</LinearLayout>

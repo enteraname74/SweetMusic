@@ -32,6 +32,7 @@ class ModifyMusicInfoActivity : Tools() {
     private var positionInAlbum = -1
     private var artistPosition = -1
     private var positionInArtist = -1
+    private var positionInShortcut = -1
 
     private lateinit var path : String
 
@@ -73,6 +74,8 @@ class ModifyMusicInfoActivity : Tools() {
                 }
             }
         }
+
+        positionInShortcut = MyMediaPlayer.allShortcuts.positionInList(musicFile)
 
         // On récupère les différents champs modifiable :
         albumCoverField = findViewById(R.id.album_image)
@@ -126,7 +129,6 @@ class ModifyMusicInfoActivity : Tools() {
     private fun onValidateButtonClick(){
         val returnIntent = Intent()
         // On modifie les éléments du fichier :
-
         // On enlève les potentiels espaces en trop :
         musicFile.name = musicNameField.text.toString().trim()
         musicFile.album = albumNameField.text.toString().trim()
@@ -165,7 +167,6 @@ class ModifyMusicInfoActivity : Tools() {
         MyMediaPlayer.allPlaylists = playlists
 
         // Modifions les infos de la musique dans nos deux autres playlists :
-        Log.d("index", MyMediaPlayer.currentPlaylist.indexOf(musicFile).toString())
         if (MyMediaPlayer.currentPlaylist.size != 0 && indexCurrentPlaylist != -1){
             MyMediaPlayer.currentPlaylist[indexCurrentPlaylist] = musicFile
         }
@@ -207,6 +208,11 @@ class ModifyMusicInfoActivity : Tools() {
             if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path == musicFile.path) {
                 updateMusicNotification(!mediaPlayer.isPlaying)
             }
+        }
+
+        if (positionInShortcut != -1) {
+            MyMediaPlayer.allShortcuts.shortcutsList[positionInShortcut] = musicFile
+            CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
         }
 
         returnIntent.putExtra("modifiedSongPath", path)

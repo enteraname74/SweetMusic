@@ -20,7 +20,11 @@ class Albums (
     private val mOnAlbumListener : OnAlbumsListener
 ) : RecyclerView.Adapter<Albums.AlbumsViewHolder>(), Serializable {
 
-    class AlbumsViewHolder(itemView : View, private var onAlbumsListener : OnAlbumsListener) : RecyclerView.ViewHolder(itemView), View.OnClickListener,Serializable {
+    class AlbumsViewHolder(itemView : View, private var onAlbumsListener : OnAlbumsListener) :
+        RecyclerView.ViewHolder(itemView),
+        View.OnClickListener,
+        View.OnLongClickListener,
+        Serializable {
 
         var albumName : TextView
         var albumCover : ShapeableImageView
@@ -34,10 +38,16 @@ class Albums (
             artistName = itemView.findViewById(R.id.artist_name)
 
             itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
         }
 
         override fun onClick(v: View?) {
             this.onAlbumsListener.onAlbumClick(bindingAdapterPosition)
+        }
+
+        override fun onLongClick(p0: View?): Boolean {
+            this.onAlbumsListener.onAlbumLongClick(bindingAdapterPosition)
+            return true
         }
     }
 
@@ -79,5 +89,7 @@ class Albums (
 
     interface OnAlbumsListener {
         fun onAlbumClick(position : Int)
+
+        fun onAlbumLongClick(position : Int)
     }
 }

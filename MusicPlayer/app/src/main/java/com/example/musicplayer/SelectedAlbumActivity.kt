@@ -74,7 +74,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         albumPosition = intent.getSerializableExtra("POSITION") as Int
 
         findViewById<ImageView>(R.id.add_songs).visibility = View.GONE
-        CoroutineScope(Dispatchers.Main).launch { findViewById<ImageView>(R.id.modify_playlist).setOnClickListener { modifyAlbum() } }
 
         album = MyMediaPlayer.allAlbums[albumPosition]
         musics = album.albumList
@@ -90,11 +89,9 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
         val albumName = findViewById<TextView>(R.id.playlist_name)
         albumName?.text = album.albumName
 
-        val quitActivity = findViewById<ImageView>(R.id.quit_activity)
-        quitActivity.setOnClickListener{ finish() }
-
-        val shuffleButton = findViewById<ImageView>(R.id.shuffle)
-        shuffleButton.setOnClickListener { playRandom(musics, this, album.albumName+album.artist) }
+        findViewById<ImageView>(R.id.quit_activity).setOnClickListener{ finish() }
+        findViewById<ImageView>(R.id.shuffle).setOnClickListener { playRandom(musics, this, album.albumName+album.artist) }
+        findViewById<ImageView>(R.id.modify_playlist).setOnClickListener { modifyAlbum() }
 
         mediaPlayer.setOnCompletionListener { playNextSong(adapter) }
 
@@ -184,7 +181,6 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
     override fun onLongMusicClick(position: Int) {
         val bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
-        bottomSheetDialog.show()
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)?.setBackgroundColor(newPrimaryColor)
         bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
@@ -206,6 +202,11 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             bottomSheetDialog.dismiss()
         }
 
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            addSelectedShortcut(adapter.musics[position])
+            bottomSheetDialog.dismiss()
+        }
+
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
             bottomSheetRemoveFromApp(adapter,position, sheetBehavior, this)
             bottomSheetDialog.dismiss()
@@ -220,6 +221,8 @@ class SelectedAlbumActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQ
             bottomSheetPlayNext(adapter,position)
             bottomSheetDialog.dismiss()
         }
+
+        bottomSheetDialog.show()
     }
 
     private var resultModifyMusic = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}

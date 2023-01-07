@@ -1,8 +1,6 @@
 package com.example.musicplayer.fragments
 
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -10,8 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.SearchView
-import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicplayer.*
@@ -19,20 +17,16 @@ import com.example.musicplayer.classes.Album
 import com.example.musicplayer.adapters.Albums
 import com.example.musicplayer.Music
 import com.example.musicplayer.classes.MyMediaPlayer
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.IOException
-
-private const val SHORTCUT_PARA = "shortcut"
 
 class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTextListener {
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Albums
     private lateinit var searchView : SearchView
     private val mediaPlayer = MyMediaPlayer.getInstance
-
-    private var shortcutUsage: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -89,25 +83,39 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
                 adapter.notifyDataSetChanged()
             }
         }
-        if (shortcutUsage == false) {
-            mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
-        }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
     }
 
     override fun onAlbumClick(position: Int) {
-        if (shortcutUsage == false) {
-            val intent = Intent(context, SelectedAlbumActivity::class.java)
-            val album = adapter.allAlbums[position]
-            val globalPosition = MyMediaPlayer.allAlbums.indexOf(album)
+        val intent = Intent(context, SelectedAlbumActivity::class.java)
+        val album = adapter.allAlbums[position]
+        val globalPosition = MyMediaPlayer.allAlbums.indexOf(album)
 
-            intent.putExtra("POSITION", globalPosition)
+        intent.putExtra("POSITION", globalPosition)
 
-            startActivity(intent)
-        } else {
-            (activity as CreateShortcutActivity).addSelectedShortcut(adapter.allAlbums[position])
+        startActivity(intent)
+    }
+
+    override fun onAlbumLongClick(position: Int) {
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_album_menu)
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            (activity as MainActivity).addSelectedShortcut(adapter.allAlbums[position], (activity as MainActivity).shortcutAdapter)
+            bottomSheetDialog.dismiss()
         }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_album)?.setOnClickListener{
+            val intent = Intent(requireContext(),ModifyAlbumInfoActivity::class.java)
+            val globalPosition = MyMediaPlayer.allAlbums.indexOf(adapter.allAlbums[position])
+            intent.putExtra("POS",globalPosition)
+            startActivity(intent)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.show()
     }
 
     override fun onQueryTextSubmit(p0: String?): Boolean {
@@ -143,15 +151,5 @@ class AlbumsFragment : Fragment(), Albums.OnAlbumsListener, SearchView.OnQueryTe
             Log.d("ERROR",error.toString())
         }
         return true
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(isForShortcut: Boolean) =
-            AlbumsFragment().apply {
-                arguments = Bundle().apply {
-                    putBoolean(SHORTCUT_PARA, isForShortcut)
-                }
-            }
     }
 }

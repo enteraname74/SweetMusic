@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.util.Size
 import android.widget.Button
 import android.widget.EditText
@@ -104,6 +105,9 @@ class ModifyPlaylistInfoActivity : Tools() {
             val verification = allPlaylists.find { it.listName == playlistNameField.text.toString().trim() }
 
             if (verification == null || verification == playlist ) {
+
+                val positionInShortcut = MyMediaPlayer.allShortcuts.positionInList(playlist)
+
                 if (playlistCoverHasChanged) {
                     playlist.listName = playlistNameField.text.toString()
                     val drawable = playlistCoverField.drawable
@@ -113,6 +117,15 @@ class ModifyPlaylistInfoActivity : Tools() {
                     val byteArray = bitmapToByteArray(bitmap)
 
                     playlist.playlistCover = byteArray
+                    if (positionInShortcut != -1) {
+                        (MyMediaPlayer.allShortcuts.shortcutsList[positionInShortcut] as Playlist).playlistCover = byteArray
+                    }
+                }
+
+                playlist.listName = playlistNameField.text.toString().trim()
+                if (positionInShortcut != -1) {
+                    (MyMediaPlayer.allShortcuts.shortcutsList[positionInShortcut] as Playlist).listName = playlistNameField.text.toString().trim()
+                    CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
                 }
 
                 // Mettons à jour nos playlists :

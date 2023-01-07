@@ -18,9 +18,13 @@ import java.io.Serializable
 class ShortcutList(
     var shortcuts: Shortcuts,
     private val context: Context,
+    private val onShortcutListener : ShortcutList.OnShortcutListener,
 ) : RecyclerView.Adapter<ShortcutList.ShortcutListViewHolder>(){
 
-    class ShortcutListViewHolder(itemView : View, val context: Context, val shortcuts: Shortcuts) : RecyclerView.ViewHolder(itemView), View.OnClickListener,
+    class ShortcutListViewHolder(itemView : View, val context: Context, val shortcuts: Shortcuts, private val onShortcutListener: OnShortcutListener) :
+        RecyclerView.ViewHolder(itemView),
+        View.OnClickListener,
+        View.OnLongClickListener,
         Serializable {
 
         var cover : ImageView
@@ -31,10 +35,16 @@ class ShortcutList(
             cover = itemView.findViewById(R.id.cover)
             name = itemView.findViewById(R.id.name)
             itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
         }
 
         override fun onClick(v: View?) {
             context.startActivity(shortcuts.getIntentFromElement(context, shortcuts.shortcutsList[bindingAdapterPosition]))
+        }
+
+        override fun onLongClick(p0: View?): Boolean {
+            this.onShortcutListener.onLongShortcutClick(bindingAdapterPosition)
+            return true
         }
     }
 
@@ -46,7 +56,8 @@ class ShortcutList(
                 false
             ),
             context,
-            shortcuts
+            shortcuts,
+            onShortcutListener
         )
     }
 
@@ -71,5 +82,9 @@ class ShortcutList(
 
     override fun getItemCount(): Int {
         return shortcuts.shortcutsList.size
+    }
+
+    interface OnShortcutListener {
+        fun onLongShortcutClick(position: Int)
     }
 }

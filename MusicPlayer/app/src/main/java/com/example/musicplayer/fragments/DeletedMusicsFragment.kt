@@ -80,9 +80,6 @@ class DeletedMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_find_new_songs)
         bottomSheetDialog.findViewById<LinearLayout>(R.id.delete_music)?.visibility = View.GONE
 
-        bottomSheetDialog.findViewById<ImageView>(R.id.retrieve_img)?.setImageResource(R.drawable.ic_baseline_add_24)
-        bottomSheetDialog.findViewById<TextView>(R.id.retrieve_text)?.text = getString(R.string.retrieve_music)
-
         bottomSheetDialog.findViewById<LinearLayout>(R.id.retrieve_music)?.setOnClickListener {
             val musicToRetrieve = adapter.musics[position]
             adapter.musics.removeAt(position)

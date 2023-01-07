@@ -220,9 +220,6 @@ class FoundMusicsFragment : Fragment(), NewMusicsList.OnMusicListener {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_find_new_songs)
 
-        bottomSheetDialog.findViewById<ImageView>(R.id.delete_img)?.setImageResource(R.drawable.ic_baseline_delete_24)
-        bottomSheetDialog.findViewById<TextView>(R.id.delete_text)?.text = getString(R.string.delete_music)
-
         bottomSheetDialog.findViewById<LinearLayout>(R.id.delete_music)?.setOnClickListener {
             val builder = AlertDialog.Builder(requireContext(), R.style.AlertDialogTheme)
             builder.setTitle(getString(R.string.delete_music))

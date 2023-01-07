@@ -21,7 +21,10 @@ class Artists (
 ) : RecyclerView.Adapter<Artists.ArtistsViewHolder>(), Serializable {
 
     class ArtistsViewHolder(itemView: View, private var onArtistsListener: OnArtistsListener) :
-        RecyclerView.ViewHolder(itemView), View.OnClickListener, Serializable {
+        RecyclerView.ViewHolder(itemView),
+        View.OnClickListener,
+        View.OnLongClickListener,
+        Serializable {
 
         var artistName: TextView
         var artistsCover: ShapeableImageView
@@ -35,10 +38,16 @@ class Artists (
             songsNumber = itemView.findViewById(R.id.number_of_songs)
 
             itemView.setOnClickListener(this)
+            itemView.setOnLongClickListener(this)
         }
 
         override fun onClick(v: View?) {
             this.onArtistsListener.onArtistClick(bindingAdapterPosition)
+        }
+
+        override fun onLongClick(p0: View?): Boolean {
+            this.onArtistsListener.onArtistLongClick(bindingAdapterPosition)
+            return true
         }
     }
 
@@ -57,7 +66,7 @@ class Artists (
 
 
         holder.artistName.text = currentArtist.artistName
-        val numberText = if (currentArtist.musicList.size > 1) {
+        val numberText = if (currentArtist.musicList.size != 1) {
             context.getString(R.string.x_musics, currentArtist.musicList.size)
         } else {
             context.getString(R.string.one_music)
@@ -85,5 +94,7 @@ class Artists (
 
     interface OnArtistsListener {
         fun onArtistClick(position: Int)
+
+        fun onArtistLongClick(position: Int)
     }
 }

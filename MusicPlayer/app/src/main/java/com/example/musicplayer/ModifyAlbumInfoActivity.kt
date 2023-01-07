@@ -38,7 +38,7 @@ class ModifyAlbumInfoActivity : Tools() {
         playlistCoverField = findViewById(R.id.playlist_cover)
         playlistNameField = findViewById(R.id.edit_playlist_name)
 
-        findViewById<TextView>(R.id.title_activity).text = getString(R.string.modify_album_informations)
+        findViewById<TextView>(R.id.title_activity).text = getString(R.string.modify_album)
         findViewById<TextView>(R.id.playlist_name).text = getString(R.string.name_of_the_album)
 
         if (selectedAlbum.albumCover != null){

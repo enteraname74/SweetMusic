@@ -232,6 +232,11 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             bottomSheetDialog.dismiss()
         }
 
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            addSelectedShortcut(adapter.musics[position])
+            bottomSheetDialog.dismiss()
+        }
+
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
             bottomSheetRemoveFromPlaylist(adapter, position, playlistPosition, playlist, this)
             bottomSheetDialog.dismiss()

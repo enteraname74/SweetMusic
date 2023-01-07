@@ -2,11 +2,8 @@ package com.example.musicplayer.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -23,20 +20,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.ObjectOutputStream
-
-private const val SHORTCUT_PARA = "shortcut"
 
 class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
-    private val savePlaylistsFile = "allPlaylists.playlists"
     private lateinit var menuRecyclerView : RecyclerView
     private lateinit var adapter : Playlists
     private val mediaPlayer = MyMediaPlayer.getInstance
-
-    private var shortcutUsage: Boolean? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,12 +38,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         )
 
         // Mise en place du bouton de création de playlist :
-        val addPlaylist = view.findViewById<ImageView>(R.id.add_playlist)
-        if (shortcutUsage == false) {
-            addPlaylist?.setOnClickListener{ addPlaylist() }
-        } else {
-            addPlaylist.visibility = View.GONE
-        }
+        view.findViewById<ImageView>(R.id.add_playlist)?.setOnClickListener{ addPlaylist() }
 
         menuRecyclerView = view.findViewById(R.id.menu_playlist_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -69,46 +52,44 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
 
         adapter.allPlaylists = MyMediaPlayer.allPlaylists
         adapter.notifyDataSetChanged()
-        if (shortcutUsage == false) {
-            mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
-            (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
-        }
+        mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }
+        (activity?.findViewById(R.id.previous) as ImageView).setOnClickListener { (activity as MainActivity).playPreviousSong() }
     }
 
     override fun onPlaylistClick(position: Int) {
-        if (shortcutUsage == false) {
-            val intent = Intent(context, SelectedPlaylistActivity::class.java)
-            intent.putExtra("POSITION", position)
-            startActivity(intent)
-        } else {
-            (activity as CreateShortcutActivity).addSelectedShortcut(adapter.allPlaylists[position])
-        }
+        val intent = Intent(context, SelectedPlaylistActivity::class.java)
+        intent.putExtra("POSITION", position)
+        startActivity(intent)
     }
 
     override fun onPlayListLongClick(position: Int) {
-        if (shortcutUsage == false) {
-            val bottomSheetDialog = BottomSheetDialog(requireContext())
-            bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
-            bottomSheetDialog.show()
+        val bottomSheetDialog = BottomSheetDialog(requireContext())
+        bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_playlist_menu)
+        bottomSheetDialog.show()
 
-            if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
-                bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.visibility = View.GONE
-            } else {
-                bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-                    (activity as MainActivity).bottomSheetRemovePlaylist(
-                        position,
-                        adapter,
-                        requireContext()
-                    )
-                    bottomSheetDialog.dismiss()
-                }
-            }
-
-            bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
-                (activity as MainActivity).bottomSheetModifyPlaylist(requireContext(), position)
+        if (MyMediaPlayer.allPlaylists[position].isFavoriteList) {
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.visibility = View.GONE
+        } else {
+            bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
+                (activity as MainActivity).bottomSheetRemovePlaylist(
+                    position,
+                    adapter,
+                    requireContext(),
+                    (activity as MainActivity).shortcutAdapter
+                )
                 bottomSheetDialog.dismiss()
             }
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.add_to_shortcuts)?.setOnClickListener {
+            (activity as MainActivity).addSelectedShortcut(adapter.allPlaylists[position], (activity as MainActivity).shortcutAdapter)
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_playlist)?.setOnClickListener {
+            (activity as MainActivity).bottomSheetModifyPlaylist(requireContext(), position)
+            bottomSheetDialog.dismiss()
         }
     }
 
@@ -150,15 +131,5 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         }
 
         builder.show()
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(isForShortcut: Boolean) =
-            PlaylistsFragment().apply {
-                arguments = Bundle().apply {
-                    putBoolean(SHORTCUT_PARA, isForShortcut)
-                }
-            }
     }
 }

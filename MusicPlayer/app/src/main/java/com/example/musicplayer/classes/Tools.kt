@@ -18,6 +18,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
 import com.example.musicplayer.adapters.MusicList
 import com.example.musicplayer.adapters.Playlists
+import com.example.musicplayer.adapters.ShortcutList
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,8 +29,11 @@ import java.io.*
 open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     val saveAllMusicsFile = "allMusics.musics"
     val savePlaylistsFile = "allPlaylists.playlists"
-    val saveAllDeletedFiles = "allDeleted.musics"
-    val saveAllFolders = "allFolders.folders"
+    private val saveAllDeletedFiles = "allDeleted.musics"
+    private val saveAllFolders = "allFolders.folders"
+    val saveAllShortcuts = "allShortcuts.shortcuts"
+    val SHARED_PREF = "SHARED_PREF"
+    val IS_SHORTCUT_ENABLE = "IS_SHORTCUTS_ENABLE"
 
     var mediaPlayer = MyMediaPlayer.getInstance
 
@@ -529,6 +533,49 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
+    open fun readAllShortcutsFromFile() {
+        val path = applicationContext.filesDir
+        var content = Shortcuts(ArrayList())
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, saveAllShortcuts)))
+            content = ois.readObject() as Shortcuts
+            ois.close()
+        } catch (error : IOException){
+            Log.e("Error read shorcuts",error.toString())
+        }
+        MyMediaPlayer.allShortcuts = content
+    }
+
+    open fun writeAllShortcuts(){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveAllShortcuts)))
+            oos.writeObject(MyMediaPlayer.allShortcuts)
+            oos.close()
+        } catch (error : IOException){
+            Log.e("Error write shortcuts",error.toString())
+        }
+    }
+
+    fun addSelectedShortcut(element : Any, adapter : ShortcutList) {
+        if (MyMediaPlayer.allShortcuts.positionInList(element) == -1) {
+            MyMediaPlayer.allShortcuts.shortcutsList.add(element)
+            adapter.notifyDataSetChanged()
+            CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
+        } else {
+            Toast.makeText(this, getString(R.string.already_a_shortcut), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun addSelectedShortcut(element : Any) {
+        if (MyMediaPlayer.allShortcuts.positionInList(element) == -1) {
+            MyMediaPlayer.allShortcuts.shortcutsList.add(element)
+            CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
+        } else {
+            Toast.makeText(this, getString(R.string.already_a_shortcut), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     /****************************** OTHERS : **********************************/
 
     fun openNavigationMenu(drawerLayout : DrawerLayout){
@@ -545,13 +592,24 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         startActivity(intent)
     }
 
-    fun bottomSheetRemoveFromApp(adapter : MusicList, position : Int, sheetBehavior : BottomSheetBehavior<LinearLayout>, context : Context) {
+    fun bottomSheetRemoveFromApp(adapter : MusicList, position : Int, sheetBehavior : BottomSheetBehavior<LinearLayout>, context : Context, shortcutAdapter: ShortcutList? = null) {
 
         val builder = AlertDialog.Builder(context, R.style.AlertDialogTheme)
         builder.setTitle(getString(R.string.delete_music))
 
         builder.setPositiveButton(getString(R.string.ok)) { _, _ ->
             val musicToRemove = adapter.musics[position]
+
+            // Enlevons la musique des shortcuts si elle y est :
+            val positionInShortcuts = MyMediaPlayer.allShortcuts.positionInList(musicToRemove)
+            if (positionInShortcuts != -1) {
+                MyMediaPlayer.allShortcuts.shortcutsList.remove(musicToRemove)
+                shortcutAdapter?.notifyItemRemoved(positionInShortcuts)
+                CoroutineScope(Dispatchers.IO).launch {
+                    writeAllShortcuts()
+                }
+            }
+
             adapter.musics.removeAt(position)
             adapter.notifyItemRemoved(position)
             MyMediaPlayer.allMusics.remove(musicToRemove)
@@ -740,7 +798,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    fun bottomSheetRemovePlaylist(position: Int, adapter : Playlists, context : Context) {
+    fun bottomSheetRemovePlaylist(position: Int, adapter : Playlists, context : Context, shortcutAdapter : ShortcutList) {
         val builder = AlertDialog.Builder(context, R.style.AlertDialogTheme)
         builder.setTitle(getString(R.string.delete_playlist))
 
@@ -752,6 +810,13 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
+                val positionInShortcuts = MyMediaPlayer.allShortcuts.positionInList(MyMediaPlayer.allPlaylists[position])
+                if (positionInShortcuts != -1) {
+                    MyMediaPlayer.allShortcuts.shortcutsList.remove(MyMediaPlayer.allPlaylists[position])
+                    shortcutAdapter.notifyItemRemoved(positionInShortcuts)
+                    writeAllShortcuts()
+                }
+
                 MyMediaPlayer.allPlaylists.removeAt(position)
                 adapter.allPlaylists = MyMediaPlayer.allPlaylists
                 adapter.notifyItemRemoved(position)
@@ -809,6 +874,12 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                     MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
                 }
             }
+        }
+
+        // Enlevons la musique des shortcuts si elle y est :
+        if (MyMediaPlayer.allShortcuts.positionInList(musicToRemove) != -1) {
+            MyMediaPlayer.allShortcuts.shortcutsList.remove(musicToRemove)
+            writeAllShortcuts()
         }
     }
 }
