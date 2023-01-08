@@ -10,8 +10,9 @@ You can also create playlists and manage them.
 Songs can be modified, added to the played queue or deleted from the app.
 Modifying a song without setting an album cover will let the app search for an album cover used in the app that matches the correct album.
 Modifying an album will modify all the songs inside it.
+You can create shortcuts in the main menu to rapidly access musics, playlists, albums or artists.
 
-<img title="" src="Screenshots/Screenshot_20230101-223825.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230108-004433.png" alt="" data-align="center" width="293">
 <img title="" src="Screenshots/Screenshot_20230101-224217.png" alt="" data-align="center" width="293">
 
 You can manage the played queue directly in the music player page :
@@ -24,7 +25,7 @@ Finally, multiple search bars let you find what you want in the app.
 ### Settings :
 The settings of this app let you manage the folders used by the application.
 
-<img title="" src="Screenshots/Screenshot_20230101-224144.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230108-004453.png" alt="" data-align="center" width="293">
 
 ### Saving your data :
 All your music data (musics and playlists) can be retrieved in your Download folder.
@@ -38,11 +39,11 @@ Principal Color theme depending of your device theme :
 
 Light theme :
 
-<img title="" src="Screenshots/Screenshot_20230101-223513.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230108-004522.png" alt="" data-align="center" width="293">
 
 Dark theme :
 
-<img title="" src="Screenshots/Screenshot_20230101-223449.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230108-004400.png" alt="" data-align="center" width="293">
 
 The music player theme depends of the color of the album art of the played music :
 
@@ -51,5 +52,5 @@ The music player theme depends of the color of the album art of the played music
 
 Finally, the playlists, albums and artists color theme depend of the cover :
 
-<img title="" src="Screenshots/Screenshot_20230101-223631.png" alt="" data-align="center" width="293">
-<img title="" src="Screenshots/Screenshot_20230101-225900.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230108-004553.png" alt="" data-align="center" width="293">
+<img title="" src="Screenshots/Screenshot_20230108-005945.png" alt="" data-align="center" width="293">
