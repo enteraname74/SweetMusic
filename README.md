@@ -1,6 +1,6 @@
 # Sweet Music (previously named MusicPlayer)
 
-A simple offline music player.
+A simple offline music player for Android 10 and above.
 
 ## Functionalities :
 ### Music related functionalities :
