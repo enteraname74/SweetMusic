@@ -32,14 +32,12 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     private val saveAllDeletedFiles = "allDeleted.musics"
     private val saveAllFolders = "allFolders.folders"
     val saveAllShortcuts = "allShortcuts.shortcuts"
-    val SHARED_PREF = "SHARED_PREF"
-    val IS_SHORTCUT_ENABLE = "IS_SHORTCUTS_ENABLE"
 
     var mediaPlayer = MyMediaPlayer.getInstance
 
     /************************ USES THE MEDIAPLAYER : ***************************/
 
-    fun verifiyAllMusics(adapter : MusicList) {
+    fun verifyAllMusics(adapter : MusicList) {
         var count = 0
 
         for (music in MyMediaPlayer.allMusics) {
@@ -96,7 +94,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             Log.d("delete songs","")
             CoroutineScope(Dispatchers.IO).launch {
                 writeAllDeletedSong()
-                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writeAllMusics()
                 writePlaylistsToFile()
             }
 
@@ -212,8 +210,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         startActivity(intent)
     }
 
-    open fun playNextSong(adapter : MusicList){
-        Log.d("TOOLS", "PLAY NEXT SONG ADAPTER")
+    open fun playNextSong(adapter : MusicList? = null){
         if(MyMediaPlayer.currentPlaylist.size != 0) {
             if (requestFocus()) {
                 if (MyMediaPlayer.currentIndex == (MyMediaPlayer.currentPlaylist.size) - 1) {
@@ -221,26 +218,13 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                 } else {
                     MyMediaPlayer.currentIndex += 1
                 }
-                adapter.notifyDataSetChanged()
+                adapter?.notifyDataSetChanged()
                 playMusic()
             }
         }
     }
 
-    open fun playNextSong(){
-        if(MyMediaPlayer.currentPlaylist.size != 0) {
-            if (requestFocus()) {
-                if (MyMediaPlayer.currentIndex == (MyMediaPlayer.currentPlaylist.size) - 1) {
-                    MyMediaPlayer.currentIndex = 0
-                } else {
-                    MyMediaPlayer.currentIndex += 1
-                }
-                playMusic()
-            }
-        }
-    }
-
-    open fun playPreviousSong(adapter : MusicList){
+    open fun playPreviousSong(adapter : MusicList? = null){
         if(MyMediaPlayer.currentPlaylist.size != 0) {
             if (requestFocus()) {
                 if (MyMediaPlayer.currentIndex == 0) {
@@ -248,20 +232,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                 } else {
                     MyMediaPlayer.currentIndex -= 1
                 }
-                adapter.notifyDataSetChanged()
-                playMusic()
-            }
-        }
-    }
-
-    open fun playPreviousSong(){
-        if(MyMediaPlayer.currentPlaylist.size != 0) {
-            if (requestFocus()) {
-                if (MyMediaPlayer.currentIndex == 0) {
-                    MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size) - 1
-                } else {
-                    MyMediaPlayer.currentIndex -= 1
-                }
+                adapter?.notifyDataSetChanged()
                 playMusic()
             }
         }
@@ -302,6 +273,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         MyMediaPlayer.currentPlaylist = ArrayList<Music>()
         MyMediaPlayer.initialPlaylist = ArrayList<Music>()
         PlaybackService.audioManager.abandonAudioFocusRequest(audioFocusRequest)
+
         val intentForNotification = Intent("BROADCAST_NOTIFICATION")
         intentForNotification.putExtra("STOP_RECEIVE", true)
         applicationContext.sendBroadcast(intentForNotification)
@@ -395,18 +367,6 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         Toast.makeText(applicationContext, getString(R.string.data_retrieved_in_download_folder), Toast.LENGTH_LONG).show()
     }
 
-    fun writeAllMusicsToFile(filename : String, content : ArrayList<Music>){
-        MyMediaPlayer.allMusics = content
-        val path = applicationContext.filesDir
-        try {
-            val oos = ObjectOutputStream(FileOutputStream(File(path, filename)))
-            oos.writeObject(content)
-            oos.close()
-        } catch (error : IOException){
-            Log.e("Error write musics",error.toString())
-        }
-    }
-
     fun writeAllMusics() {
         val path = applicationContext.filesDir
         try {
@@ -461,11 +421,6 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         val byteStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, byteStream)
         return byteStream.toByteArray()
-    }
-
-    fun writeAllAsync(musics : ArrayList<Music>, playlists : ArrayList<Playlist>){
-        writeAllMusicsToFile(saveAllMusicsFile, musics)
-        writePlaylistsToFile()
     }
 
     fun readPlaylistsAsync(){
@@ -652,7 +607,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             CoroutineScope(Dispatchers.IO).launch {
                 MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
                 writeAllDeletedSong()
-                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writeAllMusics()
                 writePlaylistsToFile()
             }
 
@@ -683,36 +638,24 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
             // Si on enlève une musique de la playlist des favoris, on enlève son statut de favoris :
             if (playlist.isFavoriteList) {
-                val globalPosition = MyMediaPlayer.allMusics.indexOf(musicToRemove)
-                val positionInInitialList = MyMediaPlayer.initialPlaylist.indexOf(musicToRemove)
-                val positionInCurrentList = MyMediaPlayer.currentPlaylist.indexOf(musicToRemove)
+                MyMediaPlayer.allMusics.find { it.path == musicToRemove.path }?.favorite = false
+                MyMediaPlayer.initialPlaylist.find { it.path == musicToRemove.path }?.favorite = false
+                MyMediaPlayer.currentPlaylist.find { it.path == musicToRemove.path }?.favorite = false
 
-                if (globalPosition != -1) {
-                    MyMediaPlayer.allMusics[globalPosition].favorite = false
+                val shortcutPos = MyMediaPlayer.allShortcuts.positionInList(musicToRemove)
+                if (shortcutPos != -1) {
+                    (MyMediaPlayer.allShortcuts.shortcutsList[shortcutPos] as Music).favorite = false
+                    CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
                 }
 
-                if (positionInInitialList != -1) {
-                    MyMediaPlayer.initialPlaylist[positionInInitialList].favorite = false
-                }
-
-                if (positionInCurrentList != -1) {
-                    MyMediaPlayer.currentPlaylist[positionInCurrentList].favorite = false
-                }
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    launch { writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics) }
-                }
-
-                for (playlist in MyMediaPlayer.allPlaylists) {
-                    if (playlist.musicList.contains(musicToRemove)) {
-                        val position = playlist.musicList.indexOf(musicToRemove)
-                        playlist.musicList[position].favorite = false
-                    }
+                for (list in MyMediaPlayer.allPlaylists) {
+                    list.musicList.find { it.path == musicToRemove.path }?.favorite = false
                 }
             }
 
             CoroutineScope(Dispatchers.IO).launch {
-                launch { writePlaylistsToFile() }
+                writeAllMusics()
+                writePlaylistsToFile()
             }
 
             Toast.makeText(

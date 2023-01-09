@@ -399,7 +399,8 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
                 cursor.close()
                 MyMediaPlayer.allMusics
 
-                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writeAllMusics()
+                writePlaylistsToFile()
                 writeAllFolders()
 
                 withContext(Dispatchers.Main){

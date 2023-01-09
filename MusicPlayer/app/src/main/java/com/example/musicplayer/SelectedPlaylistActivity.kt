@@ -195,7 +195,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
             MyMediaPlayer.allPlaylists[playlistPosition].musicList = musics
             if (playlist.isFavoriteList) {
-                writeAllMusicsToFile(saveAllMusicsFile, MyMediaPlayer.allMusics)
+                writeAllMusics()
             }
             writePlaylistsToFile()
         }

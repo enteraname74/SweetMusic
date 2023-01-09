@@ -332,7 +332,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         adapter.notifyDataSetChanged()
     }
 
-    override fun playNextSong(){
+    private fun playNextSong(){
         Log.d("MP", "play next func")
         sameMusic = false
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
@@ -344,7 +344,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         setResourcesWithMusic()
     }
 
-    override fun playPreviousSong(){
+    private fun playPreviousSong(){
         sameMusic = false
         if(MyMediaPlayer.currentIndex==0){
             MyMediaPlayer.currentIndex = (MyMediaPlayer.currentPlaylist.size)-1
@@ -357,7 +357,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     // Permet de savoir si une chanson est en favoris :
     private fun getFavoriteState(){
-        Log.d("favorite ?", currentSong.favorite.toString())
         if(currentSong.favorite){
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {
@@ -419,11 +418,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                         }
 
                         CoroutineScope(Dispatchers.IO).launch {
-                            writeAllAsync(allMusics,allPlaylists)
+                            writeAllMusics()
+                            writePlaylistsToFile()
                             changingFavouriteState = false
                         }
                     } catch (e: ArrayIndexOutOfBoundsException) {
-                        Log.d("MPA", "Erro changing state of fav")
                         Log.e("error", e.toString())
                     }
                 }

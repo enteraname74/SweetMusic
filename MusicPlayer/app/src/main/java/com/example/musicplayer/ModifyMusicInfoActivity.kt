@@ -197,10 +197,8 @@ class ModifyMusicInfoActivity : Tools() {
 
         CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
             launch {
-                writeAllAsync(
-                    MyMediaPlayer.allMusics,
-                    MyMediaPlayer.allPlaylists
-                )
+                writeAllMusics()
+                writePlaylistsToFile()
             }
         }
         // Si une musique se joue, on vérifie si celle jouée actuellement est celle que l'on modifie :

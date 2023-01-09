@@ -82,7 +82,7 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             (activity as MainActivity).playNextSong(adapter)
         }
 
-        CoroutineScope(Dispatchers.Main).launch { (activity as MainActivity).verifiyAllMusics(adapter) }
+        CoroutineScope(Dispatchers.Main).launch { (activity as MainActivity).verifyAllMusics(adapter) }
     }
 
     override fun onMusicClick(position: Int) {
