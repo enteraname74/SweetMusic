@@ -563,25 +563,18 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
             // Enlevons la musique de nos playlists :
             for(playlist in MyMediaPlayer.allPlaylists) {
-                if (playlist.musicList.contains(musicToRemove)){
-                    playlist.musicList.remove(musicToRemove)
-                }
+                playlist.musicList.removeIf { it.path == musicToRemove.path }
             }
 
             // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
             if (MyMediaPlayer.currentIndex != -1) {
                 val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-                if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
-                    MyMediaPlayer.initialPlaylist.remove(musicToRemove)
-                }
+                MyMediaPlayer.initialPlaylist.removeIf { it.path == musicToRemove.path }
                 if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
                     // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
-                    Log.d("CONTAINS","")
                     if (musicToRemove.path == currentSong.path) {
-                        Log.d("SAME","")
                         // Si on peut passer à la musique suivante, on le fait :
                         if (MyMediaPlayer.currentPlaylist.size > 1) {
-                            Log.d("PLAY NEXT","")
                             playNextSong(adapter)
                             MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
                         } else {
@@ -591,10 +584,10 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                             }
                             stopMusic()
                         }
-                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                        MyMediaPlayer.currentPlaylist.removeIf { it.path == musicToRemove.path }
                     } else {
                         Log.d("JUST DELETE","")
-                        MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                        MyMediaPlayer.currentPlaylist.removeIf { it.path == musicToRemove.path }
                         // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
                         MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
                     }
@@ -779,32 +772,26 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
     fun definitelyRemoveMusicFromApp(musicToRemove : Music) {
         MyMediaPlayer.allMusics.remove(musicToRemove)
-
-        if (MyMediaPlayer.allDeletedMusics.contains(musicToRemove)){
-            MyMediaPlayer.allDeletedMusics.remove(musicToRemove)
-        }
+        MyMediaPlayer.allDeletedMusics.removeIf { it.path == musicToRemove.path }
 
         // Enlevons la musique de nos playlists :
         for(playlist in MyMediaPlayer.allPlaylists) {
-            if (playlist.musicList.contains(musicToRemove)){
-                playlist.musicList.remove(musicToRemove)
-            }
+            playlist.musicList.removeIf { it.path == musicToRemove.path }
         }
 
         // Enlevons la musique des playlists utilisées par le mediaplayer si possible :
         if (MyMediaPlayer.currentIndex != -1) {
             val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
-            if (MyMediaPlayer.initialPlaylist.contains(musicToRemove)) {
-                MyMediaPlayer.initialPlaylist.remove(musicToRemove)
-            }
-            if (MyMediaPlayer.currentPlaylist.contains(musicToRemove)) {
+            MyMediaPlayer.initialPlaylist.removeIf { it.path == musicToRemove.path }
+
+            if (MyMediaPlayer.currentPlaylist.find { it.path == musicToRemove.path } != null) {
                 // Si c'est la chanson qu'on joue actuellement, alors on passe si possible à la suivante :
                 Log.d("CONTAINS","")
                 if (musicToRemove.path == currentSong.path) {
                     stopMusic()
-                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    MyMediaPlayer.currentPlaylist.remove(currentSong)
                 } else {
-                    MyMediaPlayer.currentPlaylist.remove(musicToRemove)
+                    MyMediaPlayer.currentPlaylist.removeIf { it.path == musicToRemove.path }
                     // Vu qu'on change les positions des musiques, on récupère la position de la musique chargée dans le mediaplayer pour bien pouvoir jouer celle d'après / avant :
                     MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
                 }
