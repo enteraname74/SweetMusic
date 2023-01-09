@@ -95,8 +95,6 @@ class Shortcuts(
                 }
             }
         }
-
-        Log.d("SHORTCUTS", "POS $res")
         return res
     }
 }

@@ -93,7 +93,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             CoroutineScope(Dispatchers.IO).launch {
                 writeAllDeletedSong()
                 writeAllMusics()
-                writePlaylistsToFile()
+                writeAllPlaylists()
             }
 
             Toast.makeText(
@@ -164,6 +164,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     fun musicClicked(context : Context, adapter: MusicList, position: Int, listName : String) {
         mediaPlayer.setOnCompletionListener(null)
         var sameMusic = true
+        Log.d("TOOLS BEFORE CLICKED", "CURRENT SONG FAV STATE : "+adapter.musics[position].favorite)
 
         if (position != MyMediaPlayer.currentIndex) {
             sameMusic = false
@@ -181,13 +182,14 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         MyMediaPlayer.currentIndex = position
 
         updateMusicNotification(!mediaPlayer.isPlaying)
+        Log.d("TOOLS CLICKED", "CURRENT SONG FAV STATE : "+MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite)
         val intent = Intent(context, MusicPlayerActivity::class.java)
         intent.putExtra("SAME MUSIC", sameMusic)
         startActivity(intent)
     }
 
     fun onBottomMenuClick(position : Int, context : Context){
-        Log.d("MUSIC POSITION", position.toString())
+        Log.d("TOOLS", "BEFORE CLICK : "+MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite)
         var sameMusic = true
 
         if (position != MyMediaPlayer.currentIndex) {
@@ -204,6 +206,8 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
         intent.putExtra("SAME MUSIC", sameMusic)
         intent.putExtra("POSITION", position)
+        Log.d("TOOLS", "AFTER CLICK : "+MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite)
+
 
         startActivity(intent)
     }
@@ -260,6 +264,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     }
 
     fun stopMusic(){
+        Log.d("TOOLS", "STOP MUSIC CALLED")
         val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
             .setAudioAttributes(PlaybackService.audioAttributes)
             .setAcceptsDelayedFocusGain(true)
@@ -390,7 +395,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         return content
     }
 
-    fun writePlaylistsToFile(){
+    fun writeAllPlaylists(){
         val path = applicationContext.filesDir
         try {
             val oos = ObjectOutputStream(FileOutputStream(File(path, savePlaylistsFile)))
@@ -425,7 +430,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         MyMediaPlayer.allPlaylists = readAllPlaylistsFromFile(savePlaylistsFile)
         if (MyMediaPlayer.allPlaylists.size == 0){
             MyMediaPlayer.allPlaylists.add(Playlist("Favorites",ArrayList(),null,true))
-            writePlaylistsToFile()
+            writeAllPlaylists()
         }
     }
 
@@ -599,7 +604,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                 MyMediaPlayer.allDeletedMusics.add(0,musicToRemove)
                 writeAllDeletedSong()
                 writeAllMusics()
-                writePlaylistsToFile()
+                writeAllPlaylists()
             }
 
             Toast.makeText(
@@ -646,7 +651,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
             CoroutineScope(Dispatchers.IO).launch {
                 writeAllMusics()
-                writePlaylistsToFile()
+                writeAllPlaylists()
             }
 
             Toast.makeText(
@@ -747,7 +752,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
                 adapter.allPlaylists = MyMediaPlayer.allPlaylists
                 adapter.notifyItemRemoved(position)
 
-                writePlaylistsToFile()
+                writeAllPlaylists()
                 Toast.makeText(
                     applicationContext,
                     resources.getString(R.string.playlist_deleted),

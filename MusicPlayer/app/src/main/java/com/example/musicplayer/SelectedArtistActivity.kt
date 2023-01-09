@@ -57,6 +57,9 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
+            if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)){
+                adapter.notifyDataSetChanged()
+            }
             updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
         }
     }

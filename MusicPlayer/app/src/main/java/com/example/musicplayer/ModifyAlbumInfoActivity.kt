@@ -134,7 +134,7 @@ class ModifyAlbumInfoActivity : Tools() {
             }
 
             CoroutineScope(Dispatchers.IO).launch {
-                writePlaylistsToFile()
+                writeAllPlaylists()
                 writeAllMusics()
             }
 

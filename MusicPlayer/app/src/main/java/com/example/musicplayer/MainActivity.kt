@@ -188,7 +188,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
                 val favoritePlaylist = Playlist("Favorites",ArrayList(),null, true)
                 MyMediaPlayer.allPlaylists = ArrayList<Playlist>()
                 MyMediaPlayer.allPlaylists.add(favoritePlaylist)
-                writePlaylistsToFile()
+                writeAllPlaylists()
                 writeAllDeletedSong()
                 retrieveAllFoldersUsed()
                 writeAllFolders()
@@ -344,7 +344,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
                 MyMediaPlayer.allMusics
 
                 writeAllMusics()
-                writePlaylistsToFile()
+                writeAllPlaylists()
                 writeAllFolders()
 
                 withContext(Dispatchers.Main){

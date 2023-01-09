@@ -1,6 +1,5 @@
 package com.example.musicplayer
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -75,7 +74,7 @@ class AddToPlaylistActivity : Tools(), PlaylistsSelection.OnPlaylistListener {
         for (playlistPosition in selectedPlaylists.keys) {
             playlists[playlistPosition].musicList.add(selectedMusic)
         }
-        CoroutineScope(Dispatchers.IO).launch { writePlaylistsToFile() }
+        CoroutineScope(Dispatchers.IO).launch { writeAllPlaylists() }
         finish()
     }
 }

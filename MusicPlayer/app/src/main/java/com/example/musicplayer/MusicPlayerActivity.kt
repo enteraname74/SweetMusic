@@ -63,13 +63,21 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d("RECEIVE IN MP", intent.extras?.getBoolean("STOP").toString())
+
+            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+            if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)){
+                Log.d("MPA", "favorite changed"+currentSong.favorite)
+                if (currentSong.favorite) {
+                    favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
+                } else {
+                    favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
+                }
+            }
             titleTv.text = currentSong.name
             CoroutineScope(Dispatchers.Main).launch { setColor() }
         }
@@ -177,6 +185,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
         super.onResume()
         // Si on a plus de musiques dans la playlist à jouer, il faut quitter cette activité
         if(MyMediaPlayer.currentIndex == -1) {
+            Log.d("MUSIC PLAYER ACTIVITY", "CURRENT INDEX == -1")
             finish()
         } else {
             val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
@@ -307,14 +316,11 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     private fun setSorting(){
         when (MyMediaPlayer.iconIndex){
             0 -> {
-                Log.d("MPA", MyMediaPlayer.initialPlaylist.size.toString())
                 MyMediaPlayer.currentPlaylist = ArrayList(MyMediaPlayer.initialPlaylist.map { it.copy() })
-                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(currentSong)
+                MyMediaPlayer.currentIndex = MyMediaPlayer.currentPlaylist.indexOf(MyMediaPlayer.currentPlaylist.find { it.path == currentSong.path })
             }
             1 -> {
-                println("shuffle")
                 MyMediaPlayer.currentPlaylist.shuffle()
-                Log.d("MPA", MyMediaPlayer.initialPlaylist.size.toString())
                 MyMediaPlayer.currentPlaylist.remove(currentSong)
                 MyMediaPlayer.currentPlaylist.add(0,currentSong)
                 MyMediaPlayer.currentIndex = 0
@@ -322,7 +328,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             2 -> {
                 // On choisit la fonction de replay de la meme musique, on supprime d'abord toute la playlist actuelle :
                 MyMediaPlayer.currentPlaylist.clear()
-                Log.d("MPA", MyMediaPlayer.initialPlaylist.size.toString())
                 MyMediaPlayer.currentPlaylist.add(currentSong)
                 MyMediaPlayer.currentIndex = 0
             }
@@ -333,7 +338,6 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
     }
 
     private fun playNextSong(){
-        Log.d("MP", "play next func")
         sameMusic = false
         if(MyMediaPlayer.currentIndex==(MyMediaPlayer.currentPlaylist.size)-1){
             MyMediaPlayer.currentIndex = 0
@@ -357,7 +361,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
     // Permet de savoir si une chanson est en favoris :
     private fun getFavoriteState(){
-        if(currentSong.favorite){
+        if(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite){
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
         } else {
             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
@@ -377,7 +381,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                             currentSong.favorite = false
                             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_border_24)
                         } else {
-                            MyMediaPlayer.initialPlaylist[MyMediaPlayer.initialPlaylist.indexOf(currentSong)].favorite = false
+                            MyMediaPlayer.initialPlaylist.find { it.path == currentSong.path }?.favorite = true
                             MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite = true
                             currentSong.favorite = true
                             favoriteBtn.setImageResource(R.drawable.ic_baseline_favorite_24)
@@ -413,11 +417,26 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                             }
                         }
 
+                        // Mettons à jour les albums et les artistes :
+                        for (album in MyMediaPlayer.allAlbums) {
+                            if (album.albumList.find { it.path == currentSong.path } != null) {
+                                album.albumList.find { it.path == currentSong.path }?.favorite = currentSong.favorite
+                            }
+                        }
+
+                        for (artist in MyMediaPlayer.allArtists) {
+                            if (artist.musicList.find { it.path == currentSong.path } != null) {
+                                artist.musicList.find { it.path == currentSong.path }?.favorite = currentSong.favorite
+                            }
+                        }
+
                         CoroutineScope(Dispatchers.IO).launch {
                             writeAllMusics()
-                            writePlaylistsToFile()
+                            writeAllPlaylists()
                             changingFavouriteState = false
                         }
+
+                        updateMusicNotification(!mediaPlayer.isPlaying)
                     } catch (e: ArrayIndexOutOfBoundsException) {
                         Log.e("error", e.toString())
                     }

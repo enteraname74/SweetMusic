@@ -21,19 +21,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MusicPlayer"
         tools:targetApi="31">
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SelectFoldersActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AddToPlaylistActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ModifyAlbumInfoActivity"
-            android:exported="false" />
 
+        <service
+            android:name=".PlaybackService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".receivers.ChangeFavoriteStateNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
         <receiver
             android:name=".receivers.DeletedNotificationIntentReceiver"
             android:enabled="true"
@@ -58,11 +55,22 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name=".PlaybackService"
-            android:enabled="true"
-            android:exported="true" />
-
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".SelectFoldersActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".AddToPlaylistActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ModifyAlbumInfoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".FindNewSongsActivity"
             android:exported="false"
@@ -116,4 +124,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

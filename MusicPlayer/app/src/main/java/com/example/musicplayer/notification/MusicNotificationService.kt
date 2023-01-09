@@ -17,10 +17,7 @@ import com.example.musicplayer.MainActivity
 import com.example.musicplayer.PlaybackService
 import com.example.musicplayer.R
 import com.example.musicplayer.classes.MyMediaPlayer
-import com.example.musicplayer.receivers.DeletedNotificationIntentReceiver
-import com.example.musicplayer.receivers.NextMusicNotificationReceiver
-import com.example.musicplayer.receivers.PausePlayNotificationReceiver
-import com.example.musicplayer.receivers.PreviousMusicNotificationReceiver
+import com.example.musicplayer.receivers.*
 
 
 class MusicNotificationService(private val context : Context) {
@@ -30,25 +27,27 @@ class MusicNotificationService(private val context : Context) {
     private lateinit var previousMusicIntent : PendingIntent
     private lateinit var nextMusicIntent : PendingIntent
     private lateinit var deleteNotificationIntent : PendingIntent
+    private lateinit var changeFavoriteStateIntent : PendingIntent
+    private val mediaPlayer = MyMediaPlayer.getInstance
 
     private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            Log.d("RECEIVE IN NOTIFICATION",intent.extras?.getBoolean("STOP").toString())
-
             if (intent.extras?.getBoolean("STOP_RECEIVE") != null && intent.extras?.getBoolean("STOP_RECEIVE") as Boolean) {
                 Log.d("STOP RECEIVE", "STOP RECEIVE")
                 context.unregisterReceiver(this)
             } else if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
-                //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_play_circle_outline_24, "pausePlay", pausePlayIntent).build()
                 updateNotification(true)
 
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
-                //notificationMusicPlayer.build().actions[1] = Notification.Action.Builder(R.drawable.ic_baseline_pause_circle_outline_24, "pausePlay", pausePlayIntent).build()
+                Log.d("NOTIF WILL UPDATE 1", (mediaPlayer.isPlaying).toString())
                 updateNotification(false)
-                Log.d("MUSIC NOTIFICATION", "POS : ${MyMediaPlayer.currentIndex}")
+
                 val intentForBroadcast = Intent("BROADCAST")
                 intentForBroadcast.putExtra("STOP", false)
                 context.sendBroadcast(intentForBroadcast)
+            } else if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)) {
+                Log.d("NOTIF WILL UPDATE", (mediaPlayer.isPlaying).toString())
+                updateNotification(!mediaPlayer.isPlaying)
             }
         }
     }
@@ -109,6 +108,19 @@ class MusicNotificationService(private val context : Context) {
             PendingIntent.FLAG_IMMUTABLE
         )
 
+        changeFavoriteStateIntent = PendingIntent.getBroadcast(
+            context,
+            6,
+            Intent(context, ChangeFavoriteStateNotificationReceiver::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val favoriteIcon = if (currentSong.favorite) {
+            R.drawable.ic_baseline_favorite_24
+        } else {
+            R.drawable.ic_baseline_favorite_border_24
+        }
+
         notificationMusicPlayer = NotificationCompat.Builder(context, MUSIC_NOTIFICATION_CHANNEL_ID)
             .setLargeIcon(bitmap)
             .setSmallIcon(R.drawable.ic_saxophone_svg)
@@ -118,6 +130,7 @@ class MusicNotificationService(private val context : Context) {
             .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
             .addAction(pausePlayIcon,"pausePlay",pausePlayIntent)
             .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+            .addAction(favoriteIcon, "favoriteState", changeFavoriteStateIntent)
             .setDeleteIntent(deleteNotificationIntent)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setShowActionsInCompactView(0, 1, 2)
@@ -130,9 +143,12 @@ class MusicNotificationService(private val context : Context) {
     }
 
     private fun updateNotification(isMusicPaused : Boolean) {
+        Log.d("UPDATE NOTIF", isMusicPaused.toString())
         var bitmap : Bitmap? = null
         val pauseIcon : Int
         val musicState : Int
+        val currentSong = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex]
+
         if (isMusicPaused) {
             pauseIcon = R.drawable.ic_baseline_play_arrow_24
             musicState = PlaybackStateCompat.STATE_PAUSED
@@ -141,9 +157,15 @@ class MusicNotificationService(private val context : Context) {
             musicState = PlaybackStateCompat.STATE_PLAYING
         }
 
-        if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
+        val favoriteIcon = if (currentSong.favorite) {
+            R.drawable.ic_baseline_favorite_24
+        } else {
+            R.drawable.ic_baseline_favorite_border_24
+        }
+
+        if (currentSong.albumCover != null) {
             // Passons d'abord notre byteArray en bitmap :
-            val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
+            val bytes = currentSong.albumCover
             if (bytes != null && bytes.isNotEmpty()) {
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             }
@@ -161,16 +183,24 @@ class MusicNotificationService(private val context : Context) {
                     )
                     .putString(
                         MediaMetadata.METADATA_KEY_DISPLAY_TITLE,
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                        currentSong.name
+                    )
+                    .putLong(
+                        MediaMetadata.METADATA_KEY_TRACK_NUMBER,
+                        MyMediaPlayer.currentIndex.toLong()
+                    )
+                    .putLong(
+                        MediaMetadata.METADATA_KEY_NUM_TRACKS,
+                        MyMediaPlayer.currentPlaylist.size.toLong()
                     )
                     // Pour les vieilles versions d'android
                     .putString(
                         MediaMetadata.METADATA_KEY_TITLE,
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                        currentSong.name
                     )
                     .putString(
                         MediaMetadata.METADATA_KEY_ARTIST,
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist
+                        currentSong.artist
                     )
                     // A small bitmap for the artwork is also recommended
                     .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
@@ -196,6 +226,7 @@ class MusicNotificationService(private val context : Context) {
             .addAction(R.drawable.ic_baseline_skip_previous_24,"previous",previousMusicIntent)
             .addAction(pauseIcon,"pausePlay",pausePlayIntent)
             .addAction(R.drawable.ic_baseline_skip_next_24,"next",nextMusicIntent)
+            .addAction(favoriteIcon, "favoriteState", changeFavoriteStateIntent)
             .setDeleteIntent(deleteNotificationIntent)
             .setStyle(androidx.media.app.NotificationCompat.MediaStyle()
                 .setMediaSession(PlaybackService.mediaSession.sessionToken)
@@ -203,6 +234,7 @@ class MusicNotificationService(private val context : Context) {
             )
 
         notificationManager.notify(1, notificationMusicPlayer.build())
+        Log.d("NOTIF", "MUSIC : "+MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite)
     }
 
     companion object {

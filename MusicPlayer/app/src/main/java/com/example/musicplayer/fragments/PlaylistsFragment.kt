@@ -1,7 +1,9 @@
 package com.example.musicplayer.fragments
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.text.InputType
 import androidx.fragment.app.Fragment
@@ -26,6 +28,14 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
     private lateinit var adapter : Playlists
     private val mediaPlayer = MyMediaPlayer.getInstance
 
+    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)){
+                adapter.notifyDataSetChanged()
+            }
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,6 +53,8 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
         menuRecyclerView = view.findViewById(R.id.menu_playlist_recycler_view)
         menuRecyclerView.layoutManager = LinearLayoutManager(context)
         menuRecyclerView.adapter = adapter
+
+        context?.registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
         return view
     }
@@ -115,7 +127,7 @@ class PlaylistsFragment : Fragment(), Playlists.OnPlaylistsListener {
                 MyMediaPlayer.allPlaylists.add(newPlaylist)
                 adapter.allPlaylists = MyMediaPlayer.allPlaylists
                 CoroutineScope(Dispatchers.IO).launch {
-                    (activity as MainActivity).writePlaylistsToFile()
+                    (activity as MainActivity).writeAllPlaylists()
                 }
 
                 menuRecyclerView.layoutManager = LinearLayoutManager(context)

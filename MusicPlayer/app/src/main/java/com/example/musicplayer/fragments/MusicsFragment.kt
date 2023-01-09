@@ -32,6 +32,9 @@ class MusicsFragment : Fragment(), MusicList.OnMusicListener, SearchView.OnQuery
             if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 adapter.notifyDataSetChanged()
             }
+            if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)){
+                adapter.notifyDataSetChanged()
+            }
         }
     }
 

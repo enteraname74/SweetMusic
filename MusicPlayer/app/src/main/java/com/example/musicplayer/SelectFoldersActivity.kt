@@ -1,7 +1,5 @@
 package com.example.musicplayer
 
-import android.media.Image
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
@@ -61,7 +59,7 @@ class SelectFoldersActivity : Tools(), FolderListSelection.OnFolderListener {
         }
 
         CoroutineScope(Dispatchers.IO).launch {
-            writePlaylistsToFile()
+            writeAllPlaylists()
             writeAllMusics()
             writeAllDeletedSong()
             writeAllFolders()

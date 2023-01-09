@@ -105,7 +105,7 @@ class SetDataActivity : Tools() {
                 }
             }
             CoroutineScope(Dispatchers.IO).launch {
-                writePlaylistsToFile()
+                writeAllPlaylists()
                 writeAllMusics()
             }
             MyMediaPlayer.dataWasChanged = true

@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
 import android.widget.Button
 import android.widget.EditText
@@ -198,7 +197,7 @@ class ModifyMusicInfoActivity : Tools() {
         CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
             launch {
                 writeAllMusics()
-                writePlaylistsToFile()
+                writeAllPlaylists()
             }
         }
         // Si une musique se joue, on vérifie si celle jouée actuellement est celle que l'on modifie :
