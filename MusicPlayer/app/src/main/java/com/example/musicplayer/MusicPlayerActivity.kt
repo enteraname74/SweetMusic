@@ -385,25 +385,13 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
 
                         // il faut maintenant sauvegardé l'état de la musique dans TOUTES les playlists :
                         // Commencons par la playlist principale :
-                        val allMusics  = MyMediaPlayer.allMusics
-                        for (element in allMusics){
-                            // Comparons avec quelque chose qui ne peut pas changer et qui soit unique :
-                            if (element.path == currentSong.path){
-                                element.favorite = currentSong.favorite
-                                break
-                            }
-                        }
+                        MyMediaPlayer.allMusics.find { it.path == currentSong.path }?.favorite = currentSong.favorite
                         // Ensuite, mettons à jour nos playlists :
                         val allPlaylists = MyMediaPlayer.allPlaylists
                         for (playlist in allPlaylists){
-                            for (element in playlist.musicList){
-                                if (element.path == currentSong.path){
-                                    element.favorite = currentSong.favorite
-                                    break
-                                }
-                            }
+                            playlist.musicList.find { it.path == currentSong.path }?.favorite = currentSong.favorite
                         }
-                        // Mettons à jour la playlist favoris :
+                        // Mettons à jour la playlist Favorites :
                         val favoritePlaylist = allPlaylists[0]
                         var shouldBeInFavoriteList = true
                         for (element in favoritePlaylist.musicList){
@@ -415,6 +403,14 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                         }
                         if (shouldBeInFavoriteList){
                             favoritePlaylist.musicList.add(currentSong)
+                        }
+
+                        val posInShortcuts = MyMediaPlayer.allShortcuts.positionInList(currentSong)
+                        if(posInShortcuts != -1) {
+                            (MyMediaPlayer.allShortcuts.shortcutsList[posInShortcuts] as Music).favorite = currentSong.favorite
+                            CoroutineScope(Dispatchers.IO).launch {
+                                writeAllShortcuts()
+                            }
                         }
 
                         CoroutineScope(Dispatchers.IO).launch {
