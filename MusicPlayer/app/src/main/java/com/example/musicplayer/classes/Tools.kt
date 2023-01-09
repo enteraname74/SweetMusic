@@ -16,9 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
-import com.example.musicplayer.adapters.MusicList
-import com.example.musicplayer.adapters.Playlists
-import com.example.musicplayer.adapters.ShortcutList
+import com.example.musicplayer.adapters.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -802,6 +800,71 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         if (MyMediaPlayer.allShortcuts.positionInList(musicToRemove) != -1) {
             MyMediaPlayer.allShortcuts.shortcutsList.remove(musicToRemove)
             writeAllShortcuts()
+        }
+    }
+
+    fun generateAlbums(adapter : Albums? = null) {
+        if (MyMediaPlayer.allMusics.size > 0) {
+            val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+            var currentAlbum: Album
+            // Trions d'abord notre liste par album et artiste :
+            copiedMusics.sortWith(compareBy<Music> { it.album }.thenBy { it.artist })
+            currentAlbum = Album(
+                copiedMusics[0].album,
+                ArrayList<Music>(),
+                copiedMusics[0].albumCover,
+                copiedMusics[0].artist
+            )
+            // On vide nos albums pour mettre à jour ensuite ces derniers :
+            MyMediaPlayer.allAlbums.clear()
+            for (music in copiedMusics) {
+                if (music.album == currentAlbum.albumName && music.artist == currentAlbum.artist) {
+                    currentAlbum.albumList.add(music)
+                } else {
+                    // On passe à un autre album :
+                    // On ajoute d'abord notre album à notre liste :
+                    MyMediaPlayer.allAlbums.add(currentAlbum)
+                    // On change ensuite l'album actuelle
+                    currentAlbum = Album(music.album.trim(), ArrayList<Music>(), music.albumCover, music.artist.trim())
+                    currentAlbum.albumList.add(music)
+                }
+            }
+            // Il faut prendre le dernier cas en compte :
+            MyMediaPlayer.allAlbums.add(currentAlbum)
+            adapter?.allAlbums = MyMediaPlayer.allAlbums
+            adapter?.notifyDataSetChanged()
+        }
+    }
+
+    fun generateArtists(adapter : Artists? = null) {
+        if (MyMediaPlayer.allMusics.size > 0) {
+            val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
+            var currentArtist: Artist
+            // Trions d'abord notre liste artiste :
+            copiedMusics.sortWith(compareBy<Music> { it.artist })
+            currentArtist = Artist(
+                copiedMusics[0].artist,
+                ArrayList(),
+                copiedMusics[0].albumCover
+            )
+
+            MyMediaPlayer.allArtists.clear()
+            for (music in copiedMusics) {
+                if (music.artist == currentArtist.artistName) {
+                    currentArtist.musicList.add(music)
+                } else {
+                    // On passe à un autre album :
+                    // On ajoute d'abord notre album à notre liste :
+                    MyMediaPlayer.allArtists.add(currentArtist)
+                    // On change ensuite l'album actuelle
+                    currentArtist = Artist(music.artist.trim(), ArrayList(), music.albumCover)
+                    currentArtist.musicList.add(music)
+                }
+            }
+            // Il faut prendre le dernier cas en compte :
+            MyMediaPlayer.allArtists.add(currentArtist)
+            adapter?.allArtists = MyMediaPlayer.allArtists
+            adapter?.notifyDataSetChanged()
         }
     }
 }

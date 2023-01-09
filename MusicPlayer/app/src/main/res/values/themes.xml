@@ -48,4 +48,9 @@
         <item name="android:textColor">@color/text_color</item>
     </style>
 
+    <style name="TabLayoutTabText" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+
 </resources>

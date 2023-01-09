@@ -52,35 +52,7 @@ class ArtistsFragment : Fragment(), Artists.OnArtistsListener, SearchView.OnQuer
         searchView.setQuery("",false)
 
         CoroutineScope(Dispatchers.Main).launch {
-            if (MyMediaPlayer.allMusics.size > 0) {
-                val copiedMusics = ArrayList(MyMediaPlayer.allMusics.map { it.copy() })
-                var currentArtist: Artist
-                // Trions d'abord notre liste artiste :
-                copiedMusics.sortWith(compareBy<Music> { it.artist })
-                currentArtist = Artist(
-                    copiedMusics[0].artist,
-                    ArrayList<Music>(),
-                    copiedMusics[0].albumCover
-                )
-
-                MyMediaPlayer.allArtists.clear()
-                for (music in copiedMusics) {
-                    if (music.artist == currentArtist.artistName) {
-                        currentArtist.musicList.add(music)
-                    } else {
-                        // On passe à un autre album :
-                        // On ajoute d'abord notre album à notre liste :
-                        MyMediaPlayer.allArtists.add(currentArtist)
-                        // On change ensuite l'album actuelle
-                        currentArtist = Artist(music.artist, ArrayList<Music>(), music.albumCover)
-                        currentArtist.musicList.add(music)
-                    }
-                }
-                // Il faut prendre le dernier cas en compte :
-                MyMediaPlayer.allArtists.add(currentArtist)
-                adapter.allArtists = MyMediaPlayer.allArtists
-                adapter.notifyDataSetChanged()
-            }
+            (activity as MainActivity).generateArtists(adapter)
         }
         mediaPlayer.setOnCompletionListener { (activity as MainActivity).playNextSong() }
         (activity?.findViewById(R.id.next) as ImageView).setOnClickListener { (activity as MainActivity).playNextSong() }

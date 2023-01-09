@@ -90,7 +90,7 @@ class ModifyAlbumInfoActivity : Tools() {
         // On modifie les éléments du fichier :
         // Si le nom est déjà prit ou si le nom reste le même, on peut enregistrer les changements
         CoroutineScope(Dispatchers.IO).launch {
-            selectedAlbum.albumName = playlistNameField.text.toString()
+            selectedAlbum.albumName = playlistNameField.text.toString().trim()
             val drawable = playlistCoverField.drawable
             val bitmapDrawable = drawable as BitmapDrawable
             val bitmap = bitmapDrawable.bitmap
