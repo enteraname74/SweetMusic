@@ -1,20 +1,18 @@
 package com.example.musicplayer
 
 import android.annotation.SuppressLint
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
-import android.media.Image
 import android.os.Bundle
 import android.util.Log
-import android.view.MenuItem
 import android.view.View
-import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.SearchView
+import android.widget.TextView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.graphics.ColorUtils
 import androidx.palette.graphics.Palette
@@ -31,16 +29,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.OnQueryTextListener {
-    private lateinit var artist : Artist
-    private var artistPosition : Int = 0
-    private lateinit var adapter : MusicList
+    private lateinit var artist: Artist
+    private var artistPosition: Int = 0
+    private lateinit var adapter: MusicList
     private var musics = ArrayList<Music>()
     private var allMusicsBackup = ArrayList<Music>()
-    private lateinit var searchView : SearchView
-    private lateinit var menuRecyclerView : RecyclerView
+    private lateinit var searchView: SearchView
+    private lateinit var menuRecyclerView: RecyclerView
     private var searchIsOn = false
 
-    private lateinit var pausePlayButton : ImageView
+    private lateinit var pausePlayButton: ImageView
 
     private lateinit var bottomSheetLayout: LinearLayout
     private lateinit var sheetBehavior: BottomSheetBehavior<LinearLayout>
@@ -54,13 +52,20 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
             if (intent.extras?.getBoolean("STOP") != null && intent.extras?.getBoolean("STOP") as Boolean) {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
-            } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
+            } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)) {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)){
+            if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean(
+                    "FAVORITE_CHANGED"
+                ) as Boolean)
+            ) {
                 adapter.notifyDataSetChanged()
             }
-            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
+            updateBottomPanel(
+                findViewById(R.id.song_title_info),
+                findViewById(R.id.song_artist_info),
+                findViewById(R.id.album_cover_info)
+            )
         }
     }
 
@@ -68,7 +73,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_selected_playlist)
 
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             updateMusicNotification(!mediaPlayer.isPlaying)
         }
 
@@ -94,7 +99,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         artistName?.text = artist.artistName
 
         val quitActivity = findViewById<ImageView>(R.id.quit_activity)
-        quitActivity.setOnClickListener{ finish() }
+        quitActivity.setOnClickListener { finish() }
 
         val shuffleButton = findViewById<ImageView>(R.id.shuffle)
         shuffleButton.setOnClickListener { playRandom(musics, this, artist.artistName) }
@@ -110,6 +115,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                     stopMusic()
                 }
             }
+
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
 
@@ -129,31 +135,14 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         adapter.musics = MyMediaPlayer.allArtists[artistPosition].musicList
         adapter.notifyDataSetChanged()
 
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val nextBtn = findViewById<ImageView>(R.id.next)
-        val previousBtn = findViewById<ImageView>(R.id.previous)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
-        if (MyMediaPlayer.currentIndex != -1){
+        if (MyMediaPlayer.currentIndex != -1) {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                    // Passons d'abord notre byteArray en bitmap :
-                    val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                    var bitmap: Bitmap? = null
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    }
-                    albumCoverInfo.setImageBitmap(bitmap)
-                } else {
-                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
-                }
+                updateBottomPanel(findViewById(R.id.song_title_info), findViewById(R.id.song_artist_info), findViewById(R.id.album_cover_info))
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
-                nextBtn?.setOnClickListener { playNextSong(adapter) }
-                previousBtn?.setOnClickListener { playPreviousSong(adapter) }
-                songTitleInfo?.isSelected = true
+                findViewById<ImageView>(R.id.next).setOnClickListener { playNextSong(adapter) }
+                findViewById<ImageView>(R.id.previous).setOnClickListener { playPreviousSong(adapter) }
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {
@@ -163,7 +152,7 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
 
         registerReceiver(broadcastReceiver, IntentFilter("BROADCAST"))
 
-        if (!mediaPlayer.isPlaying){
+        if (!mediaPlayer.isPlaying) {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_24)
         } else {
             pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
@@ -184,13 +173,19 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_dialog_music_menu)
         bottomSheetDialog.show()
 
-        bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)?.setBackgroundColor(newPrimaryColor)
-        bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        bottomSheetDialog.findViewById<TextView>(R.id.add_to_a_playlist_text)?.setTextColor(newTextColor)
-        bottomSheetDialog.findViewById<ImageView>(R.id.remove_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        bottomSheetDialog.findViewById<ImageView>(R.id.modify_music_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<LinearLayout>(R.id.bottom_sheet)
+            ?.setBackgroundColor(newPrimaryColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.add_to_a_playlist_img)
+            ?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<TextView>(R.id.add_to_a_playlist_text)
+            ?.setTextColor(newTextColor)
+        bottomSheetDialog.findViewById<ImageView>(R.id.remove_img)
+            ?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<ImageView>(R.id.modify_music_img)
+            ?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         bottomSheetDialog.findViewById<TextView>(R.id.modify_music_text)?.setTextColor(newTextColor)
-        bottomSheetDialog.findViewById<ImageView>(R.id.play_next_img)?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        bottomSheetDialog.findViewById<ImageView>(R.id.play_next_img)
+            ?.setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
         bottomSheetDialog.findViewById<TextView>(R.id.play_next_text)?.setTextColor(newTextColor)
         bottomSheetDialog.window?.navigationBarColor = newPrimaryColor
 
@@ -210,17 +205,17 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.remove)?.setOnClickListener {
-            bottomSheetRemoveFromApp(adapter,position, sheetBehavior, this)
+            bottomSheetRemoveFromApp(adapter, position, sheetBehavior, this)
             bottomSheetDialog.dismiss()
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.modify_music)?.setOnClickListener {
-            bottomSheetModifyMusic(this,position,adapter)
+            bottomSheetModifyMusic(this, position, adapter)
             bottomSheetDialog.dismiss()
         }
 
         bottomSheetDialog.findViewById<LinearLayout>(R.id.play_next)?.setOnClickListener {
-            bottomSheetPlayNext(adapter,position)
+            bottomSheetPlayNext(adapter, position)
             bottomSheetDialog.dismiss()
         }
     }
@@ -233,18 +228,22 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
         return manageSearchBarEvents(p0)
     }
 
-    private fun manageSearchBarEvents(p0 : String?) : Boolean {
+    private fun manageSearchBarEvents(p0: String?): Boolean {
         try {
             if (p0 != null) {
                 val list = ArrayList<Music>()
 
-                if(p0 == ""){
+                if (p0 == "") {
                     searchIsOn = false
                     adapter.musics = allMusicsBackup
                 } else {
                     searchIsOn = true
                     for (music: Music in allMusicsBackup) {
-                        if ((music.name.lowercase().contains(p0.lowercase())) || (music.album.lowercase().contains(p0.lowercase())) || (music.artist.lowercase().contains(p0.lowercase()))){
+                        if ((music.name.lowercase()
+                                .contains(p0.lowercase())) || (music.album.lowercase()
+                                .contains(p0.lowercase())) || (music.artist.lowercase()
+                                .contains(p0.lowercase()))
+                        ) {
                             list.add(music)
                         }
                     }
@@ -258,14 +257,14 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
                 }
                 adapter.notifyDataSetChanged()
             }
-        } catch (error : Error){
-            Log.d("ERROR",error.toString())
+        } catch (error: Error) {
+            Log.d("ERROR", error.toString())
         }
         return true
     }
 
     @SuppressLint("ResourceAsColor")
-    private fun setColorTheme(){
+    private fun setColorTheme() {
         var bitmap: Bitmap? = null
         val playlistCover = findViewById<ImageView>(R.id.cover)
 
@@ -295,29 +294,49 @@ class SelectedArtistActivity : Tools(), MusicList.OnMusicListener, SearchView.On
             } else {
                 Palette.from(bitmap).generate().lightVibrantSwatch
             }
-        newPrimaryColor = ColorUtils.blendARGB(getColor(R.color.primary_color),dominantColor?.rgb as Int,0.1f)
-        newSecondaryColor = ColorUtils.blendARGB(getColor(R.color.secondary_color),dominantColor.rgb,0.1f)
-        newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color),dominantColor.rgb,0.1f)
+        newPrimaryColor =
+            ColorUtils.blendARGB(getColor(R.color.primary_color), dominantColor?.rgb as Int, 0.1f)
+        newSecondaryColor =
+            ColorUtils.blendARGB(getColor(R.color.secondary_color), dominantColor.rgb, 0.1f)
+        newTextColor = ColorUtils.blendARGB(getColor(R.color.text_color), dominantColor.rgb, 0.1f)
 
-        searchView.background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
-        findViewById<LinearLayout>(R.id.playlists).background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
+        searchView.background.colorFilter =
+            BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
+        findViewById<LinearLayout>(R.id.playlists).background.colorFilter =
+            BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
         adapter.backgroundColor = newSecondaryColor
         adapter.notifyDataSetChanged()
 
         findViewById<CoordinatorLayout>(R.id.playlist_activity).setBackgroundColor(newPrimaryColor)
-        findViewById<TextView>(R.id.playlist_name).setBackgroundColor(ColorUtils.setAlphaComponent(newPrimaryColor,150))
+        findViewById<TextView>(R.id.playlist_name).setBackgroundColor(
+            ColorUtils.setAlphaComponent(
+                newPrimaryColor,
+                150
+            )
+        )
         findViewById<TextView>(R.id.playlist_name).setTextColor(newTextColor)
         findViewById<TextView>(R.id.song_title_info).setTextColor(newTextColor)
 
-        findViewById<ImageView>(R.id.quit_activity).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.quit_activity).background.colorFilter = BlendModeColorFilter(newPrimaryColor, BlendMode.SRC_ATOP)
+        findViewById<ImageView>(R.id.quit_activity).setColorFilter(
+            newTextColor,
+            PorterDuff.Mode.MULTIPLY
+        )
+        findViewById<ImageView>(R.id.quit_activity).background.colorFilter =
+            BlendModeColorFilter(newPrimaryColor, BlendMode.SRC_ATOP)
         findViewById<ImageView>(R.id.shuffle).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.previous).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.previous).setColorFilter(
+            newTextColor,
+            PorterDuff.Mode.MULTIPLY
+        )
         findViewById<ImageView>(R.id.next).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
-        findViewById<ImageView>(R.id.pause_play).setColorFilter(newTextColor, PorterDuff.Mode.MULTIPLY)
+        findViewById<ImageView>(R.id.pause_play).setColorFilter(
+            newTextColor,
+            PorterDuff.Mode.MULTIPLY
+        )
 
         findViewById<LinearLayout>(R.id.bottom_infos).setBackgroundColor(newPrimaryColor)
-        findViewById<LinearLayout>(R.id.buttons_panel).background.colorFilter = BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
+        findViewById<LinearLayout>(R.id.buttons_panel).background.colorFilter =
+            BlendModeColorFilter(newSecondaryColor, BlendMode.SRC_ATOP)
         findViewById<LinearLayout>(R.id.background).setBackgroundColor(newPrimaryColor)
 
         window.navigationBarColor = newPrimaryColor

@@ -410,7 +410,7 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
                         }
 
                         val posInShortcuts = MyMediaPlayer.allShortcuts.positionInList(currentSong)
-                        if(posInShortcuts != -1) {
+                        if (posInShortcuts != -1) {
                             (MyMediaPlayer.allShortcuts.shortcutsList[posInShortcuts] as Music).favorite = currentSong.favorite
                             CoroutineScope(Dispatchers.IO).launch {
                                 writeAllShortcuts()

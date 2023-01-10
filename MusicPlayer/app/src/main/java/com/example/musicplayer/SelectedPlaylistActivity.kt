@@ -54,7 +54,7 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
             if (intent.extras?.getBoolean("FAVORITE_CHANGED") != null && (intent.extras?.getBoolean("FAVORITE_CHANGED") as Boolean)){
                 adapter.notifyDataSetChanged()
             }
-            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
+            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.song_artist_info),findViewById(R.id.album_cover_info))
         }
     }
 
@@ -124,32 +124,15 @@ class SelectedPlaylistActivity : Tools(), MusicList.OnMusicListener, SearchView.
         }
         adapter.notifyItemRangeChanged(0, adapter.itemCount)
 
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val nextBtn = findViewById<ImageView>(R.id.next)
-        val previousBtn = findViewById<ImageView>(R.id.previous)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
-
         if (MyMediaPlayer.currentIndex != -1){
             Log.d("SELECTED PLAYLIST", MyMediaPlayer.currentIndex.toString())
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                    // Passons d'abord notre byteArray en bitmap :
-                    val bytes = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                    var bitmap: Bitmap? = null
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    }
-                    albumCoverInfo.setImageBitmap(bitmap)
-                } else {
-                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
-                }
+                updateBottomPanel(findViewById(R.id.song_title_info), findViewById(R.id.song_artist_info), findViewById(R.id.album_cover_info))
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
-                nextBtn?.setOnClickListener { playNextSong(adapter) }
-                previousBtn?.setOnClickListener { playPreviousSong(adapter) }
-                songTitleInfo?.isSelected = true
+                findViewById<ImageView>(R.id.next).setOnClickListener { playNextSong(adapter) }
+                findViewById<ImageView>(R.id.previous).setOnClickListener { playPreviousSong(adapter) }
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {

@@ -1,11 +1,12 @@
 package com.example.musicplayer
 
 import android.Manifest
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build.VERSION.SDK_INT
@@ -17,7 +18,10 @@ import android.util.Log
 import android.util.Size
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -26,13 +30,19 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicplayer.adapters.ShortcutList
 import com.example.musicplayer.adapters.VpAdapter
-import com.example.musicplayer.classes.*
+import com.example.musicplayer.classes.Folder
+import com.example.musicplayer.classes.MyMediaPlayer
+import com.example.musicplayer.classes.Tools
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.*
-import java.io.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
 
 class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, ShortcutList.OnShortcutListener  {
 
@@ -58,7 +68,7 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
             } else if (intent.extras?.getBoolean("STOP") != null && !(intent.extras?.getBoolean("STOP") as Boolean)){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
             }
-            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.album_cover_info))
+            updateBottomPanel(findViewById(R.id.song_title_info),findViewById(R.id.song_artist_info),findViewById(R.id.album_cover_info))
         }
     }
 
@@ -201,29 +211,12 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
             shortcutAdapter.notifyDataSetChanged()
         }
 
-        val songTitleInfo = findViewById<TextView>(R.id.song_title_info)
-        val albumCoverInfo = findViewById<ImageView>(R.id.album_cover_info)
         if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size != 0) {
             CoroutineScope(Dispatchers.Main).launch {
                 sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                songTitleInfo.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
-                if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {
-                    // Passons d'abord notre byteArray en bitmap :
-                    val bytes =
-                        MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover
-                    var bitmap: Bitmap? = null
-                    if (bytes != null && bytes.isNotEmpty()) {
-                        bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                    }
-                    withContext(Dispatchers.Main) {
-                        albumCoverInfo.setImageBitmap(bitmap)
-                    }
-                } else {
-                    albumCoverInfo.setImageResource(R.drawable.ic_saxophone_svg)
-                }
+                updateBottomPanel(findViewById(R.id.song_title_info), findViewById(R.id.song_artist_info), findViewById(R.id.album_cover_info))
 
                 pausePlayButton.setOnClickListener { pausePlay(pausePlayButton) }
-                songTitleInfo?.isSelected = true
             }
         } else {
             CoroutineScope(Dispatchers.Main).launch {

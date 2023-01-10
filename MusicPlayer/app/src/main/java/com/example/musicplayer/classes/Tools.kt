@@ -315,11 +315,13 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
         }
     }
 
-    fun updateBottomPanel(songTitle : TextView, albumCover : ImageView) {
+    fun updateBottomPanel(songTitle : TextView, songArtist : TextView, albumCover : ImageView) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 withContext(Dispatchers.Main) {
                     songTitle.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].name
+                    songTitle.isSelected = true
+                    songArtist.text = MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].artist
                 }
 
                 if (MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].albumCover != null) {

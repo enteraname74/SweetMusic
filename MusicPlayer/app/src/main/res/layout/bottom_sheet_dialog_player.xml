@@ -32,17 +32,38 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/song_title_info"
+    <LinearLayout
         android:layout_width="0dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:ellipsize="marquee"
-        android:singleLine="true"
-        android:text="@string/name_of_the_song"
-        android:layout_gravity="center"
-        android:layout_margin="10dp"
-        android:textColor="@color/text_color"/>
+        android:orientation="vertical"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/song_title_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:text="@string/name_of_the_song"
+            android:textStyle="bold"
+            android:layout_gravity="center"
+            android:textColor="@color/text_color"/>
+
+        <TextView
+            android:id="@+id/song_artist_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            android:text="@string/artist"
+            android:textSize="13sp"
+            android:layout_gravity="center"
+            android:textColor="@color/text_color"/>
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="0dp"
