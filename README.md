@@ -52,13 +52,13 @@ You can retrieve your data and set it directly in the app.
 The music player page theme depends of the color of the album art of the played music :
 
 <p align="center">
-  <img title="" src="Screenshots/Screenshot_20230101-223536.png" alt="" data-align="center" width="293">
-  <img title="" src="Screenshots/Screenshot_20230101-223552.png" alt="" data-align="center" width="293">
+  <img title="" src="Screenshots/Screenshot_20230101-223536.png" alt="" data-align="center" width="290">
+  <img title="" src="Screenshots/Screenshot_20230101-223552.png" alt="" data-align="center" width="290">
 </p>
 
 Finally, the playlists, albums and artists color theme depend of the cover of the list :
 
 <p align="center">
-  <img title="" src="Screenshots/Screenshot_20230108-004553.png" alt="" data-align="center" width="293">
-  <img title="" src="Screenshots/Screenshot_20230108-005945.png" alt="" data-align="center" width="293">
+  <img title="" src="Screenshots/Screenshot_20230108-004553.png" alt="" data-align="center" width="290">
+  <img title="" src="Screenshots/Screenshot_20230108-005945.png" alt="" data-align="center" width="290">
 </p>
