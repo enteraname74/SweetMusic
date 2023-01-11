@@ -41,7 +41,7 @@
     <string name="favorite">favoris</string>
     <string name="add_songs">Ajouter des musiques</string>
     <string name="list_type">Playlist jouée</string>
-    <string name="select_the_saved_files">Selectionnez les fichiers de sauvegardes</string>
+    <string name="select_the_saved_files">Selectionner les fichiers de sauvegardes</string>
     <string name="music_file_musics">Fichier de musiques (.musics)</string>
     <string name="select">Choisir</string>
     <string name="playlist_file_playlists">Fichier de playlists (.playlists)</string>

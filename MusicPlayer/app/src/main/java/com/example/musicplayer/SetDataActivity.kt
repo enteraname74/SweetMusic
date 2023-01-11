@@ -85,21 +85,21 @@ class SetDataActivity : Tools() {
                     albumCover = music.albumCover
                     album = music.album
                     artist = music.artist
+                    favorite = music.favorite
                 }
             }
             MyMediaPlayer.allPlaylists = SetPlaylistsFragment.allPlaylists
-            val songsToDelete = ArrayList<Music>()
+
             for (playlist in MyMediaPlayer.allPlaylists) {
                 for (music in playlist.musicList) {
                     val correspondingSong = MyMediaPlayer.allMusics.find { File(it.path).name == File(music.path).name }
-                    if (correspondingSong == null) {
-                        songsToDelete.add(music)
-                    } else {
+                    if (correspondingSong != null) {
                         music.apply {
                             name = correspondingSong.name
                             albumCover = correspondingSong.albumCover
                             album = correspondingSong.album
                             artist = correspondingSong.artist
+                            favorite = correspondingSong.favorite
                         }
                     }
                 }
