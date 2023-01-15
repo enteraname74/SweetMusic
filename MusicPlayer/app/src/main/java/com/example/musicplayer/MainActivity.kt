@@ -144,10 +144,20 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
 
         bottomSheetLayout = findViewById(R.id.bottom_infos)
         sheetBehavior = BottomSheetBehavior.from(bottomSheetLayout)
+        if (File(applicationContext.filesDir, saveCurrentPlaylist).exists()) {
+            CoroutineScope(Dispatchers.IO).launch {
+                readCurrentPlaylistFromFile()
 
-        if (MyMediaPlayer.currentIndex != -1) {
-            sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                if (MyMediaPlayer.currentIndex != -1 && MyMediaPlayer.currentPlaylist.size > 0) {
+                    withContext(Dispatchers.Main) {
+                        sheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                        findViewById<ImageView>(R.id.next).setOnClickListener { playNextSong() }
+                        loadLastCurrentPlaylist(findViewById(R.id.song_title_info),findViewById(R.id.song_artist_info),findViewById(R.id.album_cover_info))
+                    }
+                }
+            }
         }
+
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN || newState == BottomSheetBehavior.STATE_COLLAPSED) {
@@ -183,7 +193,6 @@ class MainActivity : Tools(), NavigationView.OnNavigationItemSelectedListener, S
                     MyMediaPlayer.allShortcuts,
                     this@MainActivity,
                     this@MainActivity)
-
             shortcutRecyclerView.adapter = shortcutAdapter
         }
     }

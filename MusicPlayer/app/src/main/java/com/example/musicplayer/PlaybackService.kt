@@ -14,9 +14,17 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.KeyEvent
 import com.example.musicplayer.classes.MyMediaPlayer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.ObjectOutputStream
 
 class PlaybackService : Service() {
     var mediaPlayer = MyMediaPlayer.getInstance
+    private val saveCurrentPlaylist = "currentPlaylist.playlist"
 
     override fun onBind(intent: Intent): IBinder? {
         Log.d("ON BIND","")
@@ -204,6 +212,8 @@ class PlaybackService : Service() {
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
         Log.d("PLAYBACK SERVICE", "REMOVED")
+        writeCurrentPlaylist()
+        Log.d("SERVICE", "FINISHED WRITING PLAYLIST")
         stopMusic()
     }
 
@@ -227,6 +237,17 @@ class PlaybackService : Service() {
         applicationContext.sendBroadcast(intentForNotification)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(1)
+    }
+
+    private fun writeCurrentPlaylist(){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveCurrentPlaylist)))
+            oos.writeObject(MyMediaPlayer.currentPlaylistInfos)
+            oos.close()
+        } catch (error : IOException){
+            Log.e("Error write current playlist",error.toString())
+        }
     }
 
     companion object {

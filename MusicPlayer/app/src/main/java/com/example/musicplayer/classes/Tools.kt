@@ -17,6 +17,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.musicplayer.*
 import com.example.musicplayer.adapters.*
+import com.example.musicplayer.notification.MusicNotificationService
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,7 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
     val savePlaylistsFile = "allPlaylists.playlists"
     private val saveAllDeletedFiles = "allDeleted.musics"
     private val saveAllFolders = "allFolders.folders"
+    val saveCurrentPlaylist = "currentPlaylist.playlist"
     val saveAllShortcuts = "allShortcuts.shortcuts"
 
     var mediaPlayer = MyMediaPlayer.getInstance
@@ -181,6 +183,13 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
 
         MyMediaPlayer.currentIndex = position
 
+        CoroutineScope(Dispatchers.Default).launch {
+            MyMediaPlayer.currentPlaylistInfos.apply {
+                initialPlaylist = ArrayList(adapter.musics.map { it.copy() })
+                currentPlaylist = ArrayList(adapter.musics.map { it.copy() })
+                currentMusicPos = position
+            }
+        }
         updateMusicNotification(!mediaPlayer.isPlaying)
         Log.d("TOOLS CLICKED", "CURRENT SONG FAV STATE : "+MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].favorite)
         val intent = Intent(context, MusicPlayerActivity::class.java)
@@ -525,6 +534,40 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             CoroutineScope(Dispatchers.IO).launch { writeAllShortcuts() }
         } else {
             Toast.makeText(this, getString(R.string.already_a_shortcut), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    open fun readCurrentPlaylistFromFile() {
+        val path = applicationContext.filesDir
+        var content = CurrentPlaylist(
+            MyMediaPlayer.initialPlaylist,
+            MyMediaPlayer.currentPlaylist,
+            MyMediaPlayer.currentIndex)
+        try {
+            val ois = ObjectInputStream(FileInputStream(File(path, saveCurrentPlaylist)))
+            content = ois.readObject() as CurrentPlaylist
+            ois.close()
+        } catch (error : IOException){
+            Log.e("Error read current playlist",error.toString())
+        }
+        MyMediaPlayer.currentPlaylistInfos = content
+        MyMediaPlayer.currentPlaylist = ArrayList(content.currentPlaylist.map { it.copy() })
+        MyMediaPlayer.initialPlaylist = ArrayList(content.initialPlaylist.map { it.copy() })
+        MyMediaPlayer.currentIndex = content.currentMusicPos
+
+        Log.d("TOOLS", content.currentPlaylist.size.toString())
+        Log.d("TOOLS", content.initialPlaylist.size.toString())
+        Log.d("TOOLS", content.currentMusicPos.toString())
+    }
+
+    open fun writeCurrentPlaylist(){
+        val path = applicationContext.filesDir
+        try {
+            val oos = ObjectOutputStream(FileOutputStream(File(path, saveCurrentPlaylist)))
+            oos.writeObject(MyMediaPlayer.currentPlaylistInfos)
+            oos.close()
+        } catch (error : IOException){
+            Log.e("Error write current playlist",error.toString())
         }
     }
 
@@ -873,5 +916,15 @@ open class Tools : AppCompatActivity(), MediaPlayer.OnPreparedListener {
             adapter?.allArtists = MyMediaPlayer.allArtists
             adapter?.notifyDataSetChanged()
         }
+    }
+
+    fun loadLastCurrentPlaylist(songTitle: TextView, songArtist: TextView, albumCover: ImageView) {
+        mediaPlayer.reset()
+        mediaPlayer.setDataSource(MyMediaPlayer.currentPlaylist[MyMediaPlayer.currentIndex].path)
+        mediaPlayer.prepareAsync()
+        val service = MusicNotificationService(applicationContext as Context)
+        service.showNotification(R.drawable.ic_baseline_play_arrow_24)
+        updateBottomPanel(songTitle, songArtist, albumCover)
+        updateMusicNotification(true)
     }
 }
