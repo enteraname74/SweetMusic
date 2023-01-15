@@ -278,10 +278,10 @@ class MusicPlayerActivity : Tools(), MediaPlayer.OnPreparedListener, MusicList.O
             val service = MusicNotificationService(applicationContext as Context)
             if (mediaPlayer.isPlaying){
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                service.showNotification(R.drawable.ic_baseline_pause_circle_outline_24)
+                service.showNotification(R.drawable.ic_baseline_pause_24)
             } else {
                 pausePlayButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_24)
-                service.showNotification(R.drawable.ic_baseline_play_circle_outline_24)
+                service.showNotification(R.drawable.ic_baseline_play_arrow_24)
             }
         }
 
